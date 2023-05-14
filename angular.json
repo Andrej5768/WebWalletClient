@@ -15,7 +15,7 @@
           "options": {
             "outputPath": "dist/web-wallet-client",
             "index": "src/index.html",
-            "main": "src/main.ts",
+            "main": "src/main.ts",,
             "polyfills": [
               "zone.js"
             ],
@@ -63,7 +63,8 @@
               "browserTarget": "WebWalletClient:build:production"
             },
             "development": {
-              "browserTarget": "WebWalletClient:build:development"
+              "browserTarget": "WebWalletClient:build:development",
+              "proxyConfig": "src/proxy.conf.json"
             }
           },
           "defaultConfiguration": "development"
