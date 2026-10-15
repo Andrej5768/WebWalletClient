@@ -124,7 +124,9 @@ export function ConnectModal({ current, onClose }: { current?: Connection | null
   });
 
   const connect = useMutation({
-    mutationFn: async ({ token, since }: typeof form.values) => {
+    // The token is read from the form, not passed as a variable, so it does not stay in the mutation cache.
+    mutationFn: async () => {
+      const { token, since } = form.values;
       const { error } = await api.POST('/api/v1/banks/monobank', {
         body: { token: token.trim(), since: since ?? undefined, ...schedule },
       });
@@ -135,6 +137,7 @@ export function ConnectModal({ current, onClose }: { current?: Connection | null
         queryClient.invalidateQueries({ queryKey: queryKeys.monobank }),
         queryClient.invalidateQueries({ queryKey: queryKeys.accounts }),
       ]);
+      form.reset();
       onClose();
     },
     onError: (error) => {
@@ -151,7 +154,7 @@ export function ConnectModal({ current, onClose }: { current?: Connection | null
       size="lg"
       title={<Text fw={600}>{t('imports.monobank.connectTitle')}</Text>}
     >
-      <form onSubmit={form.onSubmit((values) => connect.mutate(values))} noValidate>
+      <form onSubmit={form.onSubmit(() => connect.mutate())} noValidate>
         <Stack gap="md">
           <PasswordInput
             label={t('imports.monobank.token')}

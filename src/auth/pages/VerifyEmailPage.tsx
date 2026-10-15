@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { Link, useLocation } from 'react-router';
 import { api } from '../../api/client';
 import { AuthLayout } from '../AuthLayout';
-import { tokenFromHash } from '../token';
+import { tokenFromHash, useStripTokenFromUrl } from '../token';
 import { requiredEmail } from '../validation';
 import { CheckMail } from './CheckMail';
 import { ExpiredLink } from './ExpiredLink';
@@ -18,6 +18,7 @@ export function VerifyEmailPage() {
   const { t } = useTranslation();
   const location = useLocation();
   const [token] = useState(() => tokenFromHash(location.hash));
+  useStripTokenFromUrl();
   const [state, setState] = useState<State>(token ? 'checking' : 'expired');
   const [resentTo, setResentTo] = useState('');
   const started = useRef(false);

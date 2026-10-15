@@ -76,6 +76,16 @@ describe('api client', () => {
     expect(replay.headers.get('Authorization')).toBe('Bearer fresh');
   });
 
+  it('does not send the access token to sign-in endpoints', async () => {
+    setAccessToken('expired');
+    fetchMock.mockResolvedValueOnce(new Response(null, { status: 204 }));
+
+    await api.POST('/api/v1/auth/logout');
+
+    const request = fetchMock.mock.calls[0]![0] as Request;
+    expect(request.headers.get('Authorization')).toBeNull();
+  });
+
   it('does not refresh after a failed sign-in', async () => {
     fetchMock.mockResolvedValueOnce(json({ code: 'BAD_CREDENTIALS' }, 401));
 

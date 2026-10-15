@@ -8,7 +8,7 @@ import { api } from '../../api/client';
 import { fieldErrors, problemMessage, toProblem, type ApiProblem } from '../../api/errors';
 import i18n from '../../i18n';
 import { AuthLayout } from '../AuthLayout';
-import { tokenFromHash } from '../token';
+import { tokenFromHash, useStripTokenFromUrl } from '../token';
 import { newPassword } from '../validation';
 import { ExpiredLink } from './ExpiredLink';
 
@@ -17,6 +17,7 @@ export function ResetPasswordPage() {
   const { t } = useTranslation();
   const location = useLocation();
   const [token] = useState(() => tokenFromHash(location.hash));
+  useStripTokenFromUrl();
   const [done, setDone] = useState(false);
   const [problem, setProblem] = useState<ApiProblem | null>(null);
   const [submitting, setSubmitting] = useState(false);

@@ -98,7 +98,8 @@
     "mainNav": "Main",
     "collapse": "Collapse or expand the menu",
     "signOut": "Sign out",
-    "addTransaction": "Transaction"
+    "addTransaction": "Transaction",
+    "signOutFailed": "Could not end the session on the server. You are signed out on this device; if the computer is shared, change your password."
   },
   "balance": {
     "netWorth": {
