@@ -188,5 +188,91 @@
       "inBudget": "Include in the budget",
       "archived": "Archived"
     }
+  },
+  "transactions": {
+    "count_one": "{{count}} transaction",
+    "count_other": "{{count}} transactions",
+    "period": "Period",
+    "allTime": "All time",
+    "presets": {
+      "month": "This month",
+      "prevMonth": "Last month",
+      "quarter": "3 months",
+      "year": "This year",
+      "all": "All",
+      "custom": "Custom"
+    },
+    "search": "Search",
+    "searchPlaceholder": "Payee, comment, amount",
+    "closeSearch": "Close search",
+    "filters": {
+      "account": "Account",
+      "allAccounts": "All accounts",
+      "category": "Category",
+      "allCategories": "All categories",
+      "payee": "Payee",
+      "allPayees": "All payees",
+      "tag": "Tag",
+      "allTags": "All tags",
+      "type": "Transaction type",
+      "reset": "Reset"
+    },
+    "types": {
+      "all": "All",
+      "EXPENSE": "Expenses",
+      "INCOME": "Income",
+      "TRANSFER": "Transfers"
+    },
+    "sources": {
+      "MANUAL": "manual entry",
+      "MONOBANK": "Monobank",
+      "PRIVATBANK": "PrivatBank",
+      "ZENMONEY": "Zen Money"
+    },
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "empty": {
+      "title": "No transactions",
+      "text": "Change the period or filters, or add a transaction."
+    },
+    "shown": "Showing {{from}}–{{to}} of {{total}}",
+    "noPayee": "No payee",
+    "split": "Split: {{names}}",
+    "uncategorized": "Uncategorized",
+    "chooseCategory": "Choose a category",
+    "form": {
+      "newTitle": "New transaction",
+      "editTitle": "Transaction",
+      "types": {
+        "EXPENSE": "Expense",
+        "INCOME": "Income",
+        "TRANSFER": "Transfer"
+      },
+      "amount": "Amount",
+      "amountRequired": "Enter the amount",
+      "date": "Date",
+      "account": "Account",
+      "fromAccount": "From account",
+      "toAccount": "To account",
+      "toAccountRequired": "Choose another account",
+      "toAmount": "Received",
+      "toAmountHint": "The accounts have different currencies: enter the amount received",
+      "payee": "Payee",
+      "payeePlaceholder": "Start typing a name",
+      "category": "Category",
+      "split": "Split into several",
+      "splitCategory": "Part category",
+      "splitAmount": "Part amount",
+      "removeSplit": "Remove the part",
+      "addSplit": "Add a part",
+      "splitRemainder": "Unassigned: {{amount}}",
+      "splitMismatch": "The parts must add up to the transaction amount",
+      "tags": "Tags",
+      "tagsPlaceholder": "Add a tag",
+      "comment": "Comment",
+      "foreign": "Paid in a foreign currency",
+      "originalAmount": "Amount in the purchase currency",
+      "imported": "Imported from {{source}}: amount, date and account are as in the bank."
+    }
   }
 }

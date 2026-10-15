@@ -63,9 +63,9 @@ expenses red and income green, [Fixel](https://github.com/MacPaw/Fixel) for text
 
 ### 4. Transactions
 
-- [ ] Feed by day with period presets, filters and hidden-by-default search
-- [ ] Side panel to add and edit: expense, income, transfer between currencies, splits, tags, comment
-- [ ] Quick categorization of uncategorized transactions
+- [x] Feed by day with period presets, filters and hidden-by-default search
+- [x] Side panel to add and edit: expense, income, transfer between currencies, splits, tags, comment
+- [x] Quick categorization of uncategorized transactions
 
 ### 5. Imports
 

@@ -22,3 +22,11 @@ class ResizeObserverStub {
   disconnect() {}
 }
 window.ResizeObserver = ResizeObserverStub;
+
+// Mantine's autosize textarea listens to font loading, which jsdom does not implement.
+if (!document.fonts) {
+  Object.defineProperty(document, 'fonts', { value: new EventTarget() });
+}
+
+// Combobox keyboard navigation scrolls the active option into view.
+Element.prototype.scrollIntoView = function scrollIntoView() {};
