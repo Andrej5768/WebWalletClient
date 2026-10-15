@@ -274,5 +274,31 @@
       "originalAmount": "Amount in the purchase currency",
       "imported": "Imported from {{source}}: amount, date and account are as in the bank."
     }
+  },
+  "budget": {
+    "previousMonth": "Previous month",
+    "nextMonth": "Next month",
+    "copyPrevious": "Same as last month",
+    "move": "Move money",
+    "moveFrom": "From",
+    "moveTo": "To",
+    "moveSubmit": "Move",
+    "moveDifferent": "Choose another envelope",
+    "readyToAssign": "Ready to assign",
+    "readyPositive": "Put this money into envelopes: every hryvnia gets a job.",
+    "readyZero": "All money is assigned.",
+    "readyNegative": "More is assigned than you have. Lower some envelopes to get back to zero.",
+    "assigned": "Assigned",
+    "spent": "Spent",
+    "available": "Available",
+    "unconverted": "No rate: {{currencies}} — these amounts are not counted.",
+    "overspent": "Overspent: {{names}}. Move money from another envelope.",
+    "cover": "Cover",
+    "columns": {
+      "category": "Envelope"
+    },
+    "ahead": "ahead of pace by {{percent}}%",
+    "today": "Today's day of the month",
+    "assignTo": "Assigned: {{name}}"
   }
 }

@@ -1,6 +1,7 @@
 import { createBrowserRouter, Navigate, Outlet } from 'react-router';
 import { AccountsPage } from '../accounts/AccountsPage';
 import { TransactionsPage } from '../transactions/TransactionsPage';
+import { BudgetPage } from '../budget/BudgetPage';
 import { AuthProvider } from '../auth/AuthProvider';
 import { ForgotPasswordPage } from '../auth/pages/ForgotPasswordPage';
 import { LoginPage } from '../auth/pages/LoginPage';
@@ -11,7 +12,7 @@ import { GuestOnly, RequireAuth } from '../auth/RequireAuth';
 import { ComingSoonPage } from '../pages/ComingSoonPage';
 import { AppShell } from '../shell/AppShell';
 
-const sections = ['budget', 'reports', 'goals', 'imports', 'settings'];
+const sections = ['reports', 'goals', 'imports', 'settings'];
 
 export const routes = [
   {
@@ -51,6 +52,7 @@ export const routes = [
           { index: true, element: <ComingSoonPage section="dashboard" /> },
           { path: 'accounts', element: <AccountsPage /> },
           { path: 'transactions', element: <TransactionsPage /> },
+          { path: 'budget', element: <BudgetPage /> },
           ...sections.map((section) => ({ path: section, element: <ComingSoonPage section={section} /> })),
           { path: '*', element: <Navigate to="/" replace /> },
         ],
