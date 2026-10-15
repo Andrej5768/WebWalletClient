@@ -15,17 +15,18 @@ import {
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
 import { fieldErrors, problemMessage, toProblem } from '../api/errors';
 import { useAuth } from '../auth/context';
-import { required } from '../auth/validation';
+import { required } from '../lib/validation';
 import { currencyOptions } from '../lib/currencies';
 
 export function ProfileTab() {
   const { t, i18n } = useTranslation();
   const { user, setUser } = useAuth();
+  const queryClient = useQueryClient();
   const { colorScheme, setColorScheme } = useMantineColorScheme();
   const form = useForm({
     initialValues: {
@@ -50,8 +51,11 @@ export function ProfileTab() {
       if (error || !data) throw error;
       return data;
     },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
+      const currencyChanged = data.baseCurrency !== user?.baseCurrency;
       setUser(data);
+      // Every figure in the base currency is recalculated.
+      if (currencyChanged) await queryClient.invalidateQueries();
       if (data.locale && data.locale !== i18n.language) void i18n.changeLanguage(data.locale);
       notifications.show({ message: t('settings.saved'), color: 'green' });
     },

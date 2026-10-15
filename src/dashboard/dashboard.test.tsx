@@ -1,20 +1,6 @@
 import { screen, within } from '@testing-library/react';
-import dayjs from 'dayjs';
-import { setAccessToken } from '../api/session';
-import i18n from '../i18n';
-import { json, mockApi, renderApp, signedInApi } from '../test/render';
-
-const month = dayjs().format('YYYY-MM');
-
-beforeEach(async () => {
-  setAccessToken(null);
-  localStorage.clear();
-  await i18n.changeLanguage('uk');
-});
-
-afterEach(() => vi.unstubAllGlobals());
-
-const plain = (text: string | null) => (text ?? '').replace(/\s/g, ' ');
+import { budgetRowOf, splitOf, transactionOf } from '../test/fixtures';
+import { currentMonth as month, json, mockApi, plain, renderApp, signedInApi } from '../test/render';
 
 it('shows the month figures, envelopes, recent transactions and bank differences', async () => {
   mockApi({
@@ -34,25 +20,32 @@ it('shows the month figures, envelopes, recent transactions and bank differences
       }),
     [`GET /api/v1/budget/${month}`]: () =>
       json({
+        month,
         currency: 'UAH',
         readyToAssign: 4250,
+        assigned: 2000,
+        activity: -2340,
+        available: -340,
+        unconvertedCurrencies: [],
         categories: [
-          { categoryId: 3, name: 'Кафе', assigned: 2000, activity: -2340, available: -340, children: [] },
+          budgetRowOf({
+            categoryId: 3,
+            name: 'Кафе',
+            ownAssigned: 2000,
+            ownActivity: -2340,
+            ownAvailable: -340,
+          }),
         ],
       }),
     'GET /api/v1/transactions': () =>
       json({
         items: [
-          {
+          transactionOf({
             id: 1,
-            type: 'EXPENSE',
-            date: dayjs().format('YYYY-MM-DD'),
-            accountId: 1,
             amount: 95,
-            currency: 'UAH',
             payee: { id: 1, name: 'Aroma Kava' },
-            splits: [{ amount: 95 }],
-          },
+            splits: [splitOf({ amount: 95 })],
+          }),
         ],
         totalItems: 1,
         totalPages: 1,
@@ -66,6 +59,8 @@ it('shows the month figures, envelopes, recent transactions and bank differences
 
   const main = await screen.findByRole('main');
   expect(await within(main).findByText('Aroma Kava')).toBeInTheDocument();
+  // A recent transaction opens for editing on the transactions page.
+  expect(within(main).getByText('Aroma Kava').closest('a')).toHaveAttribute('href', '/transactions?edit=1');
   expect(plain(within(main).getByText(/52\s000,00/).textContent)).toBe('52 000,00 ₴');
   expect(within(main).getByText('Заощаджено 64% доходу')).toBeInTheDocument();
   expect(within(main).getByText('Кафе')).toBeInTheDocument();

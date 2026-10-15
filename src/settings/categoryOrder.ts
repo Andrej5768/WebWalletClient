@@ -46,7 +46,8 @@ export function moveCategory(items: CategoryInfo[], activeId: number, overId: nu
       const list = children.get(over.parentId)!;
       const overIndex = list.indexOf(over.id);
       const movingDown = items.indexOf(over) > items.indexOf(active);
-      list.splice(movingDown && over.parentId === active.parentId ? overIndex + 1 : overIndex, 0, active.id);
+      // As in the drag preview: moving down lands after the row it is dropped on, moving up before it.
+      list.splice(movingDown ? overIndex + 1 : overIndex, 0, active.id);
     }
   }
 

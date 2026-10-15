@@ -1,19 +1,8 @@
+import { accountOf } from '../test/fixtures';
 import { groupAccounts, type Account } from './groups';
 
-const account = (
-  id: number,
-  type: Account['type'],
-  balance: number,
-  extra: Partial<Account> = {},
-): Account => ({
-  id,
-  name: `Account ${id}`,
-  type,
-  currency: 'UAH',
-  balance,
-  balanceInBase: balance,
-  ...extra,
-});
+const account = (id: number, type: Account['type'], balance: number, extra: Partial<Account> = {}): Account =>
+  accountOf({ id, name: `Account ${id}`, type, balance, balanceInBase: balance, ...extra });
 
 describe('groupAccounts', () => {
   const accounts = [

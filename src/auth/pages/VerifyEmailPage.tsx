@@ -7,7 +7,7 @@ import { Link, useLocation } from 'react-router';
 import { api } from '../../api/client';
 import { AuthLayout } from '../AuthLayout';
 import { tokenFromHash, useStripTokenFromUrl } from '../token';
-import { requiredEmail } from '../validation';
+import { requiredEmail } from '../../lib/validation';
 import { CheckMail } from './CheckMail';
 import { ExpiredLink } from './ExpiredLink';
 

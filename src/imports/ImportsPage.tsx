@@ -1,5 +1,4 @@
 import {
-  Alert,
   Button,
   Card,
   FileInput,
@@ -18,8 +17,8 @@ import { useMutation } from '@tanstack/react-query';
 import { ChevronDown, FileText, Landmark, Upload } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { problemMessage, toProblem } from '../api/errors';
 import { useAccounts } from '../api/queries';
+import { ProblemAlert } from '../components/feedback';
 import { previewPrivatBank, previewZenMoneyFile, previewZenMoneyToken, type Preview } from './api';
 import { ImportPreviewModal } from './ImportPreviewModal';
 import { MonobankSection } from './MonobankSection';
@@ -45,6 +44,7 @@ export function ImportsPage() {
   const privat = useMutation({
     mutationFn: () => previewPrivatBank(privatFile!, privatAccount ? Number(privatAccount) : undefined),
     onSuccess: setPreview,
+    meta: { errorShown: true },
   });
   const zen = useMutation({
     mutationFn: () =>
@@ -54,11 +54,12 @@ export function ImportsPage() {
       setZenToken('');
       setPreview(data);
     },
+    meta: { errorShown: true },
   });
 
   const cardAccounts = (accounts.data ?? [])
     .filter((account) => !account.archived && (account.type === 'CARD' || account.type === 'CREDIT_CARD'))
-    .map((account) => ({ value: String(account.id), label: account.name ?? '' }));
+    .map((account) => ({ value: String(account.id), label: account.name }));
 
   return (
     <Stack gap="lg" maw={1200}>
@@ -140,11 +141,7 @@ export function ImportsPage() {
               value={privatAccount}
               onChange={setPrivatAccount}
             />
-            {privat.error && (
-              <Alert color="yellow" variant="light" p="xs" role="alert">
-                {problemMessage(toProblem(privat.error))}
-              </Alert>
-            )}
+            <ProblemAlert error={privat.error} />
             <Button disabled={!privatFile} loading={privat.isPending} onClick={() => privat.mutate()}>
               {t('imports.privat.submit')}
             </Button>
@@ -196,11 +193,7 @@ export function ImportsPage() {
                 inputWrapperOrder={['label', 'input', 'description', 'error']}
               />
             )}
-            {zen.error && (
-              <Alert color="yellow" variant="light" p="xs" role="alert">
-                {problemMessage(toProblem(zen.error))}
-              </Alert>
-            )}
+            <ProblemAlert error={zen.error} />
             <Button
               disabled={zenMode === 'token' ? !zenToken.trim() : !zenFile}
               loading={zen.isPending}

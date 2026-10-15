@@ -9,7 +9,7 @@ import { fieldErrors, problemMessage, toProblem, type ApiProblem } from '../../a
 import i18n from '../../i18n';
 import { AuthLayout } from '../AuthLayout';
 import { tokenFromHash, useStripTokenFromUrl } from '../token';
-import { newPassword } from '../validation';
+import { newPassword } from '../../lib/validation';
 import { ExpiredLink } from './ExpiredLink';
 
 /** Opened from the password reset email: `/reset-password#token=…`. */

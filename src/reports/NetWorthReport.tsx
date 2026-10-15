@@ -1,18 +1,18 @@
 import { AreaChart } from '@mantine/charts';
 import { Card, SimpleGrid, Skeleton, Stack } from '@mantine/core';
-import dayjs from 'dayjs';
 import { useTranslation } from 'react-i18next';
-import { locale } from '../i18n';
+import { formatMonthShort } from '../lib/format';
 import { formatMoney } from '../lib/money';
-import type { Period } from '../transactions/periods';
+import type { Period } from '../lib/periods';
 import { useNetWorth } from './api';
-import { Figure } from './Figure';
-import { UnconvertedAlert } from './ReportsPage';
+import { Figure } from '../components/Figure';
+import { QueryError, UnconvertedAlert } from '../components/feedback';
 
 export function NetWorthReport({ period }: { period: Period }) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const report = useNetWorth(period);
   if (report.isLoading) return <Skeleton height={360} radius="md" />;
+  if (!report.data) return <QueryError error={report.error} onRetry={() => void report.refetch()} />;
   const data = report.data;
   const currency = data?.currency ?? 'UAH';
   const months = data?.months ?? [];
@@ -26,9 +26,7 @@ export function NetWorthReport({ period }: { period: Period }) {
       : undefined;
 
   const chart = months.map((month) => ({
-    month: dayjs(`${month.month}-01`)
-      .toDate()
-      .toLocaleDateString(locale(i18n.language), { month: 'short', year: '2-digit' }),
+    month: formatMonthShort(month.month),
     [t('reports.netWorth')]: month.netWorth ?? 0,
     [t('reports.assets')]: month.assets ?? 0,
     [t('reports.debts')]: month.liabilities ?? 0,

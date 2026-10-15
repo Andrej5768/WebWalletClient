@@ -7,8 +7,7 @@ import settingsUk from '../settings/locales/uk.json';
 import en from './en.json';
 import uk from './uk.json';
 
-export const languages = ['uk', 'en'] as const;
-export type Language = (typeof languages)[number];
+type Language = 'uk' | 'en';
 
 const storageKey = 'ww-language';
 

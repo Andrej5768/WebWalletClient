@@ -15,51 +15,40 @@ import {
   TextInput,
 } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Info, Plus, Sparkles, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api, type Schemas } from '../api/client';
-import { problemMessage, toProblem } from '../api/errors';
-import { queryKeys, useCategories } from '../api/queries';
+import { check, unwrap } from '../api/http';
+import { invalidateLedger, queryKeys, useCategories, useCategoriesById, useRules } from '../api/queries';
 import { CategoryIcon } from '../components/CategoryIcon';
+import { confirmDelete } from '../components/confirm';
+import { ProblemAlert, QueryError } from '../components/feedback';
+import { FormFooter } from '../components/FormFooter';
 import { categorySelectData } from '../lib/categories';
 
 type Rule = Schemas['RuleResponse'];
-const rulesKey = ['categorization-rules'] as const;
 
 export function RulesTab() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const categories = useCategories();
   const [creating, setCreating] = useState(false);
-  const rules = useQuery({
-    queryKey: rulesKey,
-    queryFn: async () => {
-      const { data, error } = await api.GET('/api/v1/categorization-rules');
-      if (error || !data) throw error;
-      return data;
-    },
-  });
-  const byId = new Map((categories.data ?? []).map((category) => [category.id, category]));
+  const rules = useRules();
+  const byId = useCategoriesById();
 
   const apply = useMutation({
-    mutationFn: async () => {
-      const { data, error } = await api.POST('/api/v1/categorization-rules/apply');
-      if (error) throw error;
-      return data?.categorized ?? 0;
-    },
+    mutationFn: async () => (await unwrap(api.POST('/api/v1/categorization-rules/apply'))).categorized ?? 0,
     onSuccess: async (count) => {
       notifications.show({ message: t('settings.rules.applied', { count }), color: 'green' });
-      await queryClient.invalidateQueries({ queryKey: queryKeys.transactions });
+      // Newly categorized transactions change the budget and reports too.
+      await invalidateLedger(queryClient);
     },
   });
   const remove = useMutation({
-    mutationFn: async (id: number) => {
-      const { error } = await api.DELETE('/api/v1/categorization-rules/{id}', { params: { path: { id } } });
-      if (error) throw error;
-    },
-    onSettled: () => queryClient.invalidateQueries({ queryKey: rulesKey }),
+    mutationFn: (id: number) =>
+      check(api.DELETE('/api/v1/categorization-rules/{id}', { params: { path: { id } } })),
+    onSettled: () => queryClient.invalidateQueries({ queryKey: queryKeys.rules }),
   });
 
   const condition = (rule: Rule) =>
@@ -89,6 +78,7 @@ export function RulesTab() {
           {t('settings.rules.add')}
         </Button>
       </Group>
+      <QueryError error={rules.error} onRetry={() => void rules.refetch()} />
       <Card withBorder radius="md" p={0}>
         <Table verticalSpacing="sm" highlightOnHover>
           <Table.Thead>
@@ -123,7 +113,13 @@ export function RulesTab() {
                       variant="subtle"
                       color="red"
                       aria-label={t('settings.rules.delete')}
-                      onClick={() => remove.mutate(rule.id!)}
+                      onClick={() =>
+                        confirmDelete({
+                          title: t('settings.rules.deleteTitle'),
+                          text: condition(rule),
+                          onConfirm: () => remove.mutate(rule.id!),
+                        })
+                      }
                     >
                       <Trash2 size={14} />
                     </ActionIcon>
@@ -133,7 +129,7 @@ export function RulesTab() {
             })}
           </Table.Tbody>
         </Table>
-        {(rules.data ?? []).length === 0 && (
+        {rules.isSuccess && rules.data.length === 0 && (
           <Text c="dimmed" ta="center" py="xl">
             {t('settings.rules.empty')}
           </Text>
@@ -160,13 +156,13 @@ function RuleModal({ onClose }: { onClose(): void }) {
         mcc: type === 'mcc' ? Number(value) : undefined,
         bankCategory: type === 'bank' ? String(value).trim() : undefined,
       };
-      const { error } = await api.POST('/api/v1/categorization-rules', { body });
-      if (error) throw error;
+      await check(api.POST('/api/v1/categorization-rules', { body }));
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: rulesKey });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.rules });
       onClose();
     },
+    meta: { errorShown: true },
   });
 
   return (
@@ -200,23 +196,13 @@ function RuleModal({ onClose }: { onClose(): void }) {
           value={categoryId}
           onChange={setCategoryId}
         />
-        {save.error && (
-          <Alert color="yellow" variant="light" p="xs" role="alert">
-            {problemMessage(toProblem(save.error))}
-          </Alert>
-        )}
-        <Group justify="flex-end" gap="xs">
-          <Button variant="default" onClick={onClose}>
-            {t('common.cancel')}
-          </Button>
-          <Button
-            disabled={!categoryId || value === ''}
-            loading={save.isPending}
-            onClick={() => save.mutate()}
-          >
-            {t('common.save')}
-          </Button>
-        </Group>
+        <ProblemAlert error={save.error} />
+        <FormFooter
+          onCancel={onClose}
+          saving={save.isPending}
+          submitDisabled={!categoryId || String(value).trim() === ''}
+          onSubmit={() => save.mutate()}
+        />
       </Stack>
     </Modal>
   );

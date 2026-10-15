@@ -1,6 +1,6 @@
 import { ThemeIcon } from '@mantine/core';
 import { ArrowLeftRight, CircleHelp } from 'lucide-react';
-import { DynamicIcon, type IconName } from 'lucide-react/dynamic';
+import { CATEGORY_ICONS } from '../lib/categoryIcons';
 import { mantineColor, type PaletteColor } from '../lib/palette';
 
 interface Props {
@@ -11,9 +11,10 @@ interface Props {
   transfer?: boolean;
 }
 
-/** Category icon in a tinted tile; the icon is a Lucide name loaded on demand. */
+/** Category icon in a tinted tile; an unknown icon name shows a question mark. */
 export function CategoryIcon({ icon, color, size = 32, transfer }: Props) {
   const glyph = size * 0.5;
+  const Icon = transfer ? ArrowLeftRight : ((icon ? CATEGORY_ICONS[icon] : undefined) ?? CircleHelp);
   return (
     <ThemeIcon
       variant="light"
@@ -22,13 +23,7 @@ export function CategoryIcon({ icon, color, size = 32, transfer }: Props) {
       radius="md"
       aria-hidden
     >
-      {transfer ? (
-        <ArrowLeftRight size={glyph} />
-      ) : icon ? (
-        <DynamicIcon name={icon as IconName} size={glyph} fallback={() => <CircleHelp size={glyph} />} />
-      ) : (
-        <CircleHelp size={glyph} />
-      )}
+      <Icon size={glyph} />
     </ThemeIcon>
   );
 }

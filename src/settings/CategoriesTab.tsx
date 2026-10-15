@@ -5,6 +5,7 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
+  type Announcements,
   type DragEndEvent,
 } from '@dnd-kit/core';
 import {
@@ -14,26 +15,17 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import {
-  ActionIcon,
-  Alert,
-  Badge,
-  Button,
-  Card,
-  Group,
-  Menu,
-  SegmentedControl,
-  Stack,
-  Text,
-} from '@mantine/core';
+import { ActionIcon, Badge, Button, Card, Group, Menu, SegmentedControl, Stack, Text } from '@mantine/core';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Archive, ArchiveRestore, EllipsisVertical, GripVertical, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
-import { problemMessage, toProblem } from '../api/errors';
-import { queryKeys, useCategories } from '../api/queries';
+import { check } from '../api/http';
+import { invalidateCategories, useCategories } from '../api/queries';
 import { CategoryIcon } from '../components/CategoryIcon';
+import { confirmDelete } from '../components/confirm';
+import { ProblemAlert } from '../components/feedback';
 import type { CategoryInfo } from '../lib/categories';
 import { CategoryModal, type CategoryDraft } from './CategoryModal';
 import { moveCategory } from './categoryOrder';
@@ -52,39 +44,37 @@ export function CategoriesTab() {
   );
 
   const items = (categories.data ?? []).filter((category) => category.kind === kind);
-  const refresh = () => queryClient.invalidateQueries({ queryKey: queryKeys.categories });
+  const refresh = () => invalidateCategories(queryClient);
 
   const reorder = useMutation({
-    mutationFn: async (order: { id: number; parentId: number | null; sortOrder: number }[]) => {
-      const { error } = await api.PUT('/api/v1/categories/order', {
-        body: order.map((entry) => ({ ...entry, parentId: entry.parentId ?? undefined })),
-      });
-      if (error) throw error;
-    },
+    mutationFn: (order: { id: number; parentId: number | null; sortOrder: number }[]) =>
+      check(
+        api.PUT('/api/v1/categories/order', {
+          body: order.map((entry) => ({ ...entry, parentId: entry.parentId ?? undefined })),
+        }),
+      ),
     onSettled: refresh,
   });
 
   const update = useMutation({
-    mutationFn: async ({ category, archived }: { category: CategoryInfo; archived: boolean }) => {
-      const { error } = await api.PUT('/api/v1/categories/{id}', {
-        params: { path: { id: category.id } },
-        body: {
-          name: category.name,
-          kind: category.kind,
-          parentId: category.parentId ?? undefined,
-          archived,
-        },
-      });
-      if (error) throw error;
-    },
+    // Fields left out of the body keep their values.
+    mutationFn: ({ category, archived }: { category: CategoryInfo; archived: boolean }) =>
+      check(
+        api.PUT('/api/v1/categories/{id}', {
+          params: { path: { id: category.id } },
+          body: {
+            name: category.name,
+            kind: category.kind,
+            parentId: category.parentId ?? undefined,
+            archived,
+          },
+        }),
+      ),
     onSettled: refresh,
   });
 
   const remove = useMutation({
-    mutationFn: async (id: number) => {
-      const { error } = await api.DELETE('/api/v1/categories/{id}', { params: { path: { id } } });
-      if (error) throw error;
-    },
+    mutationFn: (id: number) => check(api.DELETE('/api/v1/categories/{id}', { params: { path: { id } } })),
     onSettled: refresh,
   });
 
@@ -95,6 +85,19 @@ export function CategoriesTab() {
   };
 
   const problem = reorder.error ?? update.error ?? remove.error;
+  const nameOf = (id: string | number) => items.find((item) => item.id === Number(id))?.name ?? '';
+  const announcements: Announcements = {
+    onDragStart: ({ active }) => t('settings.categories.dnd.start', { name: nameOf(active.id) }),
+    onDragOver: ({ active, over }) =>
+      over
+        ? t('settings.categories.dnd.over', { name: nameOf(active.id), target: nameOf(over.id) })
+        : undefined,
+    onDragEnd: ({ active, over }) =>
+      over
+        ? t('settings.categories.dnd.end', { name: nameOf(active.id), target: nameOf(over.id) })
+        : t('settings.categories.dnd.cancel', { name: nameOf(active.id) }),
+    onDragCancel: ({ active }) => t('settings.categories.dnd.cancel', { name: nameOf(active.id) }),
+  };
 
   return (
     <Stack gap="md" maw={900}>
@@ -115,13 +118,17 @@ export function CategoriesTab() {
         {t('settings.categories.dragHint')}
         {kind === 'EXPENSE' && ` ${t('settings.categories.necessityHint')}`}
       </Text>
-      {problem && (
-        <Alert color="yellow" variant="light" p="xs" role="alert">
-          {problemMessage(toProblem(problem))}
-        </Alert>
-      )}
+      <ProblemAlert error={problem} />
       <Card withBorder radius="md" p={0}>
-        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={onDragEnd}
+          accessibility={{
+            announcements,
+            screenReaderInstructions: { draggable: t('settings.categories.dnd.instructions') },
+          }}
+        >
           <SortableContext items={items.map((item) => item.id)} strategy={verticalListSortingStrategy}>
             {items.map((category) => (
               <CategoryRow
@@ -130,8 +137,14 @@ export function CategoriesTab() {
                 hasChildren={items.some((item) => item.parentId === category.id)}
                 onEdit={() => setEditing({ category, kind })}
                 onAddChild={() => setEditing({ kind, parentId: category.id })}
-                onArchive={() => update.mutate({ category, archived: !category.archived })}
-                onDelete={() => remove.mutate(category.id)}
+                onArchive={() => update.mutate({ category, archived: !category.own.archived })}
+                onDelete={() =>
+                  confirmDelete({
+                    title: t('settings.categories.deleteTitle', { name: category.name }),
+                    text: t('settings.categories.deleteText'),
+                    onConfirm: () => remove.mutate(category.id),
+                  })
+                }
               />
             ))}
           </SortableContext>
@@ -235,10 +248,11 @@ function CategoryRow({
             </Menu.Item>
           )}
           <Menu.Item
-            leftSection={category.archived ? <ArchiveRestore size={14} /> : <Archive size={14} />}
+            disabled={category.archived && !category.own.archived}
+            leftSection={category.own.archived ? <ArchiveRestore size={14} /> : <Archive size={14} />}
             onClick={onArchive}
           >
-            {t(category.archived ? 'accounts.menu.unarchive' : 'settings.categories.archive')}
+            {t(category.own.archived ? 'accounts.menu.unarchive' : 'settings.categories.archive')}
           </Menu.Item>
           <Menu.Divider />
           <Menu.Item color="red" leftSection={<Trash2 size={14} />} disabled={hasChildren} onClick={onDelete}>

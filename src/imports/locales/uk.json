@@ -111,7 +111,12 @@
       "submit_one": "Імпортувати {{count}} операцію",
       "submit_few": "Імпортувати {{count}} операції",
       "submit_many": "Імпортувати {{count}} операцій",
-      "submit_other": "Імпортувати {{count}} операції"
+      "submit_other": "Імпортувати {{count}} операції",
+      "transferRequired": "Виберіть рахунок",
+      "transfersIncomplete_one": "Для {{count}} переказу не вибрано інший рахунок.",
+      "transfersIncomplete_few": "Для {{count}} переказів не вибрано інший рахунок.",
+      "transfersIncomplete_many": "Для {{count}} переказів не вибрано інший рахунок.",
+      "transfersIncomplete_other": "Для {{count}} переказу не вибрано інший рахунок."
     },
     "result": {
       "title": "Імпорт завершено",

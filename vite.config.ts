@@ -1,4 +1,3 @@
-import { fileURLToPath, URL } from 'node:url';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 
@@ -6,9 +5,6 @@ import { defineConfig } from 'vite';
 // in production the reverse proxy does. The refresh token cookie therefore needs no CORS.
 export default defineConfig({
   plugins: [react()],
-  resolve: {
-    alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
-  },
   server: {
     port: 5173,
     proxy: {

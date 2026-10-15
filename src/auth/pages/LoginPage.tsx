@@ -7,7 +7,7 @@ import { Link, useLocation, useNavigate } from 'react-router';
 import { problemMessage, type ApiProblem } from '../../api/errors';
 import { AuthLayout } from '../AuthLayout';
 import { useAuth } from '../context';
-import { required, requiredEmail } from '../validation';
+import { required, requiredEmail } from '../../lib/validation';
 
 export function LoginPage() {
   const { t } = useTranslation();

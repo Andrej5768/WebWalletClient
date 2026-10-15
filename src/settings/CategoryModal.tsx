@@ -1,7 +1,4 @@
 import {
-  ActionIcon,
-  Alert,
-  Button,
   Group,
   Modal,
   SegmentedControl,
@@ -11,20 +8,23 @@ import {
   Switch,
   Text,
   TextInput,
-  Tooltip,
+  ThemeIcon,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { DynamicIcon, type IconName } from 'lucide-react/dynamic';
 import { useTranslation } from 'react-i18next';
 import { api, type Schemas } from '../api/client';
-import { fieldErrors, problemMessage, toProblem } from '../api/errors';
-import { queryKeys } from '../api/queries';
-import { required } from '../auth/validation';
+import { fieldErrors, toProblem } from '../api/errors';
+import { check } from '../api/http';
+import { invalidateCategories } from '../api/queries';
+import { required } from '../lib/validation';
 import { CategoryIcon } from '../components/CategoryIcon';
+import { ProblemAlert } from '../components/feedback';
+import { FormFooter } from '../components/FormFooter';
+import { RadioTiles } from '../components/RadioTiles';
+import { CATEGORY_ICON_NAMES, CATEGORY_ICONS } from '../lib/categoryIcons';
 import type { CategoryInfo } from '../lib/categories';
 import { mantineColor, type PaletteColor } from '../lib/palette';
-import { CATEGORY_ICONS } from './categoryIcons';
 import { ColorSwatches } from './ColorSwatches';
 
 export interface CategoryDraft {
@@ -60,11 +60,12 @@ export function CategoryModal({
         : draft.parentId
           ? String(draft.parentId)
           : null,
-      icon: existing?.icon ?? null,
-      color: existing?.color ?? null,
-      necessity: (existing?.necessity ??
+      icon: existing?.own.icon ?? null,
+      color: existing?.own.color ?? null,
+      // A subcategory without its own flag shows "same as group"; a new group starts as a need.
+      necessity: (existing?.own.necessity ??
         (existing?.parentId || draft.parentId ? 'INHERIT' : 'NEEDS')) as Necessity,
-      archived: existing?.archived ?? false,
+      archived: existing?.own.archived ?? false,
     },
     validate: { name: required },
   });
@@ -87,13 +88,14 @@ export function CategoryModal({
             : input.necessity,
         archived: input.archived,
       };
-      const { error } = existing
-        ? await api.PUT('/api/v1/categories/{id}', { params: { path: { id: existing.id } }, body })
-        : await api.POST('/api/v1/categories', { body });
-      if (error) throw error;
+      await check(
+        existing
+          ? api.PUT('/api/v1/categories/{id}', { params: { path: { id: existing.id } }, body })
+          : api.POST('/api/v1/categories', { body }),
+      );
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: queryKeys.categories });
+      await invalidateCategories(queryClient);
       onClose();
     },
     onError: (error) => form.setErrors(fieldErrors(toProblem(error))),
@@ -152,27 +154,30 @@ export function CategoryModal({
             <Text size="sm" fw={500}>
               {t('settings.categories.icon')}
             </Text>
-            <div
-              role="radiogroup"
-              aria-label={t('settings.categories.icon')}
-              style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(36px, 1fr))', gap: 6 }}
-            >
-              {CATEGORY_ICONS.map((name) => (
-                <Tooltip key={name} label={name} withArrow openDelay={500}>
-                  <ActionIcon
-                    role="radio"
-                    aria-checked={values.icon === name}
-                    aria-label={name}
-                    size={36}
-                    variant={values.icon === name ? 'light' : 'subtle'}
-                    color={values.icon === name ? mantineColor(shownColor, 'cobalt') : 'gray'}
-                    onClick={() => form.setFieldValue('icon', values.icon === name ? null : name)}
-                  >
-                    <DynamicIcon name={name as IconName} size={18} />
-                  </ActionIcon>
-                </Tooltip>
-              ))}
-            </div>
+            <RadioTiles
+              label={t('settings.categories.icon')}
+              style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(36px, 1fr))' }}
+              value={values.icon}
+              // Clicking the chosen icon again clears it, so a subcategory falls back to its group's.
+              onChange={(icon) => form.setFieldValue('icon', icon === values.icon ? null : icon)}
+              options={CATEGORY_ICON_NAMES.map((name) => {
+                const Icon = CATEGORY_ICONS[name]!;
+                return {
+                  value: name as string | null,
+                  label: name,
+                  render: (selected: boolean) => (
+                    <ThemeIcon
+                      size={36}
+                      radius="md"
+                      variant={selected ? 'light' : 'transparent'}
+                      color={selected ? mantineColor(shownColor, 'cobalt') : 'gray'}
+                    >
+                      <Icon size={18} />
+                    </ThemeIcon>
+                  ),
+                };
+              })}
+            />
             {values.parentId && !values.icon && (
               <Text size="xs" c="dimmed">
                 {t('settings.categories.inheritsIcon')}
@@ -217,19 +222,8 @@ export function CategoryModal({
             description={t('settings.categories.archivedHelp')}
             {...form.getInputProps('archived', { type: 'checkbox' })}
           />
-          {save.error && !toProblem(save.error).errors?.length && (
-            <Alert color="yellow" variant="light" p="xs" role="alert">
-              {problemMessage(toProblem(save.error))}
-            </Alert>
-          )}
-          <Group justify="flex-end" gap="xs">
-            <Button variant="default" onClick={onClose}>
-              {t('common.cancel')}
-            </Button>
-            <Button type="submit" loading={save.isPending}>
-              {t('common.save')}
-            </Button>
-          </Group>
+          <ProblemAlert error={save.error} fieldsShown={['name']} />
+          <FormFooter onCancel={onClose} saving={save.isPending} />
         </Stack>
       </form>
     </Modal>

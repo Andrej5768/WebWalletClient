@@ -15,7 +15,7 @@ export const accountTypes: AccountType[] = [
 ];
 
 /** Table groups, in display order; the translation key is `accounts.groups.<key>`. */
-export const accountGroups: { key: string; types: AccountType[] }[] = [
+const accountGroups: { key: string; types: AccountType[] }[] = [
   { key: 'cards', types: ['CARD'] },
   { key: 'cash', types: ['CASH'] },
   { key: 'credit', types: ['CREDIT_CARD'] },

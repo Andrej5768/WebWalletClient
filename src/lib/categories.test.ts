@@ -1,19 +1,19 @@
+import { categoryOf } from '../test/fixtures';
 import { categorySelectData, flattenCategories, type Category } from './categories';
 
 const tree: Category[] = [
-  {
+  categoryOf({
     id: 1,
     name: 'Їжа',
-    kind: 'EXPENSE',
     icon: 'utensils',
     color: 'orange',
     necessity: 'NEEDS',
     children: [
-      { id: 2, name: 'Продукти', kind: 'EXPENSE', parentId: 1, icon: 'shopping-cart' },
-      { id: 3, name: 'Кафе', kind: 'EXPENSE', parentId: 1, necessity: 'WANTS', archived: true },
+      categoryOf({ id: 2, name: 'Продукти', parentId: 1, icon: 'shopping-cart' }),
+      categoryOf({ id: 3, name: 'Кафе', parentId: 1, necessity: 'WANTS', archived: true }),
     ],
-  },
-  { id: 4, name: 'Зарплата', kind: 'INCOME', color: 'green' },
+  }),
+  categoryOf({ id: 4, name: 'Зарплата', kind: 'INCOME', color: 'green' }),
 ];
 
 describe('flattenCategories', () => {

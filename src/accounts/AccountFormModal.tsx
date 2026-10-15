@@ -1,26 +1,18 @@
-import {
-  Alert,
-  Button,
-  Group,
-  Modal,
-  NumberInput,
-  Select,
-  SimpleGrid,
-  Stack,
-  Switch,
-  Text,
-  TextInput,
-} from '@mantine/core';
+import { Group, Modal, NumberInput, Select, SimpleGrid, Stack, Switch, Text, TextInput } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api, type Schemas } from '../api/client';
-import { fieldErrors, problemMessage, toProblem, type ApiProblem } from '../api/errors';
-import { queryKeys } from '../api/queries';
-import { required } from '../auth/validation';
-import type { AccountType } from '../lib/accounts';
+import { fieldErrors, toProblem } from '../api/errors';
+import { check } from '../api/http';
+import { invalidateLedger } from '../api/queries';
+import { confirmDelete } from '../components/confirm';
+import { ProblemAlert } from '../components/feedback';
+import { FormFooter } from '../components/FormFooter';
+import { MoneyInput } from '../components/MoneyInput';
+import { inBudgetByDefault, type AccountType } from '../lib/accounts';
 import { currencyOptions } from '../lib/currencies';
+import { required } from '../lib/validation';
 import { accountTypes, hasInterest, type Account } from './groups';
 
 interface Values {
@@ -34,8 +26,9 @@ interface Values {
   archived: boolean;
 }
 
-const toNumber = (value: number | string): number | undefined =>
-  value === '' || value === undefined ? undefined : Number(value);
+const FORM_FIELDS = ['name', 'type', 'currency', 'openingBalance', 'creditLimit', 'interestRate'];
+
+const toNumber = (value: number | string): number | undefined => (value === '' ? undefined : Number(value));
 
 function initialValues(account: Account | null): Values {
   return {
@@ -45,7 +38,7 @@ function initialValues(account: Account | null): Values {
     openingBalance: account?.openingBalance ?? 0,
     creditLimit: account?.creditLimit ?? '',
     interestRate: account?.interestRate ?? '',
-    inBudget: account?.inBudget ?? true,
+    inBudget: account?.inBudget ?? inBudgetByDefault('CARD'),
     archived: account?.archived ?? false,
   };
 }
@@ -55,13 +48,21 @@ export function AccountFormModal({ account, onClose }: { account: Account | null
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const editing = account !== null;
-  const [problem, setProblem] = useState<ApiProblem | null>(null);
   const form = useForm<Values>({ initialValues: initialValues(account), validate: { name: required } });
 
-  const invalidate = () => queryClient.invalidateQueries({ queryKey: queryKeys.accounts });
+  /** A new account follows the budget default of its type until the switch is touched. */
+  const changeType = (type: AccountType) => {
+    form.setFieldValue('type', type);
+    if (!editing && !form.isTouched('inBudget')) form.setFieldValue('inBudget', inBudgetByDefault(type));
+  };
+
+  const done = async () => {
+    await invalidateLedger(queryClient);
+    onClose();
+  };
 
   const save = useMutation({
-    mutationFn: async (values: Values) => {
+    mutationFn: (values: Values) => {
       const body: Schemas['AccountRequest'] = {
         name: values.name.trim(),
         type: values.type,
@@ -73,32 +74,20 @@ export function AccountFormModal({ account, onClose }: { account: Account | null
         inBudget: values.inBudget,
         archived: values.archived,
       };
-      const { error } = editing
-        ? await api.PUT('/api/v1/accounts/{id}', { params: { path: { id: account.id! } }, body })
-        : await api.POST('/api/v1/accounts', { body });
-      if (error) throw error;
+      return check(
+        editing
+          ? api.PUT('/api/v1/accounts/{id}', { params: { path: { id: account.id } }, body })
+          : api.POST('/api/v1/accounts', { body }),
+      );
     },
-    onSuccess: async () => {
-      await invalidate();
-      onClose();
-    },
-    onError: (error) => {
-      const result = toProblem(error);
-      form.setErrors(fieldErrors(result));
-      setProblem(result);
-    },
+    onSuccess: done,
+    onError: (error) => form.setErrors(fieldErrors(toProblem(error))),
   });
 
   const remove = useMutation({
-    mutationFn: async () => {
-      const { error } = await api.DELETE('/api/v1/accounts/{id}', { params: { path: { id: account!.id! } } });
-      if (error) throw error;
-    },
-    onSuccess: async () => {
-      await invalidate();
-      onClose();
-    },
-    onError: (error) => setProblem(toProblem(error)),
+    mutationFn: () => check(api.DELETE('/api/v1/accounts/{id}', { params: { path: { id: account!.id } } })),
+    onSuccess: done,
+    meta: { errorShown: true },
   });
 
   const type = form.values.type;
@@ -119,6 +108,7 @@ export function AccountFormModal({ account, onClose }: { account: Account | null
               allowDeselect={false}
               data={accountTypes.map((value) => ({ value, label: t(`accounts.types.${value}`) }))}
               {...form.getInputProps('type')}
+              onChange={(value) => value && changeType(value as AccountType)}
             />
             <Select
               label={t('accounts.form.currency')}
@@ -127,32 +117,20 @@ export function AccountFormModal({ account, onClose }: { account: Account | null
               disabled={editing}
               data={currencyOptions(form.values.currency)}
               description={editing ? t('accounts.form.currencyLocked') : undefined}
-              inputWrapperOrder={['label', 'input', 'description', 'error']}
               styles={{ description: { color: 'var(--ww-expense)' } }}
               {...form.getInputProps('currency')}
             />
-            <NumberInput
+            <MoneyInput
               label={t('accounts.form.openingBalance')}
-              decimalScale={2}
-              thousandSeparator=" "
-              decimalSeparator=","
-              rightSection={
-                <Text size="xs" ff="monospace" c="dimmed">
-                  {form.values.currency}
-                </Text>
-              }
-              rightSectionWidth={52}
+              min={undefined}
+              currency={form.values.currency}
               {...form.getInputProps('openingBalance')}
             />
             {type === 'CREDIT_CARD' && (
-              <NumberInput
+              <MoneyInput
                 label={t('accounts.form.creditLimit')}
                 description={t('accounts.form.creditLimitHint')}
-                inputWrapperOrder={['label', 'input', 'description', 'error']}
-                min={0}
-                decimalScale={2}
-                thousandSeparator=" "
-                decimalSeparator=","
+                currency={form.values.currency}
                 {...form.getInputProps('creditLimit')}
               />
             )}
@@ -162,7 +140,6 @@ export function AccountFormModal({ account, onClose }: { account: Account | null
                 min={0}
                 max={100}
                 decimalScale={2}
-                decimalSeparator=","
                 rightSection={
                   <Text size="xs" c="dimmed">
                     %
@@ -175,6 +152,7 @@ export function AccountFormModal({ account, onClose }: { account: Account | null
           <Group gap="xl">
             <Switch
               label={t('accounts.form.inBudget')}
+              description={t('accounts.form.inBudgetHint')}
               {...form.getInputProps('inBudget', { type: 'checkbox' })}
             />
             <Switch
@@ -182,33 +160,22 @@ export function AccountFormModal({ account, onClose }: { account: Account | null
               {...form.getInputProps('archived', { type: 'checkbox' })}
             />
           </Group>
-          {problem && !problem.errors?.length && (
-            <Alert color="yellow" variant="light" p="xs" role="alert">
-              <Text size="sm">{problemMessage(problem)}</Text>
-            </Alert>
-          )}
-          <Group justify="space-between" pt="xs">
-            {editing ? (
-              <Button
-                variant="outline"
-                color="red"
-                loading={remove.isPending}
-                onClick={() => remove.mutate()}
-              >
-                {t('common.delete')}
-              </Button>
-            ) : (
-              <span />
-            )}
-            <Group gap="xs">
-              <Button variant="default" onClick={onClose}>
-                {t('common.cancel')}
-              </Button>
-              <Button type="submit" loading={save.isPending}>
-                {t('common.save')}
-              </Button>
-            </Group>
-          </Group>
+          <ProblemAlert error={save.error ?? remove.error} fieldsShown={FORM_FIELDS} />
+          <FormFooter
+            onCancel={onClose}
+            saving={save.isPending}
+            deleting={remove.isPending}
+            onDelete={
+              editing
+                ? () =>
+                    confirmDelete({
+                      title: t('accounts.form.deleteTitle', { name: account.name }),
+                      text: t('accounts.form.deleteText'),
+                      onConfirm: () => remove.mutate(),
+                    })
+                : undefined
+            }
+          />
         </Stack>
       </form>
     </Modal>

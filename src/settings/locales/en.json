@@ -83,7 +83,16 @@
       "necessityLabel": "Spending type",
       "necessityHelp": "For 50/30/20 analytics: needs, wants, savings.",
       "archivedSwitch": "Archived",
-      "archivedHelp": "Archived categories are hidden in forms; their transactions and reports stay."
+      "archivedHelp": "Archived categories are hidden in forms; their transactions and reports stay.",
+      "deleteTitle": "Delete the category “{{name}}”?",
+      "deleteText": "A category can be deleted only while it has no transactions or budget amounts. Otherwise archive it.",
+      "dnd": {
+        "instructions": "To move a category, press space, use the up and down arrows, and press space again. Escape cancels.",
+        "start": "Moving {{name}}.",
+        "over": "{{name}} is over {{target}}.",
+        "end": "{{name}} moved to the place of {{target}}.",
+        "cancel": "Moving {{name}} cancelled."
+      }
     },
     "rules": {
       "hint": "Rules categorize new transactions. When you change a category by hand, a rule for the payee is learned automatically.",
@@ -104,21 +113,26 @@
         "bank": "Bank category"
       },
       "payeeLabel": "Payee contains",
-      "bankLabel": "Bank category"
+      "bankLabel": "Bank category",
+      "deleteTitle": "Delete the rule?"
     },
     "payees": {
       "hint": "Payees come from transactions. Deleting one keeps its transactions.",
       "filter": "Find a payee",
       "rename": "Rename",
       "delete": "Delete payee",
-      "empty": "Nothing found"
+      "empty": "Nothing found",
+      "deleteTitle": "Delete the payee “{{name}}”?",
+      "deleteText": "Transactions stay, without a payee; rules for it are removed."
     },
     "tags": {
       "hint": "Tags group transactions across categories, e.g. #vacation.",
       "add": "New tag",
       "empty": "No tags yet",
       "newTitle": "New tag",
-      "editTitle": "Edit tag"
+      "editTitle": "Edit tag",
+      "deleteTitle": "Delete the tag #{{name}}?",
+      "deleteText": "The tag is removed from all transactions; the transactions stay."
     }
   }
 }

@@ -1,28 +1,22 @@
 import { BarChart } from '@mantine/charts';
 import { Card, SimpleGrid, Skeleton, Stack, Table, Text } from '@mantine/core';
-import dayjs from 'dayjs';
 import { useTranslation } from 'react-i18next';
-import { locale } from '../i18n';
+import { formatMonthShort, formatPercent } from '../lib/format';
 import { formatMoney } from '../lib/money';
-import type { Period } from '../transactions/periods';
+import type { Period } from '../lib/periods';
 import { useIncomeExpense } from './api';
-import { Figure } from './Figure';
-import { UnconvertedAlert } from './ReportsPage';
-
-const rate = (value?: number | null) => (value == null ? '—' : `${Math.round(value * 1000) / 10}%`);
+import { Figure } from '../components/Figure';
+import { QueryError, UnconvertedAlert } from '../components/feedback';
 
 export function IncomeExpenseReport({ period }: { period: Period }) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const report = useIncomeExpense(period);
   if (report.isLoading) return <Skeleton height={360} radius="md" />;
+  if (!report.data) return <QueryError error={report.error} onRetry={() => void report.refetch()} />;
   const data = report.data;
   const currency = data?.currency ?? 'UAH';
-  const monthName = (month?: string) =>
-    dayjs(`${month}-01`)
-      .toDate()
-      .toLocaleDateString(locale(i18n.language), { month: 'short', year: '2-digit' });
   const months = (data?.months ?? []).map((month) => ({
-    month: monthName(month.month),
+    month: formatMonthShort(month.month),
     [t('reports.income')]: month.income ?? 0,
     [t('reports.expense')]: month.expense ?? 0,
   }));
@@ -42,7 +36,7 @@ export function IncomeExpenseReport({ period }: { period: Period }) {
           className="expense"
         />
         <Figure label={t('reports.net')} value={formatMoney(data?.net ?? 0, currency, { signed: true })} />
-        <Figure label={t('reports.savingsRate')} value={rate(data?.savingsRate)} />
+        <Figure label={t('reports.savingsRate')} value={formatPercent(data?.savingsRate)} />
       </SimpleGrid>
       <Card withBorder radius="md" padding="lg">
         <BarChart
@@ -73,7 +67,7 @@ export function IncomeExpenseReport({ period }: { period: Period }) {
           <Table.Tbody>
             {[...(data?.months ?? [])].reverse().map((month) => (
               <Table.Tr key={month.month}>
-                <Table.Td tt="capitalize">{monthName(month.month)}</Table.Td>
+                <Table.Td tt="capitalize">{formatMonthShort(month.month)}</Table.Td>
                 <Table.Td ta="right" className="num income">
                   {formatMoney(month.income ?? 0, currency)}
                 </Table.Td>
@@ -85,7 +79,7 @@ export function IncomeExpenseReport({ period }: { period: Period }) {
                 </Table.Td>
                 <Table.Td ta="right" className="num">
                   <Text size="sm" c="dimmed" span>
-                    {rate(month.savingsRate)}
+                    {formatPercent(month.savingsRate)}
                   </Text>
                 </Table.Td>
               </Table.Tr>

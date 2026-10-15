@@ -1,5 +1,5 @@
 import i18n from '../i18n';
-import { utf8Length } from './token';
+import { utf8Length } from '../auth/token';
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 

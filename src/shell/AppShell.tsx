@@ -12,7 +12,7 @@ import { BalanceWidget } from './BalanceWidget';
 import { mainNav, settingsNav, type NavItem } from './nav';
 import classes from './shell.module.css';
 
-function initials(first?: string, last?: string): string {
+function initials(first?: string | null, last?: string | null): string {
   return ((first?.[0] ?? '') + (last?.[0] ?? '')).toUpperCase() || '?';
 }
 

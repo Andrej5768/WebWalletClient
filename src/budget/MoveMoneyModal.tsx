@@ -1,39 +1,37 @@
-import { Alert, Button, Group, Modal, NumberInput, Select, Stack, Text } from '@mantine/core';
+import { Modal, Select, Stack, Text } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { problemMessage, toProblem } from '../api/errors';
+import { fieldErrors, toProblem } from '../api/errors';
+import { ProblemAlert } from '../components/feedback';
+import { FormFooter } from '../components/FormFooter';
+import { MoneyInput } from '../components/MoneyInput';
 import { formatMoney } from '../lib/money';
-import { assign } from './api';
+import { budgetChanged, moveMoney } from './api';
 import type { Envelope } from './model';
 
-/** Moves money between two envelopes: lowers one assignment and raises the other. */
+/** Moves money between the own envelopes of two categories in one request. */
 export function MoveMoneyModal({
   month,
   envelopes,
   currency,
   initial,
   onClose,
-  onMoved,
 }: {
   month: string;
   envelopes: Envelope[];
   currency: string;
   initial: { from?: number; to?: number };
   onClose(): void;
-  onMoved(): Promise<unknown>;
 }) {
   const { t } = useTranslation();
-  const byId = new Map(envelopes.map((row) => [String(row.categoryId), row]));
-  const overspentTo = initial.to ? byId.get(String(initial.to)) : undefined;
+  const queryClient = useQueryClient();
+  const overspentTo = envelopes.find((row) => row.categoryId === initial.to);
   const form = useForm({
     initialValues: {
       from: initial.from ? String(initial.from) : null,
       to: initial.to ? String(initial.to) : null,
-      amount:
-        overspentTo && (overspentTo.available ?? 0) < 0
-          ? -(overspentTo.available ?? 0)
-          : ('' as number | string),
+      amount: overspentTo && overspentTo.available < 0 ? -overspentTo.available : ('' as number | string),
     },
     validate: {
       from: (value) => (value ? null : t('validation.required')),
@@ -43,22 +41,26 @@ export function MoveMoneyModal({
   });
 
   const move = useMutation({
-    mutationFn: async ({ from, to, amount }: typeof form.values) => {
-      const source = byId.get(from!)!;
-      const target = byId.get(to!)!;
-      const value = Number(amount);
-      await assign(month, source.categoryId!, (source.assigned ?? 0) - value);
-      await assign(month, target.categoryId!, (target.assigned ?? 0) + value);
-    },
-    onSuccess: async () => {
-      await onMoved();
+    mutationFn: ({ from, to, amount }: typeof form.values) =>
+      moveMoney(month, Number(from), Number(to), Number(amount)),
+    onSuccess: async (updated) => {
+      await budgetChanged(queryClient, updated);
       onClose();
     },
+    onError: (error) =>
+      form.setErrors(
+        Object.fromEntries(
+          Object.entries(fieldErrors(toProblem(error))).map(([field, message]) => [
+            field === 'fromCategoryId' ? 'from' : field === 'toCategoryId' ? 'to' : field,
+            message,
+          ]),
+        ),
+      ),
   });
 
   const options = envelopes.map((row) => ({
     value: String(row.categoryId),
-    label: `${row.name} · ${formatMoney(row.available ?? 0, currency)}`,
+    label: `${row.name} · ${formatMoney(row.available, currency)}`,
   }));
 
   return (
@@ -67,34 +69,13 @@ export function MoveMoneyModal({
         <Stack gap="md">
           <Select label={t('budget.moveFrom')} searchable data={options} {...form.getInputProps('from')} />
           <Select label={t('budget.moveTo')} searchable data={options} {...form.getInputProps('to')} />
-          <NumberInput
+          <MoneyInput
             label={t('transactions.form.amount')}
-            min={0}
-            decimalScale={2}
-            thousandSeparator=" "
-            decimalSeparator=","
-            classNames={{ input: 'num' }}
-            rightSection={
-              <Text size="xs" ff="monospace" c="dimmed">
-                {currency}
-              </Text>
-            }
-            rightSectionWidth={48}
+            currency={currency}
             {...form.getInputProps('amount')}
           />
-          {move.error && (
-            <Alert color="yellow" variant="light" p="xs" role="alert">
-              {problemMessage(toProblem(move.error))}
-            </Alert>
-          )}
-          <Group justify="flex-end" gap="xs">
-            <Button variant="default" onClick={onClose}>
-              {t('common.cancel')}
-            </Button>
-            <Button type="submit" loading={move.isPending}>
-              {t('budget.moveSubmit')}
-            </Button>
-          </Group>
+          <ProblemAlert error={move.error} fieldsShown={['fromCategoryId', 'toCategoryId', 'amount']} />
+          <FormFooter onCancel={onClose} saving={move.isPending} submitLabel={t('budget.moveSubmit')} />
         </Stack>
       </form>
     </Modal>

@@ -107,7 +107,10 @@
       "tagsOf": "Tags: {{name}}",
       "addTag": "+ tag",
       "submit_one": "Import {{count}} transaction",
-      "submit_other": "Import {{count}} transactions"
+      "submit_other": "Import {{count}} transactions",
+      "transferRequired": "Choose an account",
+      "transfersIncomplete_one": "{{count}} transfer has no other account chosen.",
+      "transfersIncomplete_other": "{{count}} transfers have no other account chosen."
     },
     "result": {
       "title": "Import finished",

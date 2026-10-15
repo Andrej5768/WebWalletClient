@@ -303,6 +303,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/budget/{month}/copy-previous": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Copy the assignments of the previous month to the envelopes without one this month
+         * @description Every expense category whose own assignment this month is zero gets its own assignment of the previous month; envelopes already assigned and archived categories are left as they are. Returns the month like GET.
+         */
+        post: operations["copyPrevious"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/budget/{month}/move": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Move money from the own envelope of one expense category to another in one step
+         * @description Lowers the own assignment of fromCategoryId and raises that of toCategoryId by the amount; both change or neither. Returns the month like GET.
+         */
+        post: operations["move"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/categories": {
         parameters: {
             query?: never;
@@ -810,34 +850,34 @@ export interface components {
             type: "CASH" | "CARD" | "CREDIT_CARD" | "LOAN" | "DEPOSIT" | "SAVINGS" | "DEBT" | "INVESTMENT";
         };
         AccountResponse: {
-            archived?: boolean;
-            availableCredit?: number;
-            balance?: number;
-            balanceInBase?: number;
-            creditLimit?: number;
-            currency?: string;
+            archived: boolean;
+            availableCredit: number | null;
+            balance: number;
+            balanceInBase: number | null;
+            creditLimit: number | null;
+            currency: string;
             /** Format: int64 */
-            id?: number;
-            inBudget?: boolean;
-            interestRate?: number;
-            name?: string;
-            openingBalance?: number;
+            id: number;
+            inBudget: boolean;
+            interestRate: number | null;
+            name: string;
+            openingBalance: number;
             /** Format: int32 */
-            sortOrder?: number;
+            sortOrder: number;
             /** @enum {string} */
-            type?: "CASH" | "CARD" | "CREDIT_CARD" | "LOAN" | "DEPOSIT" | "SAVINGS" | "DEBT" | "INVESTMENT";
+            type: "CASH" | "CARD" | "CREDIT_CARD" | "LOAN" | "DEPOSIT" | "SAVINGS" | "DEBT" | "INVESTMENT";
         };
         AccountSummaryResponse: {
-            available?: number;
-            availableWithCredit?: number;
-            currency?: string;
-            netWorth?: number;
-            readyToAssign?: number;
-            unconvertedCurrencies?: string[];
+            available: number;
+            availableWithCredit: number;
+            currency: string;
+            netWorth: number;
+            readyToAssign: number;
+            unconvertedCurrencies: string[];
         };
         ApplyResponse: {
             /** Format: int32 */
-            categorized?: number;
+            categorized: number;
         };
         AssignRequest: {
             assigned: number;
@@ -846,62 +886,65 @@ export interface components {
             /** Format: int64 */
             id: number;
             /** Format: int64 */
-            parentId?: number;
+            parentId?: number | null;
             /** Format: int32 */
             sortOrder: number;
         };
         CategoryRequest: {
             archived?: boolean;
-            /** @enum {string} */
-            color?: "blue" | "green" | "orange" | "violet" | "teal" | "pink" | "amber" | "slate" | "red" | "indigo" | "cyan" | "lime";
-            icon?: string;
+            /** @enum {string|null} */
+            color?: "blue" | "green" | "orange" | "violet" | "teal" | "pink" | "amber" | "slate" | "red" | "indigo" | "cyan" | "lime" | null;
+            icon?: string | null;
             /** @enum {string} */
             kind: "EXPENSE" | "INCOME";
             name: string;
-            /** @enum {string} */
-            necessity?: "NEEDS" | "WANTS";
+            /** @enum {string|null} */
+            necessity?: "NEEDS" | "WANTS" | null;
             /** Format: int64 */
-            parentId?: number;
+            parentId?: number | null;
             /** Format: int32 */
             sortOrder?: number;
         };
         CategoryResponse: {
-            archived?: boolean;
-            children?: components["schemas"]["CategoryResponse"][];
-            /** @enum {string} */
-            color?: "blue" | "green" | "orange" | "violet" | "teal" | "pink" | "amber" | "slate" | "red" | "indigo" | "cyan" | "lime";
-            icon?: string;
+            archived: boolean;
+            children: components["schemas"]["CategoryResponse"][];
+            /** @enum {string|null} */
+            color: "blue" | "green" | "orange" | "violet" | "teal" | "pink" | "amber" | "slate" | "red" | "indigo" | "cyan" | "lime" | null;
+            icon: string | null;
             /** Format: int64 */
-            id?: number;
+            id: number;
             /** @enum {string} */
-            kind?: "EXPENSE" | "INCOME";
-            name?: string;
-            /** @enum {string} */
-            necessity?: "NEEDS" | "WANTS";
+            kind: "EXPENSE" | "INCOME";
+            name: string;
+            /** @enum {string|null} */
+            necessity: "NEEDS" | "WANTS" | null;
             /** Format: int64 */
-            parentId?: number;
+            parentId: number | null;
             /** Format: int32 */
-            sortOrder?: number;
+            sortOrder: number;
         };
         CategoryRow: {
-            activity?: number;
-            archived?: boolean;
-            assigned?: number;
-            available?: number;
+            activity: number;
+            archived: boolean;
+            assigned: number;
+            available: number;
             /** Format: int64 */
-            categoryId?: number;
-            children?: components["schemas"]["CategoryRow"][];
-            name?: string;
+            categoryId: number;
+            children: components["schemas"]["CategoryRow"][];
+            name: string;
+            ownActivity: number;
+            ownAssigned: number;
+            ownAvailable: number;
             /** Format: int64 */
-            parentId?: number;
+            parentId: number | null;
         };
         CategorySpending: {
-            amount?: number;
+            amount: number;
             /** Format: int64 */
-            categoryId?: number;
-            children?: components["schemas"]["CategorySpending"][];
-            name?: string;
-            share?: number;
+            categoryId: number;
+            children: components["schemas"]["CategorySpending"][];
+            name: string;
+            share: number;
         };
         ChangePasswordRequest: {
             currentPassword: string;
@@ -933,215 +976,223 @@ export interface components {
             windowStart?: string;
         };
         ConnectionResponse: {
-            accounts?: components["schemas"]["LinkResponse"][];
-            clientName?: string;
+            accounts: components["schemas"]["LinkResponse"][];
+            clientName: string;
             /** Format: date-time */
-            connectedAt?: string;
+            connectedAt: string;
             /**
              * Format: time
              * @example 06:00
              */
-            dailyAt?: string;
-            lastError?: string;
+            dailyAt: string;
+            lastError: string | null;
             /** Format: date-time */
-            lastRequestAt?: string;
+            lastRequestAt: string | null;
             /** Format: date-time */
-            nextSyncAt?: string;
+            nextSyncAt: string;
             /** @enum {string} */
-            syncMode?: "INTERVAL" | "DAILY" | "WEBHOOK";
-            webhook?: boolean;
+            syncMode: "INTERVAL" | "DAILY" | "WEBHOOK";
+            webhook: boolean;
             /**
              * Format: time
              * @example 23:00
              */
-            windowEnd?: string;
+            windowEnd: string;
             /**
              * Format: time
              * @example 08:00
              */
-            windowStart?: string;
+            windowStart: string;
         };
         EmailRequest: {
             /** Format: email */
             email: string;
         };
         ImportAccount: {
-            created?: boolean;
-            currency?: string;
+            created: boolean;
+            currency: string;
             /** Format: int64 */
-            id?: number;
-            name?: string;
+            id: number | null;
+            name: string;
         };
         ImportOperation: {
-            account?: components["schemas"]["ImportAccount"];
-            amount?: number;
+            account: components["schemas"]["ImportAccount"];
+            amount: number;
             /** Format: int64 */
-            categoryId?: number;
-            categoryName?: string;
-            comment?: string;
-            currency?: string;
+            categoryId: number | null;
+            categoryName: string | null;
+            comment: string | null;
+            currency: string;
             /** Format: date */
-            date?: string;
-            duplicate?: boolean;
-            key?: string;
-            payee?: string;
-            tagIds?: number[];
-            toAccount?: components["schemas"]["ImportAccount"];
-            toAmount?: number;
+            date: string;
+            duplicate: boolean;
+            key: string;
+            payee: string | null;
+            tagIds: number[];
+            toAccount: components["schemas"]["ImportAccount"] | null;
+            toAmount: number | null;
             /** @enum {string} */
-            type?: "EXPENSE" | "INCOME" | "TRANSFER";
+            type: "EXPENSE" | "INCOME" | "TRANSFER";
         };
         ImportPreviewResponse: {
             /** Format: date-time */
-            expiresAt?: string;
+            expiresAt: string;
             /** Format: uuid */
-            id?: string;
-            operations?: components["schemas"]["PageResponseImportOperation"];
+            id: string;
+            operations: components["schemas"]["PageResponseImportOperation"];
             /** @enum {string} */
-            source?: "PRIVATBANK" | "ZENMONEY";
-            summary?: components["schemas"]["ImportResult"];
+            source: "PRIVATBANK" | "ZENMONEY";
+            summary: components["schemas"]["ImportResult"];
         };
         ImportResult: {
             /** Format: int32 */
-            accountsCreated?: number;
+            accountsCreated: number;
             /** Format: int32 */
-            accountsUpdated?: number;
+            accountsUpdated: number;
             /** Format: int32 */
-            budgetsImported?: number;
+            budgetsImported: number;
             /** Format: int32 */
-            categoriesCreated?: number;
+            categoriesCreated: number;
             /** Format: int32 */
-            payeesCreated?: number;
+            payeesCreated: number;
             /** Format: int32 */
-            transactionsImported?: number;
+            transactionsImported: number;
             /** Format: int32 */
-            transactionsMatched?: number;
+            transactionsMatched: number;
             /** Format: int32 */
-            transactionsSkipped?: number;
-            warnings?: string[];
+            transactionsSkipped: number;
+            warnings: string[];
         };
         IncomeExpenseResponse: {
-            currency?: string;
-            expense?: number;
+            currency: string;
+            expense: number;
             /** Format: date */
-            from?: string;
-            income?: number;
-            months?: components["schemas"]["MonthIncomeExpense"][];
-            net?: number;
-            savingsRate?: number;
+            from: string;
+            income: number;
+            months: components["schemas"]["MonthIncomeExpense"][];
+            net: number;
+            savingsRate: number | null;
             /** Format: date */
-            to?: string;
-            unconvertedCurrencies?: string[];
+            to: string;
+            unconvertedCurrencies: string[];
         };
         LinkRequest: {
             /** Format: int64 */
-            accountId?: number;
+            accountId?: number | null;
         };
         LinkResponse: {
             /** Format: int64 */
-            accountId?: number;
-            accountName?: string;
-            balance?: number;
-            bankBalance?: number;
-            currency?: string;
-            difference?: number;
+            accountId: number | null;
+            accountName: string | null;
+            balance: number | null;
+            bankBalance: number | null;
+            currency: string;
+            difference: number | null;
             /** Format: int64 */
-            id?: number;
+            id: number;
             /** Format: date-time */
-            syncedUntil?: string;
-            title?: string;
+            syncedUntil: string;
+            title: string;
         };
         LoginRequest: {
             email: string;
             password: string;
         };
         MonthIncomeExpense: {
-            expense?: number;
-            income?: number;
-            month?: string;
-            net?: number;
-            savingsRate?: number;
+            expense: number;
+            income: number;
+            month: string;
+            net: number;
+            savingsRate: number | null;
         };
         MonthNetWorth: {
-            assets?: number;
-            liabilities?: number;
-            month?: string;
-            netWorth?: number;
+            assets: number;
+            liabilities: number;
+            month: string;
+            netWorth: number;
         };
         MonthResponse: {
-            activity?: number;
-            assigned?: number;
-            available?: number;
-            categories?: components["schemas"]["CategoryRow"][];
-            currency?: string;
-            month?: string;
-            readyToAssign?: number;
-            unconvertedCurrencies?: string[];
+            activity: number;
+            assigned: number;
+            available: number;
+            categories: components["schemas"]["CategoryRow"][];
+            currency: string;
+            month: string;
+            readyToAssign: number;
+            unconvertedCurrencies: string[];
+        };
+        MoveRequest: {
+            amount: number;
+            /** Format: int64 */
+            fromCategoryId: number;
+            /** Format: int64 */
+            toCategoryId: number;
         };
         NamedResponse: {
             /** Format: int64 */
-            id?: number;
-            name?: string;
+            id: number;
+            name: string;
         };
         NetWorthResponse: {
-            currency?: string;
-            months?: components["schemas"]["MonthNetWorth"][];
-            unconvertedCurrencies?: string[];
+            currency: string;
+            months: components["schemas"]["MonthNetWorth"][];
+            unconvertedCurrencies: string[];
         };
         OperationEdit: {
             /** Format: int64 */
-            categoryId?: number;
-            comment?: string;
+            categoryId?: number | null;
+            comment?: string | null;
             include?: boolean;
+            keepSuggestedCategory?: boolean;
             key: string;
             rememberRule?: boolean;
-            tagIds?: number[];
+            tagIds?: number[] | null;
             /** Format: int64 */
             transferAccountId?: number;
             /** @enum {string} */
             type?: "EXPENSE" | "INCOME" | "TRANSFER";
         };
         PageResponseImportOperation: {
-            items?: components["schemas"]["ImportOperation"][];
+            items: components["schemas"]["ImportOperation"][];
             /** Format: int32 */
-            page?: number;
+            page: number;
             /** Format: int32 */
-            size?: number;
+            size: number;
             /** Format: int64 */
-            totalItems?: number;
+            totalItems: number;
             /** Format: int32 */
-            totalPages?: number;
+            totalPages: number;
         };
         PageResponseTransactionResponse: {
-            items?: components["schemas"]["TransactionResponse"][];
+            items: components["schemas"]["TransactionResponse"][];
             /** Format: int32 */
-            page?: number;
+            page: number;
             /** Format: int32 */
-            size?: number;
+            size: number;
             /** Format: int64 */
-            totalItems?: number;
+            totalItems: number;
             /** Format: int32 */
-            totalPages?: number;
+            totalPages: number;
         };
         PayeeRequest: {
             name: string;
         };
         PayeeSpending: {
-            amount?: number;
-            name?: string;
+            amount: number;
+            name: string;
             /** Format: int64 */
-            payeeId?: number;
+            payeeId: number;
             /** Format: int32 */
-            transactions?: number;
+            transactions: number;
         };
         PayeesResponse: {
-            currency?: string;
+            currency: string;
             /** Format: date */
-            from?: string;
-            payees?: components["schemas"]["PayeeSpending"][];
+            from: string;
+            payees: components["schemas"]["PayeeSpending"][];
             /** Format: date */
-            to?: string;
-            unconvertedCurrencies?: string[];
+            to: string;
+            unconvertedCurrencies: string[];
         };
         RegisterRequest: {
             /** Format: email */
@@ -1169,16 +1220,16 @@ export interface components {
             payeePattern?: string;
         };
         RuleResponse: {
-            bankCategory?: string;
+            bankCategory: string | null;
             /** Format: int64 */
-            categoryId?: number;
+            categoryId: number;
             /** Format: int64 */
-            id?: number;
-            learned?: boolean;
+            id: number;
+            learned: boolean;
             /** Format: int32 */
-            mcc?: number;
-            payee?: components["schemas"]["NamedResponse"];
-            payeePattern?: string;
+            mcc: number | null;
+            payee: components["schemas"]["NamedResponse"] | null;
+            payeePattern: string | null;
         };
         ScheduleRequest: {
             /**
@@ -1200,15 +1251,15 @@ export interface components {
             windowStart?: string;
         };
         SpendingResponse: {
-            categories?: components["schemas"]["CategorySpending"][];
-            currency?: string;
+            categories: components["schemas"]["CategorySpending"][];
+            currency: string;
             /** Format: date */
-            from?: string;
+            from: string;
             /** Format: date */
-            to?: string;
-            total?: number;
-            uncategorized?: number;
-            unconvertedCurrencies?: string[];
+            to: string;
+            total: number;
+            uncategorized: number;
+            unconvertedCurrencies: string[];
         };
         SplitRequest: {
             amount: number;
@@ -1217,33 +1268,33 @@ export interface components {
             comment?: string;
         };
         SplitResponse: {
-            amount?: number;
+            amount: number;
             /** Format: int64 */
-            categoryId?: number;
-            comment?: string;
+            categoryId: number | null;
+            comment: string | null;
             /** Format: int64 */
-            id?: number;
+            id: number;
         };
         TagRequest: {
-            /** @enum {string} */
-            color?: "blue" | "green" | "orange" | "violet" | "teal" | "pink" | "amber" | "slate" | "red" | "indigo" | "cyan" | "lime";
+            /** @enum {string|null} */
+            color?: "blue" | "green" | "orange" | "violet" | "teal" | "pink" | "amber" | "slate" | "red" | "indigo" | "cyan" | "lime" | null;
             name: string;
         };
         TagResponse: {
-            /** @enum {string} */
-            color?: "blue" | "green" | "orange" | "violet" | "teal" | "pink" | "amber" | "slate" | "red" | "indigo" | "cyan" | "lime";
+            /** @enum {string|null} */
+            color: "blue" | "green" | "orange" | "violet" | "teal" | "pink" | "amber" | "slate" | "red" | "indigo" | "cyan" | "lime" | null;
             /** Format: int64 */
-            id?: number;
-            name?: string;
+            id: number;
+            name: string;
         };
         TokenRequest: {
             token: string;
         };
         TokenResponse: {
-            accessToken?: string;
+            accessToken: string;
             /** Format: int64 */
-            expiresIn?: number;
-            tokenType?: string;
+            expiresIn: number;
+            tokenType: string;
         };
         TransactionRequest: {
             /** Format: int64 */
@@ -1269,49 +1320,49 @@ export interface components {
         };
         TransactionResponse: {
             /** Format: int64 */
-            accountId?: number;
-            amount?: number;
-            comment?: string;
+            accountId: number;
+            amount: number;
+            comment: string | null;
             /** Format: date-time */
-            createdAt?: string;
-            currency?: string;
+            createdAt: string;
+            currency: string;
             /** Format: date */
-            date?: string;
+            date: string;
             /** Format: int64 */
-            id?: number;
-            originalAmount?: number;
-            originalCurrency?: string;
-            payee?: components["schemas"]["NamedResponse"];
+            id: number;
+            originalAmount: number | null;
+            originalCurrency: string | null;
+            payee: components["schemas"]["NamedResponse"] | null;
             /** @enum {string} */
-            source?: "MANUAL" | "ZENMONEY" | "MONOBANK" | "PRIVATBANK";
-            splits?: components["schemas"]["SplitResponse"][];
-            tagIds?: number[];
+            source: "MANUAL" | "ZENMONEY" | "MONOBANK" | "PRIVATBANK";
+            splits: components["schemas"]["SplitResponse"][];
+            tagIds: number[];
             /** Format: int64 */
-            toAccountId?: number;
-            toAmount?: number;
-            toCurrency?: string;
+            toAccountId: number | null;
+            toAmount: number | null;
+            toCurrency: string | null;
             /** @enum {string} */
-            type?: "EXPENSE" | "INCOME" | "TRANSFER";
+            type: "EXPENSE" | "INCOME" | "TRANSFER";
         };
         UpdateProfileRequest: {
             baseCurrency: string;
             firstName: string;
-            lastName?: string;
+            lastName?: string | null;
             locale: string;
         };
         UserResponse: {
-            baseCurrency?: string;
+            baseCurrency: string;
             /** Format: date-time */
-            createdAt?: string;
-            email?: string;
-            emailVerified?: boolean;
-            firstName?: string;
+            createdAt: string;
+            email: string;
+            emailVerified: boolean;
+            firstName: string;
             /** Format: int64 */
-            id?: number;
-            lastName?: string;
-            locale?: string;
+            id: number;
+            lastName: string | null;
+            locale: string;
             /** @enum {string} */
-            role?: "USER" | "ADMIN";
+            role: "USER" | "ADMIN";
         };
         VerifyEmailRequest: {
             token: string;
@@ -1783,6 +1834,54 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["AssignRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["MonthResponse"];
+                };
+            };
+        };
+    };
+    copyPrevious: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                month: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["MonthResponse"];
+                };
+            };
+        };
+    };
+    move: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                month: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MoveRequest"];
             };
         };
         responses: {

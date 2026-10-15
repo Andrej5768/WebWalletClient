@@ -1,28 +1,17 @@
-import { MantineProvider } from '@mantine/core';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { MemoryRouter } from 'react-router';
 import { setAccessToken } from '../api/session';
-import i18n from '../i18n';
-import { json, mockApi } from '../test/render';
-import { theme } from '../theme/theme';
+import { accountOf, categoryOf } from '../test/fixtures';
+import { bodyOf, json, mockApi, renderWithProviders } from '../test/render';
 import { ImportsPage } from './ImportsPage';
-import en from './locales/en.json';
-import uk from './locales/uk.json';
 
 const accounts = [
-  { id: 1, name: 'Чорна картка', type: 'CARD', currency: 'UAH', balance: 18452.37 },
-  { id: 2, name: 'Картка «Універсальна»', type: 'CARD', currency: 'UAH', balance: 6318.9 },
+  accountOf({ id: 1, name: 'Чорна картка', balance: 18452.37 }),
+  accountOf({ id: 2, name: 'Картка «Універсальна»', balance: 6318.9 }),
 ];
 
 const categories = [
-  {
-    id: 10,
-    name: 'Їжа',
-    kind: 'EXPENSE',
-    children: [{ id: 11, name: 'Продукти', kind: 'EXPENSE', parentId: 10 }],
-  },
+  categoryOf({ id: 10, name: 'Їжа', children: [categoryOf({ id: 11, name: 'Продукти', parentId: 10 })] }),
 ];
 
 const connection = {
@@ -51,7 +40,13 @@ const connection = {
 const preview = {
   id: 'f5e1c0de-0000-4000-8000-000000000001',
   source: 'PRIVATBANK',
-  summary: { transactionsImported: 2, transactionsMatched: 1, warnings: [] },
+  summary: {
+    transactionsImported: 1,
+    transactionsMatched: 1,
+    accountsCreated: 0,
+    categoriesCreated: 0,
+    warnings: [],
+  },
   operations: {
     page: 0,
     size: 100,
@@ -92,32 +87,9 @@ const base = {
 };
 
 function renderPage() {
-  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  return render(
-    <MantineProvider theme={theme}>
-      <QueryClientProvider client={queryClient}>
-        <MemoryRouter>
-          <ImportsPage />
-        </MemoryRouter>
-      </QueryClientProvider>
-    </MantineProvider>,
-  );
-}
-
-beforeAll(() => {
-  i18n.addResourceBundle('uk', 'translation', uk, true, true);
-  i18n.addResourceBundle('en', 'translation', en, true, true);
-});
-
-beforeEach(async () => {
   setAccessToken('token');
-  await i18n.changeLanguage('uk');
-});
-
-afterEach(() => vi.unstubAllGlobals());
-
-const bodyOf = async (requests: Request[], method: string, path: string) =>
-  requests.find((request) => request.method === method && new URL(request.url).pathname === path)!.json();
+  return renderWithProviders(<ImportsPage />);
+}
 
 it('connects Monobank with a token and a daily schedule', async () => {
   const requests = mockApi({
@@ -196,18 +168,18 @@ it('reviews a PrivatBank statement before importing it', async () => {
 
   expect(await within(dialog).findByText('Імпортовано операцій')).toBeInTheDocument();
   const confirm = await bodyOf(requests, 'POST', `/api/v1/imports/previews/${preview.id}/confirm`);
-  expect(confirm.operations).toEqual(
-    expect.arrayContaining([
-      expect.objectContaining({ key: 'op-2', include: false }),
-      expect.objectContaining({
-        key: 'op-1',
-        include: true,
-        categoryId: 11,
-        rememberRule: true,
-        type: 'EXPENSE',
-      }),
-    ]),
-  );
+  // The duplicate is never imported, so it is not sent; the changed row carries all its values.
+  expect((confirm as { operations: unknown[] }).operations).toEqual([
+    expect.objectContaining({
+      key: 'op-1',
+      include: true,
+      categoryId: 11,
+      keepSuggestedCategory: false,
+      rememberRule: true,
+      type: 'EXPENSE',
+      tagIds: [],
+    }),
+  ]);
 });
 
 it('previews a Zen Money import by token', async () => {

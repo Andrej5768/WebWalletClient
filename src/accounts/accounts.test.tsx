@@ -1,8 +1,6 @@
 import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { setAccessToken } from '../api/session';
-import i18n from '../i18n';
-import { json, mockApi, renderApp, signedInApi } from '../test/render';
+import { json, mockApi, plain, renderApp, signedInApi } from '../test/render';
 
 const accounts = [
   { id: 1, name: 'Чорна картка', type: 'CARD', currency: 'UAH', balance: 18452.37, balanceInBase: 18452.37 },
@@ -31,16 +29,6 @@ const monobank = {
   clientName: 'Олена',
   accounts: [{ id: 10, accountId: 1, title: 'Чорна', currency: 'UAH', difference: 1240 }],
 };
-
-beforeEach(async () => {
-  setAccessToken(null);
-  localStorage.clear();
-  await i18n.changeLanguage('uk');
-});
-
-afterEach(() => vi.unstubAllGlobals());
-
-const plain = (text: string | null) => (text ?? '').replace(/\s/g, ' ');
 
 it('lists accounts by group with base amounts and the Monobank difference', async () => {
   mockApi({
@@ -102,4 +90,30 @@ it('creates an account', async () => {
     currency: 'UAH',
     inBudget: true,
   });
+});
+
+it('keeps savings out of the budget by default unless the switch was set', async () => {
+  mockApi({
+    ...signedInApi,
+    'GET /api/v1/accounts': () => json([]),
+    'GET /api/v1/banks/monobank': () => json({ code: 'NOT_FOUND' }, 404),
+  });
+  renderApp('/accounts');
+
+  await userEvent.click(await screen.findByRole('button', { name: 'Додати рахунок' }));
+  const dialog = await screen.findByRole('dialog');
+  const inBudget = within(dialog).getByRole('switch', { name: /Враховувати в бюджеті/ });
+  const type = within(dialog)
+    .getAllByLabelText('Тип')
+    .find((element) => element.tagName === 'INPUT')!;
+  expect(inBudget).toBeChecked();
+
+  await userEvent.click(type);
+  await userEvent.click(await screen.findByRole('option', { name: 'Заощадження', hidden: true }));
+  expect(inBudget).not.toBeChecked();
+
+  await userEvent.click(inBudget);
+  await userEvent.click(type);
+  await userEvent.click(await screen.findByRole('option', { name: 'Депозит', hidden: true }));
+  expect(inBudget).toBeChecked();
 });

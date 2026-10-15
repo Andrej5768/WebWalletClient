@@ -22,3 +22,8 @@ export function accountColorName(type: AccountType | undefined): string {
 export function accountColor(type: AccountType | undefined): string {
   return `var(--mantine-color-${accountColorName(type)}-filled)`;
 }
+
+/** Everyday money is budgeted by default; savings, deposits, loans, debts and investments are not. */
+export function inBudgetByDefault(type: AccountType): boolean {
+  return type === 'CASH' || type === 'CARD' || type === 'CREDIT_CARD';
+}

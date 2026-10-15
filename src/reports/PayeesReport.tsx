@@ -1,15 +1,16 @@
 import { Avatar, Card, Skeleton, Stack, Table, Text } from '@mantine/core';
 import { useTranslation } from 'react-i18next';
 import { formatMoney } from '../lib/money';
-import type { Period } from '../transactions/periods';
+import type { Period } from '../lib/periods';
 import { usePayeeReport } from './api';
-import { ShareBar } from './Figure';
-import { UnconvertedAlert } from './ReportsPage';
+import { ShareBar } from '../components/Figure';
+import { QueryError, UnconvertedAlert } from '../components/feedback';
 
 export function PayeesReport({ period }: { period: Period }) {
   const { t } = useTranslation();
   const report = usePayeeReport(period);
   if (report.isLoading) return <Skeleton height={360} radius="md" />;
+  if (!report.data) return <QueryError error={report.error} onRetry={() => void report.refetch()} />;
   const data = report.data;
   const currency = data?.currency ?? 'UAH';
   const payees = data?.payees ?? [];

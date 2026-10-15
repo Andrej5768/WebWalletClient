@@ -36,7 +36,11 @@ import { useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 import { api, type Schemas } from '../api/client';
-import { queryKeys, useAccounts, useAccountsSummary, useMonobankStatus } from '../api/queries';
+import { check } from '../api/http';
+import { invalidateLedger, useAccounts, useAccountsSummary, useMonobankStatus } from '../api/queries';
+import { QueryError } from '../components/feedback';
+import { Figure } from '../components/Figure';
+import { formatDateTime } from '../lib/format';
 import { accountColorName, type AccountType } from '../lib/accounts';
 import { formatMoney } from '../lib/money';
 import { AccountFormModal } from './AccountFormModal';
@@ -69,20 +73,21 @@ export function AccountsPage() {
   });
   const [editing, setEditing] = useState<Account | null | undefined>(undefined);
 
+  // Omitted optional fields keep their values, so only the archive flag changes.
   const archive = useMutation({
-    mutationFn: async (account: Account) => {
-      const { error } = await api.PUT('/api/v1/accounts/{id}', {
-        params: { path: { id: account.id! } },
-        body: {
-          name: account.name!,
-          type: account.type!,
-          currency: account.currency!,
-          archived: !account.archived,
-        },
-      });
-      if (error) throw error;
-    },
-    onSettled: () => queryClient.invalidateQueries({ queryKey: queryKeys.accounts }),
+    mutationFn: (account: Account) =>
+      check(
+        api.PUT('/api/v1/accounts/{id}', {
+          params: { path: { id: account.id } },
+          body: {
+            name: account.name,
+            type: account.type,
+            currency: account.currency,
+            archived: !account.archived,
+          },
+        }),
+      ),
+    onSettled: () => invalidateLedger(queryClient),
   });
 
   const links = new Map<number, Link>(
@@ -93,9 +98,11 @@ export function AccountsPage() {
   const groups = groupAccounts(accounts.data ?? [], showArchived);
   const count = (accounts.data ?? []).filter((account) => !account.archived).length;
   const currency = summary.data?.currency ?? 'UAH';
-  const creditDebt = (accounts.data ?? [])
-    .filter((account) => account.type === 'CREDIT_CARD' && !account.archived)
-    .reduce((sum, account) => sum + Math.min(account.balanceInBase ?? 0, 0), 0);
+  const creditCards = (accounts.data ?? []).filter(
+    (account) => account.type === 'CREDIT_CARD' && !account.archived,
+  );
+  const creditDebt = creditCards.reduce((sum, account) => sum + Math.min(account.balanceInBase ?? 0, 0), 0);
+  const creditIncomplete = creditCards.some((account) => account.balanceInBase == null);
 
   return (
     <Stack gap="lg" maw={1200}>
@@ -119,6 +126,7 @@ export function AccountsPage() {
         </Group>
       </Group>
 
+      <QueryError error={accounts.error ?? summary.error} onRetry={() => void accounts.refetch()} />
       {monobank.data?.lastError && (
         <Alert
           color="yellow"
@@ -136,9 +144,19 @@ export function AccountsPage() {
       )}
 
       <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="sm">
-        <SummaryCard label={t('balance.netWorth.label')} value={summary.data?.netWorth} currency={currency} />
-        <SummaryCard label={t('accounts.available')} value={summary.data?.available} currency={currency} />
-        <SummaryCard label={t('accounts.creditDebt')} value={-creditDebt} currency={currency} />
+        <Figure
+          label={t('balance.netWorth.label')}
+          value={summary.data ? formatMoney(summary.data.netWorth, currency) : '—'}
+        />
+        <Figure
+          label={t('accounts.available')}
+          value={summary.data ? formatMoney(summary.data.available, currency) : '—'}
+        />
+        <Figure
+          label={t('accounts.creditDebt')}
+          value={formatMoney(-creditDebt, currency)}
+          note={creditIncomplete ? t('accounts.withoutRate') : undefined}
+        />
       </SimpleGrid>
 
       <Card withBorder radius="md" p={0} style={{ overflowX: 'auto' }}>
@@ -194,19 +212,6 @@ export function AccountsPage() {
   );
 }
 
-function SummaryCard({ label, value, currency }: { label: string; value?: number; currency: string }) {
-  return (
-    <Card withBorder radius="md" padding="md">
-      <Text size="xs" fw={500} c="dimmed">
-        {label}
-      </Text>
-      <Text className="num" fz={24} fw={600} mt={6} style={{ letterSpacing: '-0.01em' }}>
-        {value === undefined ? '—' : formatMoney(value, currency)}
-      </Text>
-    </Card>
-  );
-}
-
 interface RowProps {
   account: Account;
   link?: Link;
@@ -226,7 +231,7 @@ function AccountRow({
   onTransactions,
   onNewTransaction,
 }: RowProps) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const balance = account.balance ?? 0;
   const foreign = account.currency !== baseCurrency;
   const difference = link?.difference ?? 0;
@@ -288,15 +293,7 @@ function AccountRow({
             <Text size="sm" c="dimmed">
               {link.syncedUntil
                 ? t('accounts.syncedUntil', {
-                    date: new Date(link.syncedUntil).toLocaleString(
-                      i18n.language === 'en' ? 'en-GB' : 'uk-UA',
-                      {
-                        day: 'numeric',
-                        month: 'short',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      },
-                    ),
+                    date: formatDateTime(link.syncedUntil),
                   })
                 : t('accounts.synced')}
             </Text>
