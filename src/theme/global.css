@@ -1,0 +1,83 @@
+/* Fixel by MacPaw, SIL Open Font License 1.1 (see assets/fonts/fixel/OFL.txt). */
+@font-face {
+  font-family: 'Fixel Text';
+  font-weight: 400;
+  font-display: swap;
+  src: url('../assets/fonts/fixel/FixelText-Regular.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Fixel Text';
+  font-weight: 500;
+  font-display: swap;
+  src: url('../assets/fonts/fixel/FixelText-Medium.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Fixel Text';
+  font-weight: 600;
+  font-display: swap;
+  src: url('../assets/fonts/fixel/FixelText-SemiBold.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Fixel Display';
+  font-weight: 600;
+  font-display: swap;
+  src: url('../assets/fonts/fixel/FixelDisplay-SemiBold.woff2') format('woff2');
+}
+
+/* App tokens on top of Mantine: surfaces, money and status colors. */
+:root[data-mantine-color-scheme='light'] {
+  --ww-bg: #fafafa;
+  --ww-surface: #ffffff;
+  --ww-subtle: #f4f4f5;
+  --ww-border: #e4e4e7;
+  --ww-border-strong: #d4d4d8;
+  --ww-text: #18181b;
+  --ww-muted: #52525b;
+  --ww-faint: #71717a;
+  --ww-income: #15803d;
+  --ww-expense: #c62828;
+  --ww-warn-bg: #fff9ec;
+  --ww-warn-border: #eea94a;
+  --ww-warn-text: #7a4e0e;
+  --ww-accent-text: #0d52a8;
+}
+
+:root[data-mantine-color-scheme='dark'] {
+  --ww-bg: #2b2b2b;
+  --ww-surface: #313335;
+  --ww-subtle: #3c3f41;
+  --ww-border: #45484a;
+  --ww-border-strong: #5a5d60;
+  --ww-text: #e6e6e6;
+  --ww-muted: #ababab;
+  --ww-faint: #959595;
+  --ww-income: #6cc48a;
+  --ww-expense: #f0716b;
+  --ww-warn-bg: #3d3324;
+  --ww-warn-border: #eea94a;
+  --ww-warn-text: #f2c27d;
+  --ww-accent-text: #7aaef2;
+}
+
+body {
+  background: var(--ww-bg);
+  color: var(--ww-text);
+}
+
+/* Amounts: Inter digits of equal width so columns line up. */
+.num {
+  font-family: 'Inter Variable', 'Fixel Text', system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+}
+.income {
+  color: var(--ww-income);
+}
+.expense {
+  color: var(--ww-expense);
+}
+.muted {
+  color: var(--ww-muted);
+}
+.faint {
+  color: var(--ww-faint);
+}

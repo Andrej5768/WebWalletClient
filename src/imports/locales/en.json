@@ -1,0 +1,130 @@
+{
+  "imports": {
+    "import": "Import",
+    "notStored": "The file is not stored — only the parsed operations, for an hour, to review them.",
+    "sources": {
+      "monobank": "Monobank — connect",
+      "privatbank": "PrivatBank — PDF statement",
+      "zenToken": "Zen Money — token",
+      "zenFile": "Zen Money — file"
+    },
+    "monobank": {
+      "intro": "Connect Monobank with a personal token: cards and jars become accounts and transactions arrive on their own.",
+      "connect": "Connect",
+      "connectTitle": "Connect Monobank",
+      "changeToken": "Change token",
+      "disconnect": "Disconnect",
+      "disconnectTitle": "Disconnect Monobank?",
+      "disconnectText": "New transactions will no longer arrive. Imported transactions and accounts stay.",
+      "token": "Personal token",
+      "tokenHint": "Get it in the Monobank app with the QR code at",
+      "since": "Load history from",
+      "sinceHint": "At most 3 years back",
+      "background": "The history loads in the background: the bank returns it in portions, so the first transactions appear within a few minutes.",
+      "schedule": "Synchronization",
+      "modes": {
+        "INTERVAL": "Every 15 min",
+        "DAILY": "Once a day",
+        "WEBHOOK": "Webhook (instant)"
+      },
+      "from": "From",
+      "to": "To",
+      "dailyAt": "At",
+      "intervalHint": "Outside these hours — once at night.",
+      "webhookHint": "The bank sends every transaction right away. It loads the server more — turn it on only if you need instant sync.",
+      "saveSchedule": "Save schedule",
+      "nextSync": "Next sync: {{date}}",
+      "connectedAt": "connected {{date}}",
+      "columns": {
+        "card": "Card or jar",
+        "account": "Account",
+        "ours": "Our balance",
+        "bank": "Bank balance",
+        "status": "Status"
+      },
+      "linkOf": "Account for {{name}}",
+      "notSynced": "Do not sync",
+      "missingIncome": "The bank shows more: missing income?",
+      "missingExpenses": "The bank shows less: missing expenses?",
+      "syncedUntil": "Loaded up to {{date}}",
+      "loading": "Loading history…"
+    },
+    "privat": {
+      "title": "PrivatBank — PDF statement",
+      "subtitle": "A card statement from Privat24",
+      "file": "Statement file",
+      "choose": "Choose a file",
+      "account": "Account",
+      "accountHint": "By default the account with the card number of the statement; it is created if there is none.",
+      "auto": "Detect automatically",
+      "submit": "Upload and review"
+    },
+    "zen": {
+      "title": "Zen Money",
+      "subtitle": "Move the whole history: accounts, categories, transactions, budgets",
+      "mode": "Import method",
+      "token": "Token",
+      "file": "File",
+      "tokenLabel": "Zen Money API token",
+      "tokenHint": "The token is used once and not stored.",
+      "fileLabel": "Saved sync response (JSON)",
+      "fileHint": "The response of POST /v8/diff/ with serverTimestamp 0.",
+      "submit": "Import from Zen Money"
+    },
+    "preview": {
+      "title": "Review before import",
+      "summary_one": "{{count}} transaction · duplicates: {{duplicates}} · uncategorized: {{uncategorized}}",
+      "summary_other": "{{count}} transactions · duplicates: {{duplicates}} · uncategorized: {{uncategorized}}",
+      "accountsCreated": "new accounts: {{count}}",
+      "categoriesCreated": "new categories: {{count}}",
+      "filter": "Show",
+      "filters": {
+        "all": "All",
+        "uncategorized": "Uncategorized",
+        "duplicates": "Duplicates"
+      },
+      "bulkCategory": "Category for selected",
+      "bulkTag": "Tag for selected",
+      "applyToSelected": "Apply ({{count}})",
+      "selectAll": "Select all",
+      "select": "Select {{name}}",
+      "include": "Import {{name}}",
+      "columns": {
+        "import": "Import",
+        "operation": "Transaction",
+        "amount": "Amount",
+        "type": "Type",
+        "category": "Category",
+        "tags": "Tags"
+      },
+      "duplicate": "Duplicate — already recorded",
+      "new": "new",
+      "typeOf": "Type: {{name}}",
+      "transferAccount": "Other account",
+      "categoryOf": "Category: {{name}}",
+      "newCategory": "Will be created: {{name}}",
+      "rememberRule": "Remember as a rule",
+      "tagsOf": "Tags: {{name}}",
+      "addTag": "+ tag",
+      "submit_one": "Import {{count}} transaction",
+      "submit_other": "Import {{count}} transactions",
+      "transferRequired": "Choose an account",
+      "transfersIncomplete_one": "{{count}} transfer has no other account chosen.",
+      "transfersIncomplete_other": "{{count}} transfers have no other account chosen."
+    },
+    "result": {
+      "title": "Import finished",
+      "transactionsImported": "Transactions imported",
+      "transactionsMatched": "Matched to existing",
+      "transactionsSkipped": "Skipped",
+      "accountsCreated": "Accounts created",
+      "accountsUpdated": "Accounts updated",
+      "categoriesCreated": "Categories created",
+      "payeesCreated": "Payees created",
+      "budgetsImported": "Budgets imported",
+      "warnings": "Warnings",
+      "close": "Close",
+      "toTransactions": "Go to transactions"
+    }
+  }
+}

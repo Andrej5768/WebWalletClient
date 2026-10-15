@@ -1,0 +1,350 @@
+{
+  "common": {
+    "all": "All",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "retry": "Try again",
+    "deleteWarning": "This cannot be undone."
+  },
+  "theme": {
+    "label": "Theme",
+    "auto": "Match system",
+    "light": "Light",
+    "dark": "Dark"
+  },
+  "language": {
+    "label": "Language"
+  },
+  "errors": {
+    "network": "Cannot reach the server. Check your connection and try again.",
+    "unexpected": "Something went wrong. Please try again."
+  },
+  "validation": {
+    "required": "Required",
+    "email": "Check the email address",
+    "passwordShort": "At least 8 characters",
+    "passwordLong": "Too long: at most 72 bytes",
+    "passwordsDiffer": "Passwords do not match"
+  },
+  "auth": {
+    "email": "Email",
+    "password": "Password",
+    "newPassword": "New password",
+    "repeatPassword": "Repeat password",
+    "passwordHint": "At least 8 characters",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "optional": "(optional)",
+    "requiredNote": "required fields",
+    "backToLogin": "Back to sign in",
+    "login": {
+      "title": "Sign in",
+      "subtitle": "Welcome back",
+      "forgot": "Forgot password?",
+      "submit": "Sign in",
+      "noAccount": "No account yet?",
+      "register": "Create one"
+    },
+    "register": {
+      "title": "Create account",
+      "subtitle": "It takes a minute",
+      "submit": "Create account",
+      "haveAccount": "Already have an account?"
+    },
+    "checkMail": {
+      "title": "Check your email",
+      "registered": "We sent a message to the address you entered. Follow the link in it to confirm your email and sign in.",
+      "noMail": "No email?",
+      "resent": "Sent again. Please also check the spam folder."
+    },
+    "forgot": {
+      "title": "Reset password",
+      "subtitle": "Enter your email and we will send you a link to set a new password",
+      "submit": "Send link",
+      "sent": "If an account with this email exists, a reset link is on its way."
+    },
+    "reset": {
+      "title": "New password",
+      "subtitle": "Other devices will be signed out",
+      "submit": "Save password",
+      "doneTitle": "Password changed",
+      "doneText": "Sign in with the new password.",
+      "expired": "This reset link has already been used or has expired. Ask for a new one."
+    },
+    "verify": {
+      "doneTitle": "Email confirmed",
+      "doneText": "Your account is ready. Sign in to start.",
+      "expired": "Enter your email and we will send a new confirmation link.",
+      "resend": "Send again"
+    },
+    "expired": {
+      "oops": "Oops!",
+      "title": "The link has expired"
+    }
+  },
+  "nav": {
+    "dashboard": "Overview",
+    "accounts": "Accounts",
+    "transactions": "Transactions",
+    "budget": "Envelopes",
+    "reports": "Reports",
+    "goals": "Goals",
+    "imports": "Import",
+    "settings": "Settings"
+  },
+  "shell": {
+    "mainNav": "Main",
+    "collapse": "Collapse or expand the menu",
+    "signOut": "Sign out",
+    "addTransaction": "Transaction",
+    "signOutFailed": "Could not end the session on the server. You are signed out on this device; if the computer is shared, change your password."
+  },
+  "balance": {
+    "netWorth": {
+      "label": "Net worth",
+      "hint": "Everything you own minus debts"
+    },
+    "availableWithCredit": {
+      "label": "Available with credit limits",
+      "hint": "Cards and cash plus unused credit limits"
+    },
+    "readyToAssign": {
+      "label": "Free outside envelopes",
+      "hint": "Money not assigned to any envelope"
+    },
+    "savings": "Savings",
+    "unconverted": "No rate: {{currencies}}"
+  },
+  "comingSoon": {
+    "title": "Coming soon",
+    "text": "This section arrives in the next steps"
+  },
+  "accounts": {
+    "subtitle_one": "{{count}} account · double-click a row to edit",
+    "subtitle_other": "{{count}} accounts · double-click a row to edit",
+    "showArchived": "Show archived",
+    "add": "Add account",
+    "monobankError": "Monobank: could not sync",
+    "openImports": "Open import",
+    "available": "Available",
+    "creditDebt": "Credit card debt",
+    "limit": "Limit {{amount}}",
+    "missingIncome": "The bank shows more: missing income?",
+    "missingExpenses": "The bank shows less: missing expenses?",
+    "synced": "Synced",
+    "syncedUntil": "Synced · {{date}}",
+    "manual": "Manual",
+    "archived": "Archived",
+    "actions": "Account actions",
+    "columns": {
+      "account": "Account",
+      "currency": "Currency",
+      "balance": "Balance",
+      "inBase": "In {{currency}}",
+      "status": "Status"
+    },
+    "groups": {
+      "cards": "Cards and accounts",
+      "cash": "Cash",
+      "credit": "Credit cards",
+      "savings": "Savings",
+      "debts": "Loans and debts",
+      "investments": "Investments",
+      "archived": "Archive"
+    },
+    "types": {
+      "CARD": "Card",
+      "CREDIT_CARD": "Credit card",
+      "CASH": "Cash",
+      "SAVINGS": "Savings",
+      "DEPOSIT": "Deposit",
+      "LOAN": "Loan",
+      "DEBT": "Debts with people",
+      "INVESTMENT": "Investments"
+    },
+    "empty": {
+      "title": "No accounts yet",
+      "text": "Add an account by hand or connect Monobank in Import."
+    },
+    "menu": {
+      "edit": "Edit",
+      "transactions": "Account transactions",
+      "newTransaction": "New transaction",
+      "archive": "Archive",
+      "unarchive": "Restore from archive"
+    },
+    "form": {
+      "newTitle": "New account",
+      "editTitle": "Edit account",
+      "name": "Name",
+      "type": "Type",
+      "currency": "Currency",
+      "currencyLocked": "The account currency cannot be changed",
+      "openingBalance": "Opening balance",
+      "creditLimit": "Credit limit",
+      "creditLimitHint": "0 — no limit",
+      "interestRate": "Interest rate",
+      "inBudget": "Include in the budget",
+      "archived": "Archived",
+      "inBudgetHint": "Money on a budget account is assigned to categories.",
+      "deleteTitle": "Delete the account “{{name}}”?",
+      "deleteText": "An account can be deleted only while it has no transactions. Otherwise archive it."
+    },
+    "withoutRate": "Some currencies have no exchange rate, so the total is incomplete."
+  },
+  "transactions": {
+    "count_one": "{{count}} transaction",
+    "count_other": "{{count}} transactions",
+    "period": "Period",
+    "allTime": "All time",
+    "presets": {
+      "month": "This month",
+      "prevMonth": "Last month",
+      "quarter": "3 months",
+      "year": "This year",
+      "twelveMonths": "12 months",
+      "all": "All",
+      "custom": "Custom"
+    },
+    "search": "Search",
+    "searchPlaceholder": "Payee, comment, amount",
+    "closeSearch": "Close search",
+    "filters": {
+      "account": "Account",
+      "allAccounts": "All accounts",
+      "category": "Category",
+      "allCategories": "All categories",
+      "payee": "Payee",
+      "allPayees": "All payees",
+      "tag": "Tag",
+      "allTags": "All tags",
+      "type": "Transaction type",
+      "reset": "Reset"
+    },
+    "types": {
+      "all": "All",
+      "EXPENSE": "Expenses",
+      "INCOME": "Income",
+      "TRANSFER": "Transfers"
+    },
+    "sources": {
+      "MANUAL": "manual entry",
+      "MONOBANK": "Monobank",
+      "PRIVATBANK": "PrivatBank",
+      "ZENMONEY": "Zen Money"
+    },
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "empty": {
+      "title": "No transactions",
+      "text": "Change the period or filters, or add a transaction."
+    },
+    "shown": "Showing {{from}}–{{to}} of {{total}}",
+    "noPayee": "No payee",
+    "split": "Split: {{names}}",
+    "uncategorized": "Uncategorized",
+    "chooseCategory": "Choose a category",
+    "form": {
+      "newTitle": "New transaction",
+      "editTitle": "Transaction",
+      "types": {
+        "EXPENSE": "Expense",
+        "INCOME": "Income",
+        "TRANSFER": "Transfer"
+      },
+      "amount": "Amount",
+      "amountRequired": "Enter the amount",
+      "date": "Date",
+      "account": "Account",
+      "fromAccount": "From account",
+      "toAccount": "To account",
+      "toAccountRequired": "Choose another account",
+      "toAmount": "Received",
+      "toAmountHint": "The accounts have different currencies: enter the amount received",
+      "payee": "Payee",
+      "payeePlaceholder": "Start typing a name",
+      "category": "Category",
+      "split": "Split into several",
+      "splitCategory": "Part category",
+      "splitAmount": "Part amount",
+      "removeSplit": "Remove the part",
+      "addSplit": "Add a part",
+      "splitRemainder": "Unassigned: {{amount}}",
+      "splitMismatch": "The parts must add up to the transaction amount",
+      "tags": "Tags",
+      "tagsPlaceholder": "Add a tag",
+      "comment": "Comment",
+      "foreign": "Paid in a foreign currency",
+      "originalAmount": "Amount in the purchase currency",
+      "imported": "Imported from {{source}}: amount, date and account are as in the bank.",
+      "deleteTitle": "Delete the transaction?",
+      "splitComment": "Comment on this part"
+    },
+    "chooseCategoryFor": "Choose a category for “{{name}}”",
+    "notFound": "Transaction not found: it may have been deleted."
+  },
+  "budget": {
+    "previousMonth": "Previous month",
+    "nextMonth": "Next month",
+    "copyPrevious": "Same as last month",
+    "move": "Move money",
+    "moveFrom": "From",
+    "moveTo": "To",
+    "moveSubmit": "Move",
+    "moveDifferent": "Choose another envelope",
+    "readyToAssign": "Ready to assign",
+    "readyPositive": "Put this money into envelopes: every hryvnia gets a job.",
+    "readyZero": "All money is assigned.",
+    "readyNegative": "More is assigned than you have. Lower some envelopes to get back to zero.",
+    "assigned": "Assigned",
+    "spent": "Spent",
+    "available": "Available",
+    "unconverted": "No rate: {{currencies}} — these amounts are not counted.",
+    "overspent": "Overspent: {{names}}. Move money from another envelope.",
+    "cover": "Cover",
+    "columns": {
+      "category": "Envelope"
+    },
+    "ahead": "ahead of pace by {{percent}}%",
+    "today": "Today's day of the month",
+    "assignTo": "Assigned: {{name}}"
+  },
+  "reports": {
+    "tabs": {
+      "spending": "Spending by category",
+      "income": "Income and expenses",
+      "networth": "Net worth",
+      "payees": "Payees"
+    },
+    "empty": "No data for this period",
+    "total": "Total",
+    "expand": "Show subcategories of {{name}}",
+    "collapse": "Hide subcategories of {{name}}",
+    "income": "Income",
+    "expense": "Expenses",
+    "net": "Difference",
+    "savingsRate": "Savings rate",
+    "month": "Month",
+    "netWorth": "Net worth",
+    "assets": "Assets",
+    "debts": "Debts",
+    "change": "{{amount}} over the period",
+    "operations": "Transactions"
+  },
+  "dashboard": {
+    "income": "Income this month",
+    "expense": "Expenses this month",
+    "savingsRate": "Saved {{percent}}% of income",
+    "toEnvelopes": "Assign to envelopes",
+    "monobankDifference": "Differs from the bank: {{names}}. Check that every transaction is recorded.",
+    "allReports": "All reports",
+    "sixMonths": "Income and expenses, 6 months",
+    "allEnvelopes": "All envelopes",
+    "noEnvelopes": "No envelopes are funded this month yet.",
+    "paceHint": "The mark is today's day of the month",
+    "recent": "Recent transactions",
+    "allTransactions": "All transactions",
+    "noTransactions": "No transactions yet. Add one or import from a bank."
+  }
+}

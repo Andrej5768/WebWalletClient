@@ -1,27 +1,114 @@
-# WebWalletClient
+# WebWallet Client
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 15.0.3.
+Web client for the [WebWallet](https://github.com/Andrej5768/WebWallet) personal finance API: accounts,
+transactions, envelope budget, bank imports, reports and goals.
 
-## Development server
+React + TypeScript on Vite, [Mantine](https://mantine.dev) components, TanStack Query, React Router,
+i18next (Ukrainian and English), an API client generated from the backend OpenAPI spec
+([openapi-typescript](https://openapi-ts.dev) + openapi-fetch), Vitest and Playwright.
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+## Development
 
-## Code scaffolding
+Requirements: Node.js 22.12+ (see `.nvmrc`) and the backend running on `http://localhost:8080`
+(`docker compose up` or the `local` profile, see the backend README).
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+```bash
+npm ci
+npm run dev          # http://localhost:5173, /api is proxied to the backend (API_URL overrides it)
+```
 
-## Build
+The browser talks to the API on the same origin: Vite proxies `/api` in development and the reverse proxy does
+it in production. The access token is kept in memory only; the refresh token is an HttpOnly cookie set by the
+backend, so a page reload starts with `POST /api/v1/auth/refresh`.
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+| Command                                               | What it does                                                                                                                                                                          |
+| ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm run api`                                         | Downloads the spec from the backend `dev` branch into `src/api/openapi.json` and regenerates `src/api/schema.d.ts` (`OPENAPI_SOURCE=../WebWallet/api/openapi.json` uses a local file) |
+| `npm run lint`, `npm run format`, `npm run typecheck` | ESLint, Prettier, TypeScript                                                                                                                                                          |
+| `npm test`                                            | Unit and component tests (Vitest, Testing Library)                                                                                                                                    |
+| `npm run e2e`                                         | End-to-end tests (Playwright) against the production build                                                                                                                            |
+| `npm run build`                                       | Production build into `dist/`                                                                                                                                                         |
 
-## Running unit tests
+CI runs all of the above on every push; the `api-drift` job reports when the backend spec moved ahead of the
+committed copy.
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+## Design
 
-## Running end-to-end tests
+Mockups of every screen (light and dark themes) are kept as a design canvas. Main decisions:
+minimal technical style, cobalt accent `#0D52A8`, dark background `#2B2B2B`, warnings `#FFF9EC` / `#EEA94A`,
+expenses red and income green, [Fixel](https://github.com/MacPaw/Fixel) for text (SIL OFL 1.1, bundled in
+`src/assets/fonts/fixel`) with Inter digits for amounts, Lucide icons, desktop first.
 
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
+## Roadmap
 
-## Further help
+### 1. Foundation
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+- [x] Vite + React + TypeScript, Mantine theme with light, dark and system color schemes, fonts
+- [x] Ukrainian and English translations
+- [x] API client generated from the backend spec, access token in memory, refresh through the cookie
+- [x] ESLint, Prettier, Vitest, Playwright, CI
+
+### 2. Sign-in and app shell
+
+- [x] Sign in, registration, email confirmation, forgotten and new password pages (links from emails:
+      `/verify-email#token=…`, `/reset-password#token=…`)
+- [x] Session restore on reload, protected routes, sign out
+- [x] Sidebar: balance with a selectable mode (net worth / with credit limits / free outside envelopes),
+      navigation, accounts and savings, collapsing to icons; header with theme and language
+
+### 3. Accounts
+
+- [x] Accounts grouped by type with balances in the account currency and in hryvnias, Monobank differences
+- [x] Create and edit dialog, archive, delete; row menu and double click
+
+### 4. Transactions
+
+- [x] Feed by day with period presets, filters and hidden-by-default search
+- [x] Side panel to add and edit: expense, income, transfer between currencies, splits, tags, comment
+- [x] Quick categorization of uncategorized transactions
+
+### 5. Imports
+
+- [x] Monobank: connect, synchronization schedule, card and jar links, differences, history progress
+- [x] PrivatBank PDF statement and Zen Money (token or file) with a preview before import
+
+### 6. Envelopes
+
+- [x] Month view: ready to assign, assigned / spent / available per category, moving money between envelopes
+
+### 7. Reports
+
+- [x] Spending by category, income and expenses, net worth, payees
+
+### 8. Dashboard
+
+- [x] Key figures, warnings, spending, envelopes with the today marker, recent transactions
+
+### 9. Settings
+
+- [x] Profile, password change, start over
+- [x] Categories: tree with drag and drop, icon, color, needs / wants flag; rules; payees; tags with colors
+
+### Later, together with the backend phases
+
+- [ ] Analytics: plan vs actual, cash flow, period comparison, spending trends, savings and 50/30/20
+- [ ] Goals and Monobank jars, balance forecast with planned payments (planning phase)
+- [ ] FIRE, FYM and the compound interest calculator (investments phase)
+
+### Backend changes this client needs
+
+Tracked in the backend roadmap (phase 2); listed here with the client step that needs them.
+
+- [x] Categories: icon, color, needs / wants flag, reordering — step 9
+- [x] Tag colors — steps 4 and 9
+- [x] Free-text transaction search — step 4
+- [x] Optional last name at registration — step 2
+- [x] Balances in the base currency and the accounts summary — steps 2 and 3
+- [x] Monobank synchronization schedule — step 5
+- [x] Import preview — step 5
+- [x] Start over — step 9
+
+## License
+
+This project is source-available under the [PolyForm Noncommercial License 1.0.0](LICENSE.md).
+Personal and other noncommercial use is allowed. Commercial use requires a separate agreement with the author.
