@@ -2,6 +2,7 @@ import '@fontsource-variable/inter';
 import '@fontsource/ibm-plex-mono/400.css';
 import '@fontsource/ibm-plex-mono/500.css';
 import '@mantine/core/styles.css';
+import '@mantine/dates/styles.css';
 import '@mantine/notifications/styles.css';
 import './theme/global.css';
 import './i18n';

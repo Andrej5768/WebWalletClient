@@ -190,5 +190,93 @@
       "inBudget": "Враховувати в бюджеті",
       "archived": "Архівний"
     }
+  },
+  "transactions": {
+    "count_one": "{{count}} операція",
+    "count_few": "{{count}} операції",
+    "count_many": "{{count}} операцій",
+    "count_other": "{{count}} операції",
+    "period": "Період",
+    "allTime": "За весь час",
+    "presets": {
+      "month": "Цей місяць",
+      "prevMonth": "Минулий місяць",
+      "quarter": "3 місяці",
+      "year": "Цей рік",
+      "all": "Усі",
+      "custom": "Свій період"
+    },
+    "search": "Пошук",
+    "searchPlaceholder": "Отримувач, коментар, сума",
+    "closeSearch": "Закрити пошук",
+    "filters": {
+      "account": "Рахунок",
+      "allAccounts": "Усі рахунки",
+      "category": "Категорія",
+      "allCategories": "Усі категорії",
+      "payee": "Отримувач",
+      "allPayees": "Усі отримувачі",
+      "tag": "Тег",
+      "allTags": "Усі теги",
+      "type": "Тип операції",
+      "reset": "Скинути"
+    },
+    "types": {
+      "all": "Усі",
+      "EXPENSE": "Витрати",
+      "INCOME": "Доходи",
+      "TRANSFER": "Перекази"
+    },
+    "sources": {
+      "MANUAL": "вручну",
+      "MONOBANK": "Monobank",
+      "PRIVATBANK": "ПриватБанку",
+      "ZENMONEY": "Дзен-мані"
+    },
+    "today": "Сьогодні",
+    "yesterday": "Учора",
+    "empty": {
+      "title": "Операцій немає",
+      "text": "Змініть період чи фільтри або додайте операцію."
+    },
+    "shown": "Показано {{from}}–{{to}} з {{total}}",
+    "noPayee": "Без отримувача",
+    "split": "Розділено: {{names}}",
+    "uncategorized": "Без категорії",
+    "chooseCategory": "Обрати категорію",
+    "form": {
+      "newTitle": "Нова операція",
+      "editTitle": "Операція",
+      "types": {
+        "EXPENSE": "Витрата",
+        "INCOME": "Дохід",
+        "TRANSFER": "Переказ"
+      },
+      "amount": "Сума",
+      "amountRequired": "Вкажіть суму",
+      "date": "Дата",
+      "account": "Рахунок",
+      "fromAccount": "З рахунку",
+      "toAccount": "На рахунок",
+      "toAccountRequired": "Оберіть інший рахунок",
+      "toAmount": "Зараховано",
+      "toAmountHint": "Рахунки в різних валютах: вкажіть, скільки надійшло",
+      "payee": "Отримувач",
+      "payeePlaceholder": "Почніть вводити назву",
+      "category": "Категорія",
+      "split": "Розділити на кілька",
+      "splitCategory": "Категорія частини",
+      "splitAmount": "Сума частини",
+      "removeSplit": "Прибрати частину",
+      "addSplit": "Додати частину",
+      "splitRemainder": "Нерозподілено: {{amount}}",
+      "splitMismatch": "Сума частин має дорівнювати сумі операції",
+      "tags": "Теги",
+      "tagsPlaceholder": "Додати тег",
+      "comment": "Коментар",
+      "foreign": "Оплата в іноземній валюті",
+      "originalAmount": "Сума у валюті покупки",
+      "imported": "Імпортовано з {{source}}: сума, дата й рахунок — як у банку."
+    }
   }
 }

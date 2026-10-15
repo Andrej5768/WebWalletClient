@@ -1,0 +1,28 @@
+.day {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 36px;
+  padding: 0 20px;
+  background: var(--ww-subtle);
+  border-top: 1px solid var(--ww-border);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 32px minmax(240px, 1fr) 200px 160px;
+  align-items: center;
+  column-gap: 14px;
+  padding: 8px 20px;
+  min-height: 56px;
+  border-top: 1px solid var(--ww-border);
+  cursor: pointer;
+}
+
+.row:hover,
+.row:focus-visible {
+  background: var(--ww-subtle);
+  outline: none;
+}
