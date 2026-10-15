@@ -43,8 +43,17 @@ export const user = {
   role: 'USER',
 };
 
+const currentMonth = new Date().toISOString().slice(0, 7);
+const empty = { currency: 'UAH', months: [], categories: [], payees: [] };
+
 /** Handlers for a signed-in session with empty data. */
 export const signedInApi: Record<string, Handler> = {
+  'GET /api/v1/banks/monobank': () => json({ code: 'NOT_FOUND' }, 404),
+  'GET /api/v1/categories': () => json([]),
+  'GET /api/v1/transactions': () => json({ items: [], page: 0, size: 6, totalItems: 0, totalPages: 0 }),
+  'GET /api/v1/reports/income-expense': () => json(empty),
+  'GET /api/v1/reports/spending': () => json(empty),
+  [`GET /api/v1/budget/${currentMonth}`]: () => json({ ...empty, readyToAssign: 0 }),
   'POST /api/v1/auth/refresh': () => json({ accessToken: 'token', tokenType: 'Bearer', expiresIn: 900 }),
   'GET /api/v1/me': () => json(user),
   'GET /api/v1/accounts': () => json([]),

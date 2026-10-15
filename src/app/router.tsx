@@ -1,5 +1,5 @@
 import { createBrowserRouter, Navigate, Outlet } from 'react-router';
-import { AccountsPage, BudgetPage, ReportsPage, TransactionsPage } from './pages';
+import { AccountsPage, BudgetPage, DashboardPage, ReportsPage, TransactionsPage } from './pages';
 import { AuthProvider } from '../auth/AuthProvider';
 import { ForgotPasswordPage } from '../auth/pages/ForgotPasswordPage';
 import { LoginPage } from '../auth/pages/LoginPage';
@@ -47,7 +47,7 @@ export const routes = [
           </RequireAuth>
         ),
         children: [
-          { index: true, element: <ComingSoonPage section="dashboard" /> },
+          { index: true, element: <DashboardPage /> },
           { path: 'accounts', element: <AccountsPage /> },
           { path: 'transactions', element: <TransactionsPage /> },
           { path: 'budget', element: <BudgetPage /> },
