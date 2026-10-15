@@ -336,6 +336,7 @@
     "noEnvelopes": "No envelopes are funded this month yet.",
     "paceHint": "The mark is today's day of the month",
     "recent": "Recent transactions",
-    "allTransactions": "All transactions"
+    "allTransactions": "All transactions",
+    "noTransactions": "No transactions yet. Add one or import from a bank."
   }
 }

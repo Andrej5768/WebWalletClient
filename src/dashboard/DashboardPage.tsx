@@ -237,6 +237,11 @@ export function DashboardPage() {
                 {t('dashboard.allTransactions')}
               </Anchor>
             </Group>
+            {recent.data && (recent.data.items ?? []).length === 0 && (
+              <Text c="dimmed" size="sm" px="lg" pb="lg">
+                {t('dashboard.noTransactions')}
+              </Text>
+            )}
             {(recent.data?.items ?? []).map((transaction) => {
               const info = displayCategory(transaction, categoriesById);
               const amount = signedAmount(transaction);

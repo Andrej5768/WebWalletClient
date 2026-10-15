@@ -249,6 +249,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/banks/monobank/schedule": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Change when Monobank is synchronized
+         * @description INTERVAL: every 15 minutes from windowStart to windowEnd (Kyiv time) and once at night halfway between windowEnd and windowStart; DAILY: once a day at dailyAt; WEBHOOK: the bank pushes new operations (needs the public URL of the server) and the accounts are also checked once a day at dailyAt. Omitted times are kept.
+         */
+        put: operations["schedule"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/budget/{month}": {
         parameters: {
             query?: never;
@@ -391,6 +411,44 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/imports/previews/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** A page of the operations of an import preview, newest first; 404 when it expired */
+        get: operations["get_2"];
+        put?: never;
+        post?: never;
+        /** Discard an import preview */
+        delete: operations["discard"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/imports/previews/{id}/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Import the previewed operations with the changes of the user
+         * @description Operations not listed are imported as previewed. The preview is removed afterwards; 404 when it is unknown or expired.
+         */
+        post: operations["confirm"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/imports/privatbank": {
         parameters: {
             query?: never;
@@ -402,6 +460,26 @@ export interface paths {
         put?: never;
         /** Import a PrivatBank card statement (PDF from Privat24); the file is not stored. Without accountId the account with the card number of the statement is used or created. */
         post: operations["importStatement"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/imports/privatbank/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Preview a PrivatBank card statement without saving anything
+         * @description Returns the operations as they would be imported and the first page of them; review them and import with POST /api/v1/imports/previews/{id}/confirm within an hour. Only the parsed operations are kept, not the file.
+         */
+        post: operations["preview"];
         delete?: never;
         options?: never;
         head?: never;
@@ -442,6 +520,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/imports/zenmoney/file/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Preview a saved response of the Zen Money sync API without saving anything
+         * @description Like POST /api/v1/imports/zenmoney/preview; only the parsed records are kept, not the file.
+         */
+        post: operations["previewFile"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/imports/zenmoney/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Preview everything from Zen Money with an API token without saving anything
+         * @description Returns a summary (accounts, categories and payees to create, budgets) and the first page of the transactions; review them and import with POST /api/v1/imports/previews/{id}/confirm within an hour. The token is not stored.
+         */
+        post: operations["previewWithToken"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/me": {
         parameters: {
             query?: never;
@@ -474,6 +592,26 @@ export interface paths {
          * @description All sessions are ended, including the current one; a new session is started: the response contains a new access token and sets a new refresh token cookie
          */
         post: operations["changePassword"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/reset": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Start over: delete all finance data
+         * @description Deletes all accounts, transactions, payees, tags, the budget, bank connections and import previews; with keepCategories false also the categories and categorization rules, and the default categories are created again. confirm must be exactly DELETE. The profile, the password and the sessions stay.
+         */
+        post: operations["reset"];
         delete?: never;
         options?: never;
         head?: never;
@@ -769,24 +907,99 @@ export interface components {
             currentPassword: string;
             newPassword: string;
         };
+        ConfirmRequest: {
+            operations?: components["schemas"]["OperationEdit"][];
+        };
         ConnectRequest: {
+            /**
+             * Format: time
+             * @example 06:00
+             */
+            dailyAt?: string;
             /** Format: date */
             since?: string;
+            /** @enum {string} */
+            syncMode?: "INTERVAL" | "DAILY" | "WEBHOOK";
             token: string;
+            /**
+             * Format: time
+             * @example 23:00
+             */
+            windowEnd?: string;
+            /**
+             * Format: time
+             * @example 08:00
+             */
+            windowStart?: string;
         };
         ConnectionResponse: {
             accounts?: components["schemas"]["LinkResponse"][];
             clientName?: string;
             /** Format: date-time */
             connectedAt?: string;
+            /**
+             * Format: time
+             * @example 06:00
+             */
+            dailyAt?: string;
             lastError?: string;
             /** Format: date-time */
             lastRequestAt?: string;
+            /** Format: date-time */
+            nextSyncAt?: string;
+            /** @enum {string} */
+            syncMode?: "INTERVAL" | "DAILY" | "WEBHOOK";
             webhook?: boolean;
+            /**
+             * Format: time
+             * @example 23:00
+             */
+            windowEnd?: string;
+            /**
+             * Format: time
+             * @example 08:00
+             */
+            windowStart?: string;
         };
         EmailRequest: {
             /** Format: email */
             email: string;
+        };
+        ImportAccount: {
+            created?: boolean;
+            currency?: string;
+            /** Format: int64 */
+            id?: number;
+            name?: string;
+        };
+        ImportOperation: {
+            account?: components["schemas"]["ImportAccount"];
+            amount?: number;
+            /** Format: int64 */
+            categoryId?: number;
+            categoryName?: string;
+            comment?: string;
+            currency?: string;
+            /** Format: date */
+            date?: string;
+            duplicate?: boolean;
+            key?: string;
+            payee?: string;
+            tagIds?: number[];
+            toAccount?: components["schemas"]["ImportAccount"];
+            toAmount?: number;
+            /** @enum {string} */
+            type?: "EXPENSE" | "INCOME" | "TRANSFER";
+        };
+        ImportPreviewResponse: {
+            /** Format: date-time */
+            expiresAt?: string;
+            /** Format: uuid */
+            id?: string;
+            operations?: components["schemas"]["PageResponseImportOperation"];
+            /** @enum {string} */
+            source?: "PRIVATBANK" | "ZENMONEY";
+            summary?: components["schemas"]["ImportResult"];
         };
         ImportResult: {
             /** Format: int32 */
@@ -875,6 +1088,30 @@ export interface components {
             months?: components["schemas"]["MonthNetWorth"][];
             unconvertedCurrencies?: string[];
         };
+        OperationEdit: {
+            /** Format: int64 */
+            categoryId?: number;
+            comment?: string;
+            include?: boolean;
+            key: string;
+            rememberRule?: boolean;
+            tagIds?: number[];
+            /** Format: int64 */
+            transferAccountId?: number;
+            /** @enum {string} */
+            type?: "EXPENSE" | "INCOME" | "TRANSFER";
+        };
+        PageResponseImportOperation: {
+            items?: components["schemas"]["ImportOperation"][];
+            /** Format: int32 */
+            page?: number;
+            /** Format: int32 */
+            size?: number;
+            /** Format: int64 */
+            totalItems?: number;
+            /** Format: int32 */
+            totalPages?: number;
+        };
         PageResponseTransactionResponse: {
             items?: components["schemas"]["TransactionResponse"][];
             /** Format: int32 */
@@ -917,6 +1154,10 @@ export interface components {
             newPassword: string;
             token: string;
         };
+        ResetRequest: {
+            confirm?: string;
+            keepCategories?: boolean;
+        };
         RuleRequest: {
             bankCategory?: string;
             /** Format: int64 */
@@ -938,6 +1179,25 @@ export interface components {
             mcc?: number;
             payee?: components["schemas"]["NamedResponse"];
             payeePattern?: string;
+        };
+        ScheduleRequest: {
+            /**
+             * Format: time
+             * @example 06:00
+             */
+            dailyAt?: string;
+            /** @enum {string} */
+            syncMode: "INTERVAL" | "DAILY" | "WEBHOOK";
+            /**
+             * Format: time
+             * @example 23:00
+             */
+            windowEnd?: string;
+            /**
+             * Format: time
+             * @example 08:00
+             */
+            windowStart?: string;
         };
         SpendingResponse: {
             categories?: components["schemas"]["CategorySpending"][];
@@ -1463,6 +1723,30 @@ export interface operations {
             };
         };
     };
+    schedule: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ScheduleRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ConnectionResponse"];
+                };
+            };
+        };
+    };
     month: {
         parameters: {
             query?: never;
@@ -1737,6 +2021,77 @@ export interface operations {
             };
         };
     };
+    get_2: {
+        parameters: {
+            query?: {
+                page?: number;
+                size?: number;
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ImportPreviewResponse"];
+                };
+            };
+        };
+    };
+    discard: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    confirm: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConfirmRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ImportResult"];
+                };
+            };
+        };
+    };
     importStatement: {
         parameters: {
             query?: {
@@ -1762,6 +2117,35 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["ImportResult"];
+                };
+            };
+        };
+    };
+    preview: {
+        parameters: {
+            query?: {
+                accountId?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    file: string;
+                };
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ImportPreviewResponse"];
                 };
             };
         };
@@ -1813,6 +2197,57 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["ImportResult"];
+                };
+            };
+        };
+    };
+    previewFile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    file: string;
+                };
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ImportPreviewResponse"];
+                };
+            };
+        };
+    };
+    previewWithToken: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TokenRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ImportPreviewResponse"];
                 };
             };
         };
@@ -1882,6 +2317,28 @@ export interface operations {
                 content: {
                     "*/*": components["schemas"]["TokenResponse"];
                 };
+            };
+        };
+    };
+    reset: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResetRequest"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
