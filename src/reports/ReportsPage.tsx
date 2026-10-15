@@ -1,10 +1,9 @@
-import { Alert, Group, SegmentedControl, Stack, Tabs, Text, Title } from '@mantine/core';
+import { Group, SegmentedControl, Stack, Tabs, Text, Title } from '@mantine/core';
 import { DatePickerInput } from '@mantine/dates';
-import dayjs from 'dayjs';
-import { TriangleAlert } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router';
-import { periodOf, type Period, type Preset } from '../transactions/periods';
+import { formatDate } from '../lib/format';
+import { isPreset, kyivToday, periodOf, type Period, type Preset } from '../lib/periods';
 import { IncomeExpenseReport } from './IncomeExpenseReport';
 import { NetWorthReport } from './NetWorthReport';
 import { PayeesReport } from './PayeesReport';
@@ -28,8 +27,9 @@ export function ReportsPage() {
   const tab = (tabs as readonly string[]).includes(params.get('tab') ?? '')
     ? (params.get('tab') as Tab)
     : 'spending';
-  const preset = (params.get('period') as Preset | null) ?? DEFAULT_PRESET[tab];
-  const period: Period = periodOf(preset, new Date(), {
+  const requested = params.get('period');
+  const preset = isPreset(requested) && PRESETS.includes(requested) ? requested : DEFAULT_PRESET[tab];
+  const period: Period = periodOf(preset, kyivToday(), {
     from: params.get('from') ?? undefined,
     to: params.get('to') ?? undefined,
   });
@@ -64,7 +64,7 @@ export function ReportsPage() {
             />
           ) : (
             <Text size="sm" c="dimmed">
-              {dayjs(period.from).format('DD.MM.YYYY')} – {dayjs(period.to).format('DD.MM.YYYY')}
+              {formatDate(period.from)} – {formatDate(period.to)}
             </Text>
           )}
         </Group>
@@ -88,15 +88,5 @@ export function ReportsPage() {
       {tab === 'networth' && <NetWorthReport period={period} />}
       {tab === 'payees' && <PayeesReport period={period} />}
     </Stack>
-  );
-}
-
-export function UnconvertedAlert({ currencies }: { currencies?: string[] }) {
-  const { t } = useTranslation();
-  if (!currencies?.length) return null;
-  return (
-    <Alert color="yellow" variant="light" icon={<TriangleAlert size={18} />}>
-      {t('budget.unconverted', { currencies: currencies.join(', ') })}
-    </Alert>
   );
 }

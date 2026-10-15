@@ -1,12 +1,11 @@
 {
-  "app": {
-    "name": "WebWallet"
-  },
   "common": {
     "all": "All",
     "cancel": "Cancel",
     "save": "Save",
-    "delete": "Delete"
+    "delete": "Delete",
+    "retry": "Try again",
+    "deleteWarning": "This cannot be undone."
   },
   "theme": {
     "label": "Theme",
@@ -187,8 +186,12 @@
       "creditLimitHint": "0 — no limit",
       "interestRate": "Interest rate",
       "inBudget": "Include in the budget",
-      "archived": "Archived"
-    }
+      "archived": "Archived",
+      "inBudgetHint": "Money on a budget account is assigned to categories.",
+      "deleteTitle": "Delete the account “{{name}}”?",
+      "deleteText": "An account can be deleted only while it has no transactions. Otherwise archive it."
+    },
+    "withoutRate": "Some currencies have no exchange rate, so the total is incomplete."
   },
   "transactions": {
     "count_one": "{{count}} transaction",
@@ -274,8 +277,12 @@
       "comment": "Comment",
       "foreign": "Paid in a foreign currency",
       "originalAmount": "Amount in the purchase currency",
-      "imported": "Imported from {{source}}: amount, date and account are as in the bank."
-    }
+      "imported": "Imported from {{source}}: amount, date and account are as in the bank.",
+      "deleteTitle": "Delete the transaction?",
+      "splitComment": "Comment on this part"
+    },
+    "chooseCategoryFor": "Choose a category for “{{name}}”",
+    "notFound": "Transaction not found: it may have been deleted."
   },
   "budget": {
     "previousMonth": "Previous month",

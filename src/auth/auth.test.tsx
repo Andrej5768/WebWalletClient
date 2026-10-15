@@ -1,20 +1,8 @@
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { setAccessToken } from '../api/session';
-import i18n from '../i18n';
 import { json, mockApi, renderApp, signedInApi, user } from '../test/render';
 
 const signedOut = { 'POST /api/v1/auth/refresh': () => json({ code: 'INVALID_REFRESH_TOKEN' }, 401) };
-
-beforeEach(async () => {
-  setAccessToken(null);
-  localStorage.clear();
-  await i18n.changeLanguage('uk');
-});
-
-afterEach(() => {
-  vi.unstubAllGlobals();
-});
 
 describe('session', () => {
   it('sends a signed-out visitor to the sign-in page and back after signing in', async () => {
@@ -24,6 +12,8 @@ describe('session', () => {
       'GET /api/v1/me': () => json(user),
       'GET /api/v1/accounts': () => json([]),
       'GET /api/v1/accounts/summary': signedInApi['GET /api/v1/accounts/summary']!,
+      'GET /api/v1/categories': () => json([]),
+      'GET /api/v1/reports/spending': signedInApi['GET /api/v1/reports/spending']!,
     });
     const router = renderApp('/reports');
 

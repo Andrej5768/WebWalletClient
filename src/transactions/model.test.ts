@@ -1,6 +1,7 @@
+import { splitOf, transactionOf } from '../test/fixtures';
 import { groupByDay, isUncategorized, toRequest, type Transaction } from './model';
 
-const expense: Transaction = {
+const expense: Transaction = transactionOf({
   id: 1,
   type: 'EXPENSE',
   date: '2026-10-15',
@@ -8,9 +9,9 @@ const expense: Transaction = {
   amount: 1284.5,
   currency: 'UAH',
   payee: { id: 3, name: 'Сільпо' },
-  splits: [{ id: 11, categoryId: 20, amount: 1284.5 }],
+  splits: [splitOf({ id: 11, categoryId: 20, amount: 1284.5 })],
   tagIds: [5],
-};
+});
 
 describe('toRequest', () => {
   it('keeps the transaction and applies changes', () => {
@@ -30,8 +31,8 @@ describe('toRequest', () => {
     const split: Transaction = {
       ...expense,
       splits: [
-        { categoryId: 20, amount: 1000 },
-        { categoryId: 22, amount: 284.5, comment: 'хімія' },
+        splitOf({ categoryId: 20, amount: 1000 }),
+        splitOf({ id: 2, categoryId: 22, amount: 284.5, comment: 'хімія' }),
       ],
     };
     expect(toRequest(split)).toMatchObject({
@@ -46,7 +47,7 @@ describe('toRequest', () => {
 
 describe('isUncategorized', () => {
   it('is true without a category and never for transfers', () => {
-    expect(isUncategorized({ ...expense, splits: [{ amount: 10 }] })).toBe(true);
+    expect(isUncategorized({ ...expense, splits: [splitOf({ amount: 10 })] })).toBe(true);
     expect(isUncategorized({ ...expense, splits: [] })).toBe(true);
     expect(isUncategorized(expense)).toBe(false);
     expect(isUncategorized({ ...expense, type: 'TRANSFER', splits: [] })).toBe(false);

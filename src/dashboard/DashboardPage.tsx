@@ -1,53 +1,47 @@
 import { BarChart } from '@mantine/charts';
 import { Alert, Anchor, Button, Card, Group, SimpleGrid, Skeleton, Stack, Text, Title } from '@mantine/core';
-import dayjs from 'dayjs';
 import { TriangleAlert } from 'lucide-react';
-import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useNavigate } from 'react-router';
-import { useAccountsSummary, useCategories, useMonobankStatus, useTransactions } from '../api/queries';
+import { Link } from 'react-router';
+import { useAccountsSummary, useCategoriesById, useMonobankStatus, useTransactions } from '../api/queries';
 import { useBudget } from '../budget/api';
 import { flatEnvelopes, monthKey, monthProgress, spentShare } from '../budget/model';
+import { Amount } from '../components/Amount';
 import { CategoryIcon } from '../components/CategoryIcon';
-import { locale } from '../i18n';
+import { QueryError } from '../components/feedback';
+import { Figure, ShareBar } from '../components/Figure';
+import { formatMonthLong, formatMonthShort } from '../lib/format';
 import { formatMoney } from '../lib/money';
 import { mantineColor } from '../lib/palette';
+import { isoDate, kyivToday, periodOf } from '../lib/periods';
 import { useIncomeExpense, useSpending } from '../reports/api';
-import { Figure, ShareBar } from '../reports/Figure';
 import { displayCategory, signedAmount } from '../transactions/model';
-import { periodOf } from '../transactions/periods';
 import classes from './dashboard.module.css';
 
 export function DashboardPage() {
-  const { t, i18n } = useTranslation();
-  const navigate = useNavigate();
-  const month = dayjs().startOf('month');
-  const thisMonth = periodOf('month', new Date());
-  const sixMonths = { from: month.subtract(5, 'month').format('YYYY-MM-DD'), to: thisMonth.to };
+  const { t } = useTranslation();
+  const today = kyivToday();
+  const month = today.startOf('month');
+  const thisMonth = periodOf('month', today);
+  const sixMonths = { from: isoDate(month.subtract(5, 'month')), to: thisMonth.to };
 
   const summary = useAccountsSummary();
   const monthly = useIncomeExpense(sixMonths);
   const spending = useSpending(thisMonth);
   const budget = useBudget(monthKey(month));
   const recent = useTransactions({ page: 0, size: 6 });
-  const categories = useCategories();
+  const categoriesById = useCategoriesById();
   const monobank = useMonobankStatus();
 
-  const categoriesById = useMemo(
-    () => new Map((categories.data ?? []).map((category) => [category.id, category])),
-    [categories.data],
-  );
   const currency = summary.data?.currency ?? 'UAH';
-  const current = monthly.data?.months?.at(-1);
-  const previousMonths = monthly.data?.months ?? [];
-  const progress = monthProgress(month) ?? 1;
+  const current = monthly.data?.months.find((item) => item.month === monthKey(month));
+  const progress = monthProgress(month, today) ?? 1;
   const envelopes = flatEnvelopes(budget.data?.categories ?? [])
-    .filter((row) => (row.assigned ?? 0) > 0 || (row.available ?? 0) < 0)
-    .sort((a, b) => (a.available ?? 0) - (b.available ?? 0))
+    .filter((row) => row.assigned > 0 || row.available < 0)
+    .sort((a, b) => a.available - b.available)
     .slice(0, 6);
   const differences = (monobank.data?.accounts ?? []).filter((link) => (link.difference ?? 0) !== 0);
-  const monthName = (value?: string) =>
-    dayjs(`${value}-01`).toDate().toLocaleDateString(locale(i18n.language), { month: 'short' });
+  const error = summary.error ?? monthly.error ?? spending.error ?? budget.error ?? recent.error;
 
   return (
     <Stack gap="lg" maw={1200}>
@@ -56,9 +50,10 @@ export function DashboardPage() {
           {t('nav.dashboard')}
         </Title>
         <Text c="dimmed" tt="capitalize">
-          {month.toDate().toLocaleDateString(locale(i18n.language), { month: 'long', year: 'numeric' })}
+          {formatMonthLong(month)}
         </Text>
       </Stack>
+      <QueryError error={error} />
 
       <SimpleGrid cols={{ base: 2, md: 4 }} spacing="sm">
         <Figure
@@ -106,12 +101,12 @@ export function DashboardPage() {
                 names: differences
                   .map(
                     (link) =>
-                      `${link.accountName ?? link.title} ${formatMoney(link.difference ?? 0, link.currency ?? currency, { signed: true })}`,
+                      `${link.accountName ?? link.title} ${formatMoney(link.difference ?? 0, link.currency, { signed: true })}`,
                   )
                   .join(', '),
               })}
             </Text>
-            <Button size="xs" variant="default" onClick={() => void navigate('/accounts')}>
+            <Button size="xs" variant="default" component={Link} to="/accounts">
               {t('nav.accounts')}
             </Button>
           </Group>
@@ -136,7 +131,7 @@ export function DashboardPage() {
             ) : (
               <Stack gap="sm">
                 {(spending.data?.categories ?? []).slice(0, 6).map((row) => {
-                  const info = categoriesById.get(row.categoryId!);
+                  const info = row.categoryId != null ? categoriesById.get(row.categoryId) : undefined;
                   return (
                     <Group key={row.categoryId} gap="sm" wrap="nowrap">
                       <CategoryIcon icon={info?.icon} color={info?.color} size={28} />
@@ -146,11 +141,11 @@ export function DashboardPage() {
                             {row.name}
                           </Text>
                           <Text size="sm" className="num" fw={500}>
-                            {formatMoney(row.amount ?? 0, spending.data?.currency ?? currency)}
+                            {formatMoney(row.amount, spending.data?.currency ?? currency)}
                           </Text>
                         </Group>
                         <ShareBar
-                          share={row.share ?? 0}
+                          share={row.share}
                           color={`var(--mantine-color-${mantineColor(info?.color)}-filled)`}
                         />
                       </Stack>
@@ -170,10 +165,10 @@ export function DashboardPage() {
             ) : (
               <BarChart
                 h={220}
-                data={previousMonths.map((item) => ({
-                  month: monthName(item.month),
-                  [t('reports.income')]: item.income ?? 0,
-                  [t('reports.expense')]: item.expense ?? 0,
+                data={(monthly.data?.months ?? []).map((item) => ({
+                  month: formatMonthShort(item.month),
+                  [t('reports.income')]: item.income,
+                  [t('reports.expense')]: item.expense,
                 }))}
                 dataKey="month"
                 series={[
@@ -205,7 +200,7 @@ export function DashboardPage() {
               <Stack gap="sm">
                 {envelopes.map((row) => {
                   const share = spentShare(row);
-                  const available = row.available ?? 0;
+                  const available = row.available;
                   return (
                     <Stack key={row.categoryId} gap={4}>
                       <Group justify="space-between" wrap="nowrap">
@@ -237,7 +232,7 @@ export function DashboardPage() {
                 {t('dashboard.allTransactions')}
               </Anchor>
             </Group>
-            {recent.data && (recent.data.items ?? []).length === 0 && (
+            {recent.data?.items.length === 0 && (
               <Text c="dimmed" size="sm" px="lg" pb="lg">
                 {t('dashboard.noTransactions')}
               </Text>
@@ -249,12 +244,12 @@ export function DashboardPage() {
               return (
                 <Group
                   key={transaction.id}
+                  renderRoot={(props) => <Link to={`/transactions?edit=${transaction.id}`} {...props} />}
                   px="lg"
                   py="xs"
                   gap="sm"
                   wrap="nowrap"
                   className={classes.recent}
-                  onClick={() => void navigate(`/transactions?edit=${transaction.id}`)}
                 >
                   <CategoryIcon icon={info?.icon} color={info?.color} transfer={transfer} size={28} />
                   <div style={{ flex: 1, minWidth: 0 }}>
@@ -266,13 +261,12 @@ export function DashboardPage() {
                       {info?.path ?? (transfer ? '' : t('transactions.uncategorized'))}
                     </Text>
                   </div>
-                  <Text
+                  <Amount
                     size="sm"
-                    fw={500}
-                    className={`num ${transfer ? 'muted' : amount < 0 ? 'expense' : 'income'}`}
-                  >
-                    {formatMoney(amount, transaction.currency ?? currency, { signed: !transfer })}
-                  </Text>
+                    value={amount}
+                    currency={transaction.currency}
+                    kind={transfer ? 'neutral' : 'signed'}
+                  />
                 </Group>
               );
             })}

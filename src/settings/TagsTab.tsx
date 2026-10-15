@@ -1,11 +1,14 @@
-import { Alert, Badge, Button, Card, Group, Modal, Stack, Text, TextInput } from '@mantine/core';
+import { Badge, Button, Card, Group, Modal, Stack, Text, TextInput } from '@mantine/core';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api, type Schemas } from '../api/client';
-import { problemMessage, toProblem } from '../api/errors';
-import { queryKeys, useTags } from '../api/queries';
+import { check } from '../api/http';
+import { invalidateLedger, useTags } from '../api/queries';
+import { confirmDelete } from '../components/confirm';
+import { ProblemAlert } from '../components/feedback';
+import { FormFooter } from '../components/FormFooter';
 import { mantineColor, type PaletteColor } from '../lib/palette';
 import { ColorSwatches } from './ColorSwatches';
 
@@ -63,26 +66,27 @@ function TagModal({ tag, onClose }: { tag: Tag | null; onClose(): void }) {
   const [color, setColor] = useState<PaletteColor | null>(tag?.color ?? null);
 
   const done = async () => {
-    await queryClient.invalidateQueries({ queryKey: queryKeys.tags });
+    // Tags show on transactions and filter reports, so those refresh too.
+    await invalidateLedger(queryClient);
     onClose();
   };
   const save = useMutation({
-    mutationFn: async () => {
+    mutationFn: () => {
       // An explicit null removes the color on update.
       const body = { name: name.trim(), color: color as PaletteColor };
-      const { error } = tag
-        ? await api.PUT('/api/v1/tags/{id}', { params: { path: { id: tag.id! } }, body })
-        : await api.POST('/api/v1/tags', { body });
-      if (error) throw error;
+      return check(
+        tag
+          ? api.PUT('/api/v1/tags/{id}', { params: { path: { id: tag.id! } }, body })
+          : api.POST('/api/v1/tags', { body }),
+      );
     },
     onSuccess: done,
+    meta: { errorShown: true },
   });
   const remove = useMutation({
-    mutationFn: async () => {
-      const { error } = await api.DELETE('/api/v1/tags/{id}', { params: { path: { id: tag!.id! } } });
-      if (error) throw error;
-    },
+    mutationFn: () => check(api.DELETE('/api/v1/tags/{id}', { params: { path: { id: tag!.id! } } })),
     onSuccess: done,
+    meta: { errorShown: true },
   });
   const problem = save.error ?? remove.error;
 
@@ -120,28 +124,24 @@ function TagModal({ tag, onClose }: { tag: Tag | null; onClose(): void }) {
             #{name.trim() || '…'}
           </Badge>
         </Group>
-        {problem && (
-          <Alert color="yellow" variant="light" p="xs" role="alert">
-            {problemMessage(toProblem(problem))}
-          </Alert>
-        )}
-        <Group justify="space-between">
-          {tag ? (
-            <Button variant="outline" color="red" loading={remove.isPending} onClick={() => remove.mutate()}>
-              {t('common.delete')}
-            </Button>
-          ) : (
-            <span />
-          )}
-          <Group gap="xs">
-            <Button variant="default" onClick={onClose}>
-              {t('common.cancel')}
-            </Button>
-            <Button disabled={!name.trim()} loading={save.isPending} onClick={() => save.mutate()}>
-              {t('common.save')}
-            </Button>
-          </Group>
-        </Group>
+        <ProblemAlert error={problem} />
+        <FormFooter
+          onCancel={onClose}
+          onDelete={
+            tag
+              ? () =>
+                  confirmDelete({
+                    title: t('settings.tags.deleteTitle', { name: tag.name }),
+                    text: t('settings.tags.deleteText'),
+                    onConfirm: () => remove.mutate(),
+                  })
+              : undefined
+          }
+          deleting={remove.isPending}
+          saving={save.isPending}
+          submitDisabled={!name.trim()}
+          onSubmit={() => save.mutate()}
+        />
       </Stack>
     </Modal>
   );

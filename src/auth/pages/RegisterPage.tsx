@@ -16,7 +16,7 @@ import { Link } from 'react-router';
 import { api } from '../../api/client';
 import { fieldErrors, problemMessage, toProblem, type ApiProblem } from '../../api/errors';
 import { AuthLayout } from '../AuthLayout';
-import { newPassword, required, requiredEmail } from '../validation';
+import { newPassword, required, requiredEmail } from '../../lib/validation';
 import { CheckMail } from './CheckMail';
 
 export function RegisterPage() {

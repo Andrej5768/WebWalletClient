@@ -2,7 +2,7 @@ import { Anchor, Group, Skeleton, Text } from '@mantine/core';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import type { Schemas } from '../api/client';
-import { useAccounts } from '../api/queries';
+import { useAccounts, useBaseCurrency } from '../api/queries';
 import { accountColor } from '../lib/accounts';
 import { formatMoney } from '../lib/money';
 import classes from './shell.module.css';
@@ -16,6 +16,7 @@ const SHOWN = 6;
 export function AccountsWidget() {
   const { t } = useTranslation();
   const { data, isLoading } = useAccounts();
+  const baseCurrency = useBaseCurrency();
 
   if (isLoading) return <Skeleton height={120} radius="md" />;
   const active = (data ?? []).filter((account) => !account.archived);
@@ -24,6 +25,8 @@ export function AccountsWidget() {
   const everyday = active.filter((account) => !SAVINGS.includes(account.type)).slice(0, SHOWN);
   const savings = active.filter((account) => SAVINGS.includes(account.type));
   const savingsTotal = savings.reduce((sum, account) => sum + (account.balanceInBase ?? 0), 0);
+  // A savings account without an exchange rate is left out of the total; the total says so.
+  const savingsIncomplete = savings.some((account) => account.balanceInBase == null);
 
   return (
     <div className={classes.widget}>
@@ -40,7 +43,7 @@ export function AccountsWidget() {
           <span className={classes.dot} style={{ background: accountColor(account.type) }} />
           <span className={classes.accountName}>{account.name}</span>
           <span className={`num ${(account.balance ?? 0) < 0 ? 'expense' : ''}`} style={{ fontWeight: 500 }}>
-            {formatMoney(account.balance ?? 0, account.currency ?? 'UAH')}
+            {formatMoney(account.balance, account.currency)}
           </span>
         </div>
       ))}
@@ -51,8 +54,13 @@ export function AccountsWidget() {
         >
           <span className={classes.dot} style={{ background: accountColor('SAVINGS') }} />
           <span className={classes.accountName}>{t('balance.savings')}</span>
-          <span className="num" style={{ fontWeight: 500 }}>
-            {formatMoney(savingsTotal, 'UAH')}
+          <span
+            className="num"
+            style={{ fontWeight: 500 }}
+            title={savingsIncomplete ? t('accounts.withoutRate') : undefined}
+          >
+            {formatMoney(savingsTotal, baseCurrency)}
+            {savingsIncomplete && '*'}
           </span>
         </div>
       )}

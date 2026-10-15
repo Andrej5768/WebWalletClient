@@ -15,6 +15,13 @@ export interface CategoryInfo {
   parentId: number | null;
   archived: boolean;
   necessity: 'NEEDS' | 'WANTS' | null;
+  /** The category's own values, without what it inherits from its group; these are what is edited. */
+  own: {
+    icon: string | null;
+    color: PaletteColor | null;
+    necessity: 'NEEDS' | 'WANTS' | null;
+    archived: boolean;
+  };
 }
 
 /** Flattens the category tree, groups first followed by their subcategories. */
@@ -31,6 +38,12 @@ export function flattenCategories(tree: Category[]): CategoryInfo[] {
       parentId: parent?.id ?? null,
       archived: !!category.archived || !!parent?.archived,
       necessity: category.necessity ?? parent?.necessity ?? null,
+      own: {
+        icon: category.icon ?? null,
+        color: category.color ?? null,
+        necessity: category.necessity ?? null,
+        archived: !!category.archived,
+      },
     };
     result.push(info);
     (category.children ?? []).forEach((child) => visit(child, info));

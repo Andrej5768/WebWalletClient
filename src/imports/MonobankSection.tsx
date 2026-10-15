@@ -1,13 +1,10 @@
 import {
   Alert,
-  Anchor,
   Badge,
   Button,
   Card,
   Group,
   Modal,
-  PasswordInput,
-  SegmentedControl,
   Select,
   Skeleton,
   Stack,
@@ -16,198 +13,20 @@ import {
   ThemeIcon,
   Title,
 } from '@mantine/core';
-import { DateInput, TimeInput } from '@mantine/dates';
-import { useForm } from '@mantine/form';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import dayjs from 'dayjs';
 import { CircleCheck, Landmark, RefreshCw, TriangleAlert } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
 import { fieldErrors, problemMessage, toProblem } from '../api/errors';
-import { queryKeys, useAccounts, useMonobankStatus } from '../api/queries';
-import { locale } from '../i18n';
+import { check } from '../api/http';
+import { invalidateLedger, queryKeys, useAccounts, useMonobankStatus } from '../api/queries';
+import { formatDateTime } from '../lib/format';
 import { formatMoney } from '../lib/money';
-import type { Connection, Schedule, SyncMode } from './api';
-
-const MODES: SyncMode[] = ['INTERVAL', 'DAILY', 'WEBHOOK'];
-const DEFAULT_SCHEDULE = {
-  syncMode: 'INTERVAL' as SyncMode,
-  windowStart: '08:00',
-  windowEnd: '23:00',
-  dailyAt: '06:00',
-};
-
-const hhmm = (value?: string) => (value ? value.slice(0, 5) : undefined);
-
-function scheduleOf(connection?: Connection | null) {
-  return {
-    syncMode: connection?.syncMode ?? DEFAULT_SCHEDULE.syncMode,
-    windowStart: hhmm(connection?.windowStart) ?? DEFAULT_SCHEDULE.windowStart,
-    windowEnd: hhmm(connection?.windowEnd) ?? DEFAULT_SCHEDULE.windowEnd,
-    dailyAt: hhmm(connection?.dailyAt) ?? DEFAULT_SCHEDULE.dailyAt,
-  };
-}
-
-/** Choice of how often Monobank is synchronized, with the matching time fields. */
-function ScheduleFields({
-  value,
-  onChange,
-  errors,
-}: {
-  value: Required<Schedule>;
-  onChange: (value: Required<Schedule>) => void;
-  errors?: Record<string, string>;
-}) {
-  const { t } = useTranslation();
-  return (
-    <Stack gap="xs">
-      <SegmentedControl
-        aria-label={t('imports.monobank.schedule')}
-        value={value.syncMode}
-        onChange={(syncMode) => onChange({ ...value, syncMode: syncMode as SyncMode })}
-        data={MODES.map((mode) => ({ value: mode, label: t(`imports.monobank.modes.${mode}`) }))}
-      />
-      {value.syncMode === 'INTERVAL' && (
-        <Group gap="sm" align="flex-start">
-          <TimeInput
-            label={t('imports.monobank.from')}
-            w={120}
-            value={value.windowStart}
-            onChange={(event) => onChange({ ...value, windowStart: event.currentTarget.value })}
-            error={errors?.windowStart}
-          />
-          <TimeInput
-            label={t('imports.monobank.to')}
-            w={120}
-            value={value.windowEnd}
-            onChange={(event) => onChange({ ...value, windowEnd: event.currentTarget.value })}
-            error={errors?.windowEnd}
-          />
-          <Text size="xs" c="dimmed" mt={30} maw={260}>
-            {t('imports.monobank.intervalHint')}
-          </Text>
-        </Group>
-      )}
-      {value.syncMode === 'DAILY' && (
-        <TimeInput
-          label={t('imports.monobank.dailyAt')}
-          w={120}
-          value={value.dailyAt}
-          onChange={(event) => onChange({ ...value, dailyAt: event.currentTarget.value })}
-          error={errors?.dailyAt}
-        />
-      )}
-      {value.syncMode === 'WEBHOOK' && (
-        <Alert color="yellow" variant="light" p="xs" icon={<TriangleAlert size={16} />}>
-          <Text size="sm">{t('imports.monobank.webhookHint')}</Text>
-        </Alert>
-      )}
-      {errors?.syncMode && (
-        <Text size="xs" c="red">
-          {errors.syncMode}
-        </Text>
-      )}
-    </Stack>
-  );
-}
-
-export function ConnectModal({ current, onClose }: { current?: Connection | null; onClose: () => void }) {
-  const { t } = useTranslation();
-  const queryClient = useQueryClient();
-  const [schedule, setSchedule] = useState<Required<Schedule>>(scheduleOf(current));
-  const [scheduleErrors, setScheduleErrors] = useState<Record<string, string>>({});
-  const earliest = dayjs().subtract(3, 'year').add(1, 'day').format('YYYY-MM-DD');
-  const form = useForm({
-    initialValues: { token: '', since: dayjs().subtract(1, 'year').format('YYYY-MM-DD') as string | null },
-    validate: { token: (value) => (value.trim() ? null : t('validation.required')) },
-  });
-
-  const connect = useMutation({
-    // The token is read from the form, not passed as a variable, so it does not stay in the mutation cache.
-    mutationFn: async () => {
-      const { token, since } = form.values;
-      const { error } = await api.POST('/api/v1/banks/monobank', {
-        body: { token: token.trim(), since: since ?? undefined, ...schedule },
-      });
-      if (error) throw error;
-    },
-    onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: queryKeys.monobank }),
-        queryClient.invalidateQueries({ queryKey: queryKeys.accounts }),
-      ]);
-      form.reset();
-      onClose();
-    },
-    onError: (error) => {
-      const errors = fieldErrors(toProblem(error));
-      form.setErrors(errors);
-      setScheduleErrors(errors);
-    },
-  });
-
-  return (
-    <Modal
-      opened
-      onClose={onClose}
-      size="lg"
-      title={<Text fw={600}>{t('imports.monobank.connectTitle')}</Text>}
-    >
-      <form onSubmit={form.onSubmit(() => connect.mutate())} noValidate>
-        <Stack gap="md">
-          <PasswordInput
-            label={t('imports.monobank.token')}
-            autoComplete="off"
-            data-autofocus
-            description={
-              <>
-                {t('imports.monobank.tokenHint')}{' '}
-                <Anchor href="https://api.monobank.ua/" target="_blank" rel="noreferrer" size="xs">
-                  api.monobank.ua
-                </Anchor>
-              </>
-            }
-            inputWrapperOrder={['label', 'input', 'description', 'error']}
-            {...form.getInputProps('token')}
-          />
-          <DateInput
-            label={t('imports.monobank.since')}
-            description={t('imports.monobank.sinceHint')}
-            inputWrapperOrder={['label', 'input', 'description', 'error']}
-            valueFormat="DD.MM.YYYY"
-            minDate={earliest}
-            maxDate={dayjs().format('YYYY-MM-DD')}
-            w={220}
-            {...form.getInputProps('since')}
-          />
-          <Stack gap={4}>
-            <Text size="sm" fw={500}>
-              {t('imports.monobank.schedule')}
-            </Text>
-            <ScheduleFields value={schedule} onChange={setSchedule} errors={scheduleErrors} />
-          </Stack>
-          <Alert color="blue" variant="light" p="xs">
-            <Text size="sm">{t('imports.monobank.background')}</Text>
-          </Alert>
-          {connect.error && !Object.keys(fieldErrors(toProblem(connect.error))).length && (
-            <Alert color="yellow" variant="light" p="xs" role="alert">
-              {problemMessage(toProblem(connect.error))}
-            </Alert>
-          )}
-          <Group justify="flex-end" gap="xs">
-            <Button variant="default" onClick={onClose}>
-              {t('common.cancel')}
-            </Button>
-            <Button type="submit" loading={connect.isPending}>
-              {t('imports.monobank.connect')}
-            </Button>
-          </Group>
-        </Stack>
-      </form>
-    </Modal>
-  );
-}
+import type { Schedule } from './api';
+import { ConnectModal } from './ConnectModal';
+import { scheduleOf } from './schedule';
+import { ScheduleFields } from './ScheduleFields';
 
 export function MonobankSection({
   connectOpen,
@@ -216,7 +35,7 @@ export function MonobankSection({
   connectOpen: boolean;
   setConnectOpen: (open: boolean) => void;
 }) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const status = useMonobankStatus();
   const accounts = useAccounts();
@@ -225,54 +44,38 @@ export function MonobankSection({
   const [schedule, setSchedule] = useState<Required<Schedule> | null>(null);
   const shown = schedule ?? scheduleOf(connection);
 
-  const refresh = () =>
-    Promise.all([
-      queryClient.invalidateQueries({ queryKey: queryKeys.monobank }),
-      queryClient.invalidateQueries({ queryKey: queryKeys.accounts }),
-    ]);
+  // Linking, unlinking and disconnecting change which transactions arrive and the balances.
+  const refresh = () => invalidateLedger(queryClient);
 
   const saveSchedule = useMutation({
-    mutationFn: async (body: Required<Schedule>) => {
-      const { error } = await api.PUT('/api/v1/banks/monobank/schedule', { body });
-      if (error) throw error;
-    },
+    mutationFn: (body: Required<Schedule>) => check(api.PUT('/api/v1/banks/monobank/schedule', { body })),
     onSuccess: async () => {
       setSchedule(null);
-      await refresh();
+      await queryClient.invalidateQueries({ queryKey: queryKeys.monobank });
     },
+    meta: { errorShown: true },
   });
 
   const relink = useMutation({
-    mutationFn: async ({ linkId, accountId }: { linkId: number; accountId: number | null }) => {
-      const { error } = await api.PUT('/api/v1/banks/monobank/accounts/{linkId}', {
-        params: { path: { linkId } },
-        body: { accountId: accountId as number },
-      });
-      if (error) throw error;
-    },
+    mutationFn: ({ linkId, accountId }: { linkId: number; accountId: number | null }) =>
+      check(
+        api.PUT('/api/v1/banks/monobank/accounts/{linkId}', {
+          params: { path: { linkId } },
+          body: { accountId },
+        }),
+      ),
     onSettled: refresh,
   });
 
   const disconnect = useMutation({
-    mutationFn: async () => {
-      const { error } = await api.DELETE('/api/v1/banks/monobank');
-      if (error) throw error;
-    },
+    mutationFn: () => check(api.DELETE('/api/v1/banks/monobank')),
     onSuccess: async () => {
       setDisconnecting(false);
       await refresh();
     },
   });
 
-  const dateTime = (value?: string) =>
-    value
-      ? new Date(value).toLocaleString(locale(i18n.language), {
-          day: 'numeric',
-          month: 'short',
-          hour: '2-digit',
-          minute: '2-digit',
-        })
-      : '—';
+  const dateTime = (value?: string | null) => formatDateTime(value) || '—';
   const scheduleError = saveSchedule.error ? toProblem(saveSchedule.error) : null;
 
   return (
@@ -373,11 +176,11 @@ export function MonobankSection({
                 </Table.Tr>
               </Table.Thead>
               <Table.Tbody>
-                {(connection.accounts ?? []).map((link) => {
+                {connection.accounts.map((link) => {
                   const difference = link.difference ?? 0;
                   const options = (accounts.data ?? [])
                     .filter((account) => !account.archived && account.currency === link.currency)
-                    .map((account) => ({ value: String(account.id), label: account.name ?? '' }));
+                    .map((account) => ({ value: String(account.id), label: account.name }));
                   return (
                     <Table.Tr key={link.id}>
                       <Table.Td>
@@ -398,19 +201,17 @@ export function MonobankSection({
                           value={link.accountId != null ? String(link.accountId) : 'none'}
                           onChange={(value) =>
                             relink.mutate({
-                              linkId: link.id!,
+                              linkId: link.id,
                               accountId: value === 'none' || !value ? null : Number(value),
                             })
                           }
                         />
                       </Table.Td>
                       <Table.Td ta="right" className="num">
-                        {link.balance != null ? formatMoney(link.balance, link.currency ?? 'UAH') : '—'}
+                        {link.balance != null ? formatMoney(link.balance, link.currency) : '—'}
                       </Table.Td>
                       <Table.Td ta="right" className="num">
-                        {link.bankBalance != null
-                          ? formatMoney(link.bankBalance, link.currency ?? 'UAH')
-                          : '—'}
+                        {link.bankBalance != null ? formatMoney(link.bankBalance, link.currency) : '—'}
                       </Table.Td>
                       <Table.Td>
                         {link.accountId == null ? (
@@ -425,7 +226,7 @@ export function MonobankSection({
                               className="num"
                               leftSection={<TriangleAlert size={12} />}
                             >
-                              {formatMoney(difference, link.currency ?? 'UAH', { signed: true })}
+                              {formatMoney(difference, link.currency, { signed: true })}
                             </Badge>
                             <Text size="xs" c="dimmed">
                               {t(

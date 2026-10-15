@@ -1,8 +1,6 @@
 import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { setAccessToken } from '../api/session';
-import i18n from '../i18n';
-import { json, mockApi, renderApp, signedInApi } from '../test/render';
+import { bodyOf, json, mockApi, renderApp, signedInApi } from '../test/render';
 
 const categories = [
   {
@@ -15,17 +13,6 @@ const categories = [
     children: [{ id: 2, name: 'Кафе', kind: 'EXPENSE', parentId: 1, necessity: 'WANTS' }],
   },
 ];
-
-beforeEach(async () => {
-  setAccessToken(null);
-  localStorage.clear();
-  await i18n.changeLanguage('uk');
-});
-
-afterEach(() => vi.unstubAllGlobals());
-
-const bodyOf = async (requests: Request[], method: string, path: string) =>
-  requests.find((request) => request.method === method && new URL(request.url).pathname === path)!.json();
 
 it('saves the profile with an optional last name', async () => {
   const requests = mockApi({
@@ -112,4 +99,22 @@ it('creates a tag with a color', async () => {
 
   await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
   expect(await bodyOf(requests, 'POST', '/api/v1/tags')).toEqual({ name: 'відпустка', color: 'cyan' });
+});
+
+it('deletes a tag only after confirming', async () => {
+  const requests = mockApi({
+    ...signedInApi,
+    'GET /api/v1/tags': () => json([{ id: 3, name: 'відпустка', color: null }]),
+    'DELETE /api/v1/tags/3': () => new Response(null, { status: 204 }),
+  });
+  renderApp('/settings?tab=tags');
+
+  await userEvent.click(await screen.findByRole('button', { name: '#відпустка' }));
+  await userEvent.click(within(await screen.findByRole('dialog')).getByRole('button', { name: 'Видалити' }));
+
+  const confirm = await screen.findByRole('dialog', { name: 'Видалити тег #відпустка?' });
+  expect(requests.some((request) => request.method === 'DELETE')).toBe(false);
+  await userEvent.click(within(confirm).getByRole('button', { name: 'Видалити' }));
+
+  await waitFor(() => expect(requests.some((request) => request.method === 'DELETE')).toBe(true));
 });

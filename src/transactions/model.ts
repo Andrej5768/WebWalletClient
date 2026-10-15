@@ -20,6 +20,14 @@ export function isUncategorized(transaction: Transaction): boolean {
   return splits.length === 0 || splits.some((split) => split.categoryId == null);
 }
 
+/**
+ * Whether the row may offer a category picker: an uncategorized expense or income that is not split.
+ * A split with an uncategorized part is fixed in the side panel, so its parts are not replaced.
+ */
+export function canQuickCategorize(transaction: Transaction): boolean {
+  return isUncategorized(transaction) && !isSplit(transaction);
+}
+
 /** Request that recreates the transaction as it is, with the given changes on top. */
 export function toRequest(
   transaction: Transaction,
@@ -27,24 +35,24 @@ export function toRequest(
 ): TransactionRequest {
   const split = isSplit(transaction);
   return {
-    type: transaction.type!,
-    date: transaction.date!,
-    accountId: transaction.accountId!,
-    amount: transaction.amount!,
-    toAccountId: transaction.toAccountId,
-    toAmount: transaction.toAmount,
-    originalAmount: transaction.originalAmount,
-    originalCurrency: transaction.originalCurrency,
+    type: transaction.type,
+    date: transaction.date,
+    accountId: transaction.accountId,
+    amount: transaction.amount,
+    toAccountId: transaction.toAccountId ?? undefined,
+    toAmount: transaction.toAmount ?? undefined,
+    originalAmount: transaction.originalAmount ?? undefined,
+    originalCurrency: transaction.originalCurrency ?? undefined,
     categoryId: split ? undefined : (singleCategoryId(transaction) ?? undefined),
     splits: split
-      ? (transaction.splits ?? []).map((item) => ({
-          categoryId: item.categoryId,
-          amount: item.amount!,
-          comment: item.comment,
+      ? transaction.splits.map((item) => ({
+          categoryId: item.categoryId ?? undefined,
+          amount: item.amount,
+          comment: item.comment ?? undefined,
         }))
       : undefined,
     payeeId: transaction.payee?.id,
-    comment: transaction.comment,
+    comment: transaction.comment ?? undefined,
     tagIds: transaction.tagIds,
     ...changes,
   };

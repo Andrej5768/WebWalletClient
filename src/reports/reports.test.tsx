@@ -1,7 +1,5 @@
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { setAccessToken } from '../api/session';
-import i18n from '../i18n';
 import { json, mockApi, renderApp, signedInApi } from '../test/render';
 
 const categories = [{ id: 1, name: 'Їжа', kind: 'EXPENSE', icon: 'utensils', color: 'orange' }];
@@ -47,14 +45,6 @@ function api() {
       json({ currency: 'UAH', payees: [{ payeeId: 5, name: 'Сільпо', amount: 6300, transactions: 9 }] }),
   });
 }
-
-beforeEach(async () => {
-  setAccessToken(null);
-  localStorage.clear();
-  await i18n.changeLanguage('uk');
-});
-
-afterEach(() => vi.unstubAllGlobals());
 
 it('shows spending by category with subcategories and the missing rates', async () => {
   const requests = api();

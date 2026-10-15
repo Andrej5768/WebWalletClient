@@ -1,12 +1,30 @@
 import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import dayjs from 'dayjs';
-import { setAccessToken } from '../api/session';
-import i18n from '../i18n';
-import { json, mockApi, renderApp, signedInApi } from '../test/render';
+import { budgetRowOf } from '../test/fixtures';
+import { bodyOf, currentMonth as month, json, mockApi, plain, renderApp, signedInApi } from '../test/render';
 
-const month = dayjs().format('YYYY-MM');
-const previousMonth = dayjs().subtract(1, 'month').format('YYYY-MM');
+const food = budgetRowOf({
+  categoryId: 1,
+  name: 'Їжа',
+  children: [
+    budgetRowOf({
+      categoryId: 2,
+      name: 'Продукти',
+      parentId: 1,
+      ownAssigned: 9000,
+      ownActivity: -4950,
+      ownAvailable: 4050,
+    }),
+    budgetRowOf({
+      categoryId: 3,
+      name: 'Кафе',
+      parentId: 1,
+      ownAssigned: 2000,
+      ownActivity: -2340,
+      ownAvailable: -340,
+    }),
+  ],
+});
 
 const budget = {
   month,
@@ -16,19 +34,7 @@ const budget = {
   activity: -7290,
   available: 3710,
   unconvertedCurrencies: [],
-  categories: [
-    {
-      categoryId: 1,
-      name: 'Їжа',
-      assigned: 0,
-      activity: 0,
-      available: 0,
-      children: [
-        { categoryId: 2, name: 'Продукти', parentId: 1, assigned: 9000, activity: -4950, available: 4050 },
-        { categoryId: 3, name: 'Кафе', parentId: 1, assigned: 2000, activity: -2340, available: -340 },
-      ],
-    },
-  ],
+  categories: [food],
 };
 
 function api(extra = {}) {
@@ -36,32 +42,28 @@ function api(extra = {}) {
     ...signedInApi,
     'GET /api/v1/categories': () => json([]),
     [`GET /api/v1/budget/${month}`]: () => json(budget),
-    [`GET /api/v1/budget/${previousMonth}`]: () => json({ ...budget, month: previousMonth }),
     ...extra,
   });
 }
 
-beforeEach(async () => {
-  setAccessToken(null);
-  localStorage.clear();
-  await i18n.changeLanguage('uk');
-});
-
-afterEach(() => vi.unstubAllGlobals());
-
-const plain = (text: string | null) => (text ?? '').replace(/\s/g, ' ');
-
-it('shows ready to assign, envelopes and overspending', async () => {
+it('shows ready to assign, group totals counted once, envelopes and overspending', async () => {
   api();
   renderApp('/budget');
 
   expect(plain((await screen.findByText(/4\s250,00/)).textContent)).toBe('4 250,00 ₴');
   expect(screen.getByText('Продукти')).toBeInTheDocument();
+  // The group row shows the server total, not the total plus its children again.
+  expect(
+    screen.getAllByText((_, element) => plain(element?.textContent) === '11 000,00 ₴').length,
+  ).toBeGreaterThan(0);
+  expect(
+    screen.queryByText((_, element) => plain(element?.textContent) === '22 000,00 ₴'),
+  ).not.toBeInTheDocument();
   expect(screen.getByText(/Перевитрата: Кафе/)).toBeInTheDocument();
 });
 
 it('saves a new assignment when the field loses focus', async () => {
-  const requests = api({ [`PUT /api/v1/budget/${month}/categories/2`]: () => json({}) });
+  const requests = api({ [`PUT /api/v1/budget/${month}/categories/2`]: () => json(budget) });
   renderApp('/budget');
 
   const input = await screen.findByLabelText('Призначено: Продукти');
@@ -70,14 +72,11 @@ it('saves a new assignment when the field loses focus', async () => {
   fireEvent.blur(input);
 
   await waitFor(() => expect(requests.some((request) => request.method === 'PUT')).toBe(true));
-  expect(await requests.find((request) => request.method === 'PUT')!.json()).toEqual({ assigned: 9500 });
+  expect(await bodyOf(requests, 'PUT', `/api/v1/budget/${month}/categories/2`)).toEqual({ assigned: 9500 });
 });
 
-it('covers overspending by moving money between envelopes', async () => {
-  const requests = api({
-    [`PUT /api/v1/budget/${month}/categories/2`]: () => json({}),
-    [`PUT /api/v1/budget/${month}/categories/3`]: () => json({}),
-  });
+it('covers overspending by moving money in one request', async () => {
+  const requests = api({ [`POST /api/v1/budget/${month}/move`]: () => json(budget) });
   renderApp('/budget');
 
   await userEvent.click(await screen.findByRole('button', { name: 'Покрити' }));
@@ -88,7 +87,20 @@ it('covers overspending by moving money between envelopes', async () => {
   await userEvent.click(within(dialog).getByRole('button', { name: 'Перемістити' }));
 
   await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
-  const puts = requests.filter((request) => request.method === 'PUT');
-  expect(await puts[0]!.json()).toEqual({ assigned: 8660 });
-  expect(await puts[1]!.json()).toEqual({ assigned: 2340 });
+  expect(await bodyOf(requests, 'POST', `/api/v1/budget/${month}/move`)).toEqual({
+    fromCategoryId: 2,
+    toCategoryId: 3,
+    amount: 340,
+  });
+});
+
+it('copies the previous month with one request', async () => {
+  const requests = api({ [`POST /api/v1/budget/${month}/copy-previous`]: () => json(budget) });
+  renderApp('/budget');
+
+  await userEvent.click(await screen.findByRole('button', { name: 'Як минулого місяця' }));
+
+  await waitFor(() =>
+    expect(requests.some((request) => new URL(request.url).pathname.endsWith('/copy-previous'))).toBe(true),
+  );
 });

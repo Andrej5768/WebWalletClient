@@ -19,8 +19,10 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
 import { fieldErrors, problemMessage, toProblem } from '../api/errors';
+import { check } from '../api/http';
 import { shareAccessToken } from '../api/session';
-import { newPassword, required } from '../auth/validation';
+import { ProblemAlert } from '../components/feedback';
+import { newPassword, required } from '../lib/validation';
 import i18n from '../i18n';
 
 const CONFIRM_WORD = 'DELETE';
@@ -148,15 +150,13 @@ function ResetModal({ onClose }: { onClose(): void }) {
   const [confirm, setConfirm] = useState('');
 
   const reset = useMutation({
-    mutationFn: async () => {
-      const { error } = await api.POST('/api/v1/me/reset', { body: { keepCategories, confirm } });
-      if (error) throw error;
-    },
+    mutationFn: () => check(api.POST('/api/v1/me/reset', { body: { keepCategories, confirm } })),
     onSuccess: async () => {
       await queryClient.invalidateQueries();
       notifications.show({ message: t('settings.danger.done'), color: 'green' });
       onClose();
     },
+    meta: { errorShown: true },
   });
 
   return (
@@ -176,11 +176,7 @@ function ResetModal({ onClose }: { onClose(): void }) {
           onChange={(event) => setConfirm(event.currentTarget.value)}
           autoComplete="off"
         />
-        {reset.error && (
-          <Alert color="yellow" variant="light" p="xs" role="alert">
-            {problemMessage(toProblem(reset.error))}
-          </Alert>
-        )}
+        <ProblemAlert error={reset.error} />
         <Group justify="flex-end" gap="xs">
           <Button variant="default" onClick={onClose}>
             {t('common.cancel')}

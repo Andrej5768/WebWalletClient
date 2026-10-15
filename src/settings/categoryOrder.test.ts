@@ -2,6 +2,7 @@ import type { CategoryInfo } from '../lib/categories';
 import { moveCategory, type OrderItem } from './categoryOrder';
 
 const item = (id: number, parentId: number | null): CategoryInfo => ({
+  own: { icon: null, color: null, necessity: null, archived: false },
   id,
   name: String(id),
   path: String(id),
@@ -25,7 +26,8 @@ describe('moveCategory', () => {
   });
 
   it('moves a subcategory into another group', () => {
-    expect(shape(moveCategory(items, 12, 22))).toBe('1 1>11 2 2>21 2>12 2>22');
+    expect(shape(moveCategory(items, 12, 22))).toBe('1 1>11 2 2>21 2>22 2>12');
+    expect(shape(moveCategory(items, 22, 11))).toBe('1 1>22 1>11 1>12 2 2>21');
   });
 
   it('moves a subcategory dropped on a group header below it to the top of that group', () => {

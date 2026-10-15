@@ -4,28 +4,27 @@ import { ChevronDown, ChevronRight } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Schemas } from '../api/client';
-import { useCategories } from '../api/queries';
+import { useCategoriesById } from '../api/queries';
 import { CategoryIcon } from '../components/CategoryIcon';
 import type { CategoryInfo } from '../lib/categories';
+import { formatPercent } from '../lib/format';
 import { formatMoney } from '../lib/money';
 import { mantineColor } from '../lib/palette';
-import type { Period } from '../transactions/periods';
+import type { Period } from '../lib/periods';
 import { useSpending } from './api';
-import { ShareBar } from './Figure';
-import { UnconvertedAlert } from './ReportsPage';
+import { ShareBar } from '../components/Figure';
+import { QueryError, UnconvertedAlert } from '../components/feedback';
 
 type Row = Schemas['CategorySpending'];
-
-const percent = (share?: number) => `${Math.round((share ?? 0) * 1000) / 10}%`;
 
 export function SpendingReport({ period }: { period: Period }) {
   const { t } = useTranslation();
   const report = useSpending(period);
-  const categories = useCategories();
   const [open, setOpen] = useState<Set<number>>(new Set());
-  const byId = new Map((categories.data ?? []).map((category) => [category.id, category]));
+  const byId = useCategoriesById();
 
   if (report.isLoading) return <Skeleton height={360} radius="md" />;
+  if (!report.data) return <QueryError error={report.error} onRetry={() => void report.refetch()} />;
   const data = report.data;
   const currency = data?.currency ?? 'UAH';
   const rows = data?.categories ?? [];
@@ -158,7 +157,7 @@ function CategoryRow({
               {row.name}
             </Text>
             <Text size="xs" c="dimmed" className="num">
-              {percent(row.share)}
+              {formatPercent(row.share)}
             </Text>
           </Group>
           <ShareBar share={row.share ?? 0} color={color} />
@@ -179,7 +178,7 @@ function CategoryRow({
               {child.name}
             </Text>
             <Text size="xs" c="dimmed" className="num">
-              {percent(child.share)}
+              {formatPercent(child.share)}
             </Text>
             <Text size="sm" className="num" w={130} ta="right">
               {formatMoney(child.amount ?? 0, currency)}

@@ -5,7 +5,9 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { api } from '../api/client';
-import { queryKeys, usePayees } from '../api/queries';
+import { check } from '../api/http';
+import { invalidateLedger, usePayees } from '../api/queries';
+import { confirmDelete } from '../components/confirm';
 
 interface Draft {
   id: number;
@@ -19,22 +21,18 @@ export function PayeesTab() {
   const [filter, setFilter] = useState('');
   const [editing, setEditing] = useState<Draft | null>(null);
 
-  const refresh = () => queryClient.invalidateQueries({ queryKey: queryKeys.payees });
+  // Payee names show on transactions and in reports, so those refresh too.
+  const refresh = () => invalidateLedger(queryClient);
   const rename = useMutation({
-    mutationFn: async ({ id, name }: Draft) => {
-      const { error } = await api.PUT('/api/v1/payees/{id}', { params: { path: { id } }, body: { name } });
-      if (error) throw error;
-    },
+    mutationFn: ({ id, name }: Draft) =>
+      check(api.PUT('/api/v1/payees/{id}', { params: { path: { id } }, body: { name } })),
     onSuccess: async () => {
       setEditing(null);
       await refresh();
     },
   });
   const remove = useMutation({
-    mutationFn: async (id: number) => {
-      const { error } = await api.DELETE('/api/v1/payees/{id}', { params: { path: { id } } });
-      if (error) throw error;
-    },
+    mutationFn: (id: number) => check(api.DELETE('/api/v1/payees/{id}', { params: { path: { id } } })),
     onSuccess: refresh,
   });
 
@@ -127,7 +125,13 @@ export function PayeesTab() {
                         variant="subtle"
                         color="red"
                         aria-label={t('settings.payees.delete')}
-                        onClick={() => remove.mutate(payee.id!)}
+                        onClick={() =>
+                          confirmDelete({
+                            title: t('settings.payees.deleteTitle', { name: payee.name }),
+                            text: t('settings.payees.deleteText'),
+                            onConfirm: () => remove.mutate(payee.id!),
+                          })
+                        }
                       >
                         <Trash2 size={14} />
                       </ActionIcon>

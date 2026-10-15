@@ -26,3 +26,18 @@
   background: var(--ww-subtle);
   outline: none;
 }
+
+.title {
+  display: block;
+  max-width: 100%;
+  text-align: left;
+}
+
+.attention {
+  border-color: var(--ww-warn-border);
+  background: var(--ww-warn-bg);
+}
+
+.footer {
+  border-top: 1px solid var(--ww-border);
+}
