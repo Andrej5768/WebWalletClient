@@ -1,0 +1,22 @@
+{
+  "app": {
+    "name": "WebWallet",
+    "tagline": "Personal finance: accounts, transactions, envelopes and reports"
+  },
+  "theme": {
+    "label": "Theme",
+    "auto": "Match system",
+    "light": "Light",
+    "dark": "Dark"
+  },
+  "language": {
+    "label": "Language"
+  },
+  "start": {
+    "title": "Client under construction",
+    "text": "The foundation is ready: theme, fonts, languages and the API client. Sign-in and the main menu come next.",
+    "income": "Income",
+    "expense": "Expense",
+    "transfer": "Transfer"
+  }
+}
