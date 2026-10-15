@@ -4,6 +4,12 @@ import { lazy } from 'react';
 export const DashboardPage = lazy(() =>
   import('../dashboard/DashboardPage').then((m) => ({ default: m.DashboardPage })),
 );
+export const SettingsPage = lazy(() =>
+  import('../settings/SettingsPage').then((m) => ({ default: m.SettingsPage })),
+);
+export const ImportsPage = lazy(() =>
+  import('../imports/ImportsPage').then((m) => ({ default: m.ImportsPage })),
+);
 export const AccountsPage = lazy(() =>
   import('../accounts/AccountsPage').then((m) => ({ default: m.AccountsPage })),
 );

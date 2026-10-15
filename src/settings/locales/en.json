@@ -1,0 +1,124 @@
+{
+  "settings": {
+    "tabs": {
+      "profile": "Profile",
+      "security": "Security",
+      "categories": "Categories",
+      "rules": "Rules",
+      "payees": "Payees",
+      "tags": "Tags"
+    },
+    "saved": "Saved",
+    "name": "Name",
+    "color": "Color",
+    "noColor": "No color",
+    "preview": "Preview:",
+    "colors": {
+      "blue": "Blue",
+      "green": "Green",
+      "orange": "Orange",
+      "violet": "Violet",
+      "teal": "Teal",
+      "pink": "Pink",
+      "amber": "Amber",
+      "slate": "Slate",
+      "red": "Red",
+      "indigo": "Indigo",
+      "cyan": "Cyan",
+      "lime": "Lime"
+    },
+    "profile": {
+      "verified": "Verified",
+      "baseCurrency": "Base currency",
+      "baseCurrencyHint": "Net worth, reports and envelopes are in this currency. It cannot change while the budget has assignments.",
+      "language": "Interface language"
+    },
+    "security": {
+      "title": "Change password",
+      "current": "Current password",
+      "submit": "Change password",
+      "othersSignedOut": "Other devices will be signed out.",
+      "changed": "Password changed"
+    },
+    "danger": {
+      "title": "Danger zone",
+      "resetTitle": "Start over",
+      "resetText": "Deletes all accounts, transactions, envelopes, payees, tags and bank connections. Your profile and password stay.",
+      "resetButton": "Start over",
+      "resetWarning": "This cannot be undone. Consider an export first (coming later).",
+      "keepCategories": "Keep categories and rules",
+      "confirmLabel": "Type {{word}} to confirm",
+      "resetSubmit": "Delete everything",
+      "done": "Your data is deleted. You can start over.",
+      "deleteTitle": "Delete account",
+      "deleteText": "Coming later.",
+      "deleteButton": "Delete account"
+    },
+    "categories": {
+      "expense": "Expenses",
+      "income": "Income",
+      "expenseOne": "Expense",
+      "incomeOne": "Income",
+      "add": "New category",
+      "addChild": "Add a subcategory",
+      "archive": "Archive",
+      "dragHint": "Drag by the handle to reorder or to move a subcategory into another group.",
+      "necessityHint": "Needs or wants is used for 50/30/20 analytics.",
+      "drag": "Drag {{name}}",
+      "actions": "Actions for {{name}}",
+      "archived": "Archived",
+      "necessity": {
+        "NEEDS": "Need",
+        "WANTS": "Want",
+        "INHERIT": "Same as group"
+      },
+      "newTitle": "New category",
+      "editTitle": "Edit category",
+      "kind": "Type",
+      "parent": "Group",
+      "noParent": "No group (this is a group)",
+      "parentLocked": "A category with subcategories is a group itself",
+      "icon": "Icon",
+      "inheritsIcon": "Without its own icon the group icon is used",
+      "necessityLabel": "Spending type",
+      "necessityHelp": "For 50/30/20 analytics: needs, wants, savings.",
+      "archivedSwitch": "Archived",
+      "archivedHelp": "Archived categories are hidden in forms; their transactions and reports stay."
+    },
+    "rules": {
+      "hint": "Rules categorize new transactions. When you change a category by hand, a rule for the payee is learned automatically.",
+      "apply": "Apply to uncategorized transactions",
+      "applied_one": "Categorized {{count}} transaction",
+      "applied_other": "Categorized {{count}} transactions",
+      "add": "New rule",
+      "condition": "Condition",
+      "learned": "Learned",
+      "delete": "Delete rule",
+      "empty": "No rules yet",
+      "payeeContains": "Payee contains “{{value}}”",
+      "payeeIs": "Payee is {{value}}",
+      "bankCategory": "Bank category “{{value}}”",
+      "newTitle": "New rule",
+      "types": {
+        "payee": "Payee",
+        "bank": "Bank category"
+      },
+      "payeeLabel": "Payee contains",
+      "bankLabel": "Bank category"
+    },
+    "payees": {
+      "hint": "Payees come from transactions. Deleting one keeps its transactions.",
+      "filter": "Find a payee",
+      "rename": "Rename",
+      "delete": "Delete payee",
+      "empty": "Nothing found"
+    },
+    "tags": {
+      "hint": "Tags group transactions across categories, e.g. #vacation.",
+      "add": "New tag",
+      "empty": "No tags yet",
+      "newTitle": "New tag",
+      "editTitle": "Edit tag"
+    }
+  }
+}

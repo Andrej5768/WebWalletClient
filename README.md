@@ -69,8 +69,8 @@ expenses red and income green, [Fixel](https://github.com/MacPaw/Fixel) for text
 
 ### 5. Imports
 
-- [ ] Monobank: connect, synchronization schedule, card and jar links, differences, history progress
-- [ ] PrivatBank PDF statement and Zen Money (token or file) with a preview before import
+- [x] Monobank: connect, synchronization schedule, card and jar links, differences, history progress
+- [x] PrivatBank PDF statement and Zen Money (token or file) with a preview before import
 
 ### 6. Envelopes
 
@@ -86,8 +86,8 @@ expenses red and income green, [Fixel](https://github.com/MacPaw/Fixel) for text
 
 ### 9. Settings
 
-- [ ] Profile, password change, start over
-- [ ] Categories: tree with drag and drop, icon, color, needs / wants flag; rules; payees; tags with colors
+- [x] Profile, password change, start over
+- [x] Categories: tree with drag and drop, icon, color, needs / wants flag; rules; payees; tags with colors
 
 ### Later, together with the backend phases
 
@@ -104,9 +104,9 @@ Tracked in the backend roadmap (phase 2); listed here with the client step that 
 - [x] Free-text transaction search — step 4
 - [x] Optional last name at registration — step 2
 - [x] Balances in the base currency and the accounts summary — steps 2 and 3
-- [ ] Monobank synchronization schedule — step 5
-- [ ] Import preview — step 5
-- [ ] Start over — step 9
+- [x] Monobank synchronization schedule — step 5
+- [x] Import preview — step 5
+- [x] Start over — step 9
 
 ## License
 
