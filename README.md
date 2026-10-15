@@ -50,16 +50,16 @@ expenses red and income green, [Fixel](https://github.com/MacPaw/Fixel) for text
 
 ### 2. Sign-in and app shell
 
-- [ ] Sign in, registration, email confirmation, forgotten and new password pages (links from emails:
+- [x] Sign in, registration, email confirmation, forgotten and new password pages (links from emails:
       `/verify-email#token=…`, `/reset-password#token=…`)
-- [ ] Session restore on reload, protected routes, sign out
-- [ ] Sidebar: balance with a selectable mode (net worth / with credit limits / free outside envelopes),
+- [x] Session restore on reload, protected routes, sign out
+- [x] Sidebar: balance with a selectable mode (net worth / with credit limits / free outside envelopes),
       navigation, accounts and savings, collapsing to icons; header with theme and language
 
 ### 3. Accounts
 
-- [ ] Accounts grouped by type with balances in the account currency and in hryvnias, Monobank differences
-- [ ] Create and edit dialog, archive, delete; row menu and double click
+- [x] Accounts grouped by type with balances in the account currency and in hryvnias, Monobank differences
+- [x] Create and edit dialog, archive, delete; row menu and double click
 
 ### 4. Transactions
 
@@ -99,13 +99,14 @@ expenses red and income green, [Fixel](https://github.com/MacPaw/Fixel) for text
 
 Tracked in the backend roadmap (phase 2); listed here with the client step that needs them.
 
-- Categories: icon, color, needs / wants flag, reordering — step 9 (step 4 shows defaults until then)
-- Tag colors — steps 4 and 9
-- Free-text transaction search — step 4
-- Optional last name at registration — step 2
-- Monobank synchronization schedule — step 5
-- Import preview — step 5
-- Start over — step 9
+- [x] Categories: icon, color, needs / wants flag, reordering — step 9
+- [x] Tag colors — steps 4 and 9
+- [x] Free-text transaction search — step 4
+- [x] Optional last name at registration — step 2
+- [x] Balances in the base currency and the accounts summary — steps 2 and 3
+- [ ] Monobank synchronization schedule — step 5
+- [ ] Import preview — step 5
+- [ ] Start over — step 9
 
 ## License
 

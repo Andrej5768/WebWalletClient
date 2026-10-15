@@ -11,10 +11,33 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** List accounts with current balances */
+        /**
+         * List accounts with current balances
+         * @description balanceInBase is the balance in the base currency at today's NBU rate, null when there is no rate; availableCredit is the credit limit plus the balance of a credit card
+         */
         get: operations["list_4"];
         put?: never;
         post: operations["create_5"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/accounts/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Totals of the accounts in the base currency
+         * @description Accounts that are not archived, at today's NBU rates; balances in a currency without a rate are left out and listed in unconvertedCurrencies. readyToAssign is that of the budget of the current month.
+         */
+        get: operations["summary"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -277,6 +300,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/categories/order": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Move and sort categories at once, e.g. after drag and drop
+         * @description Applies all items or none. Categories not listed stay where they are. Only two levels are allowed: a category with subcategories cannot get a parent, and a subcategory must have the kind of its parent. Errors name the item, e.g. the field [2].parentId. Returns the whole tree like the list.
+         */
+        put: operations["reorder"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/categories/{id}": {
         parameters: {
             query?: never;
@@ -285,6 +328,10 @@ export interface paths {
             cookie?: never;
         };
         get?: never;
+        /**
+         * Update a category
+         * @description The parent is always applied (null makes a top-level category); other omitted optional fields keep their values. icon, color and necessity sent as null are removed. A necessity is allowed only on expense categories; it is removed when the category becomes income.
+         */
         put: operations["update_2"];
         post?: never;
         /** Delete an unused category without subcategories; others should be archived */
@@ -558,6 +605,10 @@ export interface paths {
             cookie?: never;
         };
         get?: never;
+        /**
+         * Rename a tag or change its color
+         * @description An omitted color keeps its value; a color sent as null is removed
+         */
         put: operations["rename"];
         post?: never;
         /** Delete a tag; it is removed from all transactions */
@@ -574,7 +625,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** List transactions, newest first */
+        /**
+         * List transactions, newest first
+         * @description All given filters must match. q searches the payee name, the comment and the comments of splits, ignoring case; when it is a number (1284.50, 1284,50 or 1 284,50), transactions with this amount match too (the amount or, of a transfer, the received amount).
+         */
         get: operations["list"];
         put?: never;
         post: operations["create"];
@@ -619,7 +673,9 @@ export interface components {
         };
         AccountResponse: {
             archived?: boolean;
+            availableCredit?: number;
             balance?: number;
+            balanceInBase?: number;
             creditLimit?: number;
             currency?: string;
             /** Format: int64 */
@@ -633,6 +689,14 @@ export interface components {
             /** @enum {string} */
             type?: "CASH" | "CARD" | "CREDIT_CARD" | "LOAN" | "DEPOSIT" | "SAVINGS" | "DEBT" | "INVESTMENT";
         };
+        AccountSummaryResponse: {
+            available?: number;
+            availableWithCredit?: number;
+            currency?: string;
+            netWorth?: number;
+            readyToAssign?: number;
+            unconvertedCurrencies?: string[];
+        };
         ApplyResponse: {
             /** Format: int32 */
             categorized?: number;
@@ -640,11 +704,24 @@ export interface components {
         AssignRequest: {
             assigned: number;
         };
+        CategoryOrderRequest: {
+            /** Format: int64 */
+            id: number;
+            /** Format: int64 */
+            parentId?: number;
+            /** Format: int32 */
+            sortOrder: number;
+        };
         CategoryRequest: {
             archived?: boolean;
             /** @enum {string} */
+            color?: "blue" | "green" | "orange" | "violet" | "teal" | "pink" | "amber" | "slate" | "red" | "indigo" | "cyan" | "lime";
+            icon?: string;
+            /** @enum {string} */
             kind: "EXPENSE" | "INCOME";
             name: string;
+            /** @enum {string} */
+            necessity?: "NEEDS" | "WANTS";
             /** Format: int64 */
             parentId?: number;
             /** Format: int32 */
@@ -653,11 +730,16 @@ export interface components {
         CategoryResponse: {
             archived?: boolean;
             children?: components["schemas"]["CategoryResponse"][];
+            /** @enum {string} */
+            color?: "blue" | "green" | "orange" | "violet" | "teal" | "pink" | "amber" | "slate" | "red" | "indigo" | "cyan" | "lime";
+            icon?: string;
             /** Format: int64 */
             id?: number;
             /** @enum {string} */
             kind?: "EXPENSE" | "INCOME";
             name?: string;
+            /** @enum {string} */
+            necessity?: "NEEDS" | "WANTS";
             /** Format: int64 */
             parentId?: number;
             /** Format: int32 */
@@ -783,9 +865,6 @@ export interface components {
             readyToAssign?: number;
             unconvertedCurrencies?: string[];
         };
-        NameRequest: {
-            name: string;
-        };
         NamedResponse: {
             /** Format: int64 */
             id?: number;
@@ -831,7 +910,7 @@ export interface components {
             /** Format: email */
             email: string;
             firstName: string;
-            lastName: string;
+            lastName?: string;
             password: string;
         };
         ResetPasswordRequest: {
@@ -884,6 +963,18 @@ export interface components {
             comment?: string;
             /** Format: int64 */
             id?: number;
+        };
+        TagRequest: {
+            /** @enum {string} */
+            color?: "blue" | "green" | "orange" | "violet" | "teal" | "pink" | "amber" | "slate" | "red" | "indigo" | "cyan" | "lime";
+            name: string;
+        };
+        TagResponse: {
+            /** @enum {string} */
+            color?: "blue" | "green" | "orange" | "violet" | "teal" | "pink" | "amber" | "slate" | "red" | "indigo" | "cyan" | "lime";
+            /** Format: int64 */
+            id?: number;
+            name?: string;
         };
         TokenRequest: {
             token: string;
@@ -945,7 +1036,7 @@ export interface components {
         UpdateProfileRequest: {
             baseCurrency: string;
             firstName: string;
-            lastName: string;
+            lastName?: string;
             locale: string;
         };
         UserResponse: {
@@ -1014,6 +1105,26 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["AccountResponse"];
+                };
+            };
+        };
+    };
+    summary: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AccountSummaryResponse"];
                 };
             };
         };
@@ -1442,6 +1553,30 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["CategoryResponse"];
+                };
+            };
+        };
+    };
+    reorder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CategoryOrderRequest"][];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CategoryResponse"][];
                 };
             };
         };
@@ -1948,7 +2083,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["NamedResponse"][];
+                    "*/*": components["schemas"]["TagResponse"][];
                 };
             };
         };
@@ -1962,7 +2097,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["NameRequest"];
+                "application/json": components["schemas"]["TagRequest"];
             };
         };
         responses: {
@@ -1972,7 +2107,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["NamedResponse"];
+                    "*/*": components["schemas"]["TagResponse"];
                 };
             };
         };
@@ -1988,7 +2123,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["NameRequest"];
+                "application/json": components["schemas"]["TagRequest"];
             };
         };
         responses: {
@@ -1998,7 +2133,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["NamedResponse"];
+                    "*/*": components["schemas"]["TagResponse"];
                 };
             };
         };
@@ -2033,6 +2168,7 @@ export interface operations {
                 type?: "EXPENSE" | "INCOME" | "TRANSFER";
                 payeeId?: number;
                 tagId?: number;
+                q?: string;
                 page?: number;
                 size?: number;
             };

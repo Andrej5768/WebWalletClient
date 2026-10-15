@@ -1,4 +1,5 @@
 import createClient, { type Middleware } from 'openapi-fetch';
+import i18n from '../i18n';
 import type { components, paths } from './schema';
 import { getAccessToken, setAccessToken } from './session';
 
@@ -41,6 +42,8 @@ const auth: Middleware = {
   onRequest({ request }) {
     const token = getAccessToken();
     if (token) request.headers.set('Authorization', `Bearer ${token}`);
+    // The backend translates error messages into this language.
+    request.headers.set('Accept-Language', i18n.language);
     replays.set(request, request.clone());
     return request;
   },

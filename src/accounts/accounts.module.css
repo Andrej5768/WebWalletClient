@@ -1,0 +1,36 @@
+.row {
+  display: grid;
+  grid-template-columns: minmax(280px, 1fr) 72px 160px 160px 220px 40px;
+  align-items: center;
+  column-gap: 16px;
+  padding: 0 20px;
+}
+
+.head {
+  height: 40px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ww-faint);
+}
+
+.group {
+  height: 36px;
+  background: var(--ww-subtle);
+  border-top: 1px solid var(--ww-border);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.item {
+  min-height: 56px;
+  border-top: 1px solid var(--ww-border);
+  user-select: none;
+}
+
+.item:hover {
+  background: var(--ww-subtle);
+}
+
+.right {
+  text-align: right;
+}
