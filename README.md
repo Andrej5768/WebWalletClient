@@ -74,7 +74,7 @@ expenses red and income green, [Fixel](https://github.com/MacPaw/Fixel) for text
 
 ### 6. Envelopes
 
-- [ ] Month view: ready to assign, assigned / spent / available per category, moving money between envelopes
+- [x] Month view: ready to assign, assigned / spent / available per category, moving money between envelopes
 
 ### 7. Reports
 
