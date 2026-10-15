@@ -82,7 +82,7 @@ expenses red and income green, [Fixel](https://github.com/MacPaw/Fixel) for text
 
 ### 8. Dashboard
 
-- [ ] Key figures, warnings, spending, envelopes with the today marker, recent transactions
+- [x] Key figures, warnings, spending, envelopes with the today marker, recent transactions
 
 ### 9. Settings
 

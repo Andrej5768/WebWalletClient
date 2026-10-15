@@ -323,5 +323,19 @@
     "debts": "Debts",
     "change": "{{amount}} over the period",
     "operations": "Transactions"
+  },
+  "dashboard": {
+    "income": "Income this month",
+    "expense": "Expenses this month",
+    "savingsRate": "Saved {{percent}}% of income",
+    "toEnvelopes": "Assign to envelopes",
+    "monobankDifference": "Differs from the bank: {{names}}. Check that every transaction is recorded.",
+    "allReports": "All reports",
+    "sixMonths": "Income and expenses, 6 months",
+    "allEnvelopes": "All envelopes",
+    "noEnvelopes": "No envelopes are funded this month yet.",
+    "paceHint": "The mark is today's day of the month",
+    "recent": "Recent transactions",
+    "allTransactions": "All transactions"
   }
 }

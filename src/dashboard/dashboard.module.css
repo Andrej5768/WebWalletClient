@@ -1,0 +1,39 @@
+.columns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+  gap: 16px;
+  align-items: start;
+}
+
+.link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.link:hover {
+  border-color: var(--ww-border-strong);
+}
+
+.pace {
+  position: relative;
+}
+
+.pace > i {
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  width: 2px;
+  margin-left: -1px;
+  border-radius: 1px;
+  background: var(--ww-text);
+  opacity: 0.55;
+}
+
+.recent {
+  border-top: 1px solid var(--ww-border);
+  cursor: pointer;
+}
+
+.recent:hover {
+  background: var(--ww-subtle);
+}

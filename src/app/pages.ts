@@ -1,6 +1,9 @@
 import { lazy } from 'react';
 
 // Sections load on demand; charts in particular are heavy.
+export const DashboardPage = lazy(() =>
+  import('../dashboard/DashboardPage').then((m) => ({ default: m.DashboardPage })),
+);
 export const AccountsPage = lazy(() =>
   import('../accounts/AccountsPage').then((m) => ({ default: m.AccountsPage })),
 );
