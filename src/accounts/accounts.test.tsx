@@ -50,12 +50,13 @@ it('lists accounts by group with base amounts and the Monobank difference', asyn
   });
   renderApp('/accounts');
 
-  expect(await screen.findByText('Чорна картка')).toBeInTheDocument();
-  expect(screen.getByText('Картки та рахунки')).toBeInTheDocument();
+  const main = await screen.findByRole('main');
+  expect(await within(main).findByText('Картки та рахунки')).toBeInTheDocument();
+  expect(within(main).getByText('Чорна картка')).toBeInTheDocument();
   expect(screen.getByText('Кредитні картки')).toBeInTheDocument();
   expect(screen.queryByText('Старий кредит')).not.toBeInTheDocument();
   expect(plain(screen.getByText(/51\s212,00/).textContent)).toBe('51 212,00 ₴');
-  expect(screen.getByText('Банк показує більше: бракує доходів?')).toBeInTheDocument();
+  expect(await screen.findByText('Банк показує більше: бракує доходів?')).toBeInTheDocument();
 
   await userEvent.click(screen.getByLabelText('Показати архівні'));
   expect(screen.getByText('Старий кредит')).toBeInTheDocument();
@@ -69,7 +70,7 @@ it('opens the edit dialog on double click with the currency locked', async () =>
   });
   renderApp('/accounts');
 
-  fireEvent.doubleClick(await screen.findByText('Кредитка'));
+  fireEvent.doubleClick(await within(await screen.findByRole('main')).findByText('Кредитка'));
 
   const dialog = await screen.findByRole('dialog');
   expect(within(dialog).getByText('Редагувати рахунок')).toBeInTheDocument();

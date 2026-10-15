@@ -3,7 +3,7 @@ import { configure } from '@testing-library/react';
 import '../i18n';
 
 // Pages render behind the session check and lazy icons; give async queries more time on slow runners.
-configure({ asyncUtilTimeout: 3000 });
+configure({ asyncUtilTimeout: 8000 });
 // Mantine reads these browser APIs that jsdom does not implement.
 Object.defineProperty(window, 'matchMedia', {
   writable: true,

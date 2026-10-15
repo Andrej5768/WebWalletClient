@@ -10,6 +10,8 @@ export default mergeConfig(
       setupFiles: ['./src/test/setup.ts'],
       include: ['src/**/*.test.{ts,tsx}'],
       css: false,
+      // Pages are loaded lazily; the first import of a page with charts takes a while in jsdom.
+      testTimeout: 20_000,
     },
   }),
 );
