@@ -49,7 +49,11 @@ export function ImportsPage() {
   const zen = useMutation({
     mutationFn: () =>
       zenMode === 'token' ? previewZenMoneyToken(zenToken.trim()) : previewZenMoneyFile(zenFile!),
-    onSuccess: setPreview,
+    onSuccess: (data) => {
+      // The token is used once and should not stay in memory.
+      setZenToken('');
+      setPreview(data);
+    },
   });
 
   const cardAccounts = (accounts.data ?? [])

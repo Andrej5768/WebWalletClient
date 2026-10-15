@@ -106,9 +106,10 @@ describe('email links', () => {
       ...signedOut,
       'POST /api/v1/auth/verify-email': () => new Response(null, { status: 204 }),
     });
-    renderApp('/verify-email#token=abc123');
+    const router = renderApp('/verify-email#token=abc123');
 
     expect(await screen.findByRole('heading', { name: 'Пошту підтверджено' })).toBeInTheDocument();
+    expect(router.state.location.hash).toBe('');
     const verify = requests.find((request) => request.url.endsWith('/auth/verify-email'))!;
     expect(await verify.json()).toEqual({ token: 'abc123' });
   });

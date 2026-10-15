@@ -19,7 +19,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
 import { fieldErrors, problemMessage, toProblem } from '../api/errors';
-import { setAccessToken } from '../api/session';
+import { shareAccessToken } from '../api/session';
 import { newPassword, required } from '../auth/validation';
 import i18n from '../i18n';
 
@@ -47,8 +47,10 @@ export function SecurityTab() {
     },
     onSuccess: (data) => {
       // The other sessions are revoked; this one continues with the new token.
-      if (data?.accessToken) setAccessToken(data.accessToken);
+      if (data?.accessToken) shareAccessToken(data.accessToken);
       form.reset();
+      // The passwords should not stay in the mutation cache.
+      change.reset();
       notifications.show({ message: t('settings.security.changed'), color: 'green' });
     },
     onError: (error) => {
