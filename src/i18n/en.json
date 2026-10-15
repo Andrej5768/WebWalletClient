@@ -1,7 +1,12 @@
 {
   "app": {
-    "name": "WebWallet",
-    "tagline": "Personal finance: accounts, transactions, envelopes and reports"
+    "name": "WebWallet"
+  },
+  "common": {
+    "all": "All",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete"
   },
   "theme": {
     "label": "Theme",
@@ -12,11 +17,176 @@
   "language": {
     "label": "Language"
   },
-  "start": {
-    "title": "Client under construction",
-    "text": "The foundation is ready: theme, fonts, languages and the API client. Sign-in and the main menu come next.",
-    "income": "Income",
-    "expense": "Expense",
-    "transfer": "Transfer"
+  "errors": {
+    "network": "Cannot reach the server. Check your connection and try again.",
+    "unexpected": "Something went wrong. Please try again."
+  },
+  "validation": {
+    "required": "Required",
+    "email": "Check the email address",
+    "passwordShort": "At least 8 characters",
+    "passwordLong": "Too long: at most 72 bytes",
+    "passwordsDiffer": "Passwords do not match"
+  },
+  "auth": {
+    "email": "Email",
+    "password": "Password",
+    "newPassword": "New password",
+    "repeatPassword": "Repeat password",
+    "passwordHint": "At least 8 characters",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "optional": "(optional)",
+    "requiredNote": "required fields",
+    "backToLogin": "Back to sign in",
+    "login": {
+      "title": "Sign in",
+      "subtitle": "Welcome back",
+      "forgot": "Forgot password?",
+      "submit": "Sign in",
+      "noAccount": "No account yet?",
+      "register": "Create one"
+    },
+    "register": {
+      "title": "Create account",
+      "subtitle": "It takes a minute",
+      "submit": "Create account",
+      "haveAccount": "Already have an account?"
+    },
+    "checkMail": {
+      "title": "Check your email",
+      "registered": "We sent a message to the address you entered. Follow the link in it to confirm your email and sign in.",
+      "noMail": "No email?",
+      "resent": "Sent again. Please also check the spam folder."
+    },
+    "forgot": {
+      "title": "Reset password",
+      "subtitle": "Enter your email and we will send you a link to set a new password",
+      "submit": "Send link",
+      "sent": "If an account with this email exists, a reset link is on its way."
+    },
+    "reset": {
+      "title": "New password",
+      "subtitle": "Other devices will be signed out",
+      "submit": "Save password",
+      "doneTitle": "Password changed",
+      "doneText": "Sign in with the new password.",
+      "expired": "This reset link has already been used or has expired. Ask for a new one."
+    },
+    "verify": {
+      "doneTitle": "Email confirmed",
+      "doneText": "Your account is ready. Sign in to start.",
+      "expired": "Enter your email and we will send a new confirmation link.",
+      "resend": "Send again"
+    },
+    "expired": {
+      "oops": "Oops!",
+      "title": "The link has expired"
+    }
+  },
+  "nav": {
+    "dashboard": "Overview",
+    "accounts": "Accounts",
+    "transactions": "Transactions",
+    "budget": "Envelopes",
+    "reports": "Reports",
+    "goals": "Goals",
+    "imports": "Import",
+    "settings": "Settings"
+  },
+  "shell": {
+    "mainNav": "Main",
+    "collapse": "Collapse or expand the menu",
+    "signOut": "Sign out",
+    "addTransaction": "Transaction"
+  },
+  "balance": {
+    "netWorth": {
+      "label": "Net worth",
+      "hint": "Everything you own minus debts"
+    },
+    "availableWithCredit": {
+      "label": "Available with credit limits",
+      "hint": "Cards and cash plus unused credit limits"
+    },
+    "readyToAssign": {
+      "label": "Free outside envelopes",
+      "hint": "Money not assigned to any envelope"
+    },
+    "savings": "Savings",
+    "unconverted": "No rate: {{currencies}}"
+  },
+  "comingSoon": {
+    "title": "Coming soon",
+    "text": "This section arrives in the next steps"
+  },
+  "accounts": {
+    "subtitle_one": "{{count}} account · double-click a row to edit",
+    "subtitle_other": "{{count}} accounts · double-click a row to edit",
+    "showArchived": "Show archived",
+    "add": "Add account",
+    "monobankError": "Monobank: could not sync",
+    "openImports": "Open import",
+    "available": "Available",
+    "creditDebt": "Credit card debt",
+    "limit": "Limit {{amount}}",
+    "missingIncome": "The bank shows more: missing income?",
+    "missingExpenses": "The bank shows less: missing expenses?",
+    "synced": "Synced",
+    "syncedUntil": "Synced · {{date}}",
+    "manual": "Manual",
+    "archived": "Archived",
+    "actions": "Account actions",
+    "columns": {
+      "account": "Account",
+      "currency": "Currency",
+      "balance": "Balance",
+      "inBase": "In {{currency}}",
+      "status": "Status"
+    },
+    "groups": {
+      "cards": "Cards and accounts",
+      "cash": "Cash",
+      "credit": "Credit cards",
+      "savings": "Savings",
+      "debts": "Loans and debts",
+      "investments": "Investments",
+      "archived": "Archive"
+    },
+    "types": {
+      "CARD": "Card",
+      "CREDIT_CARD": "Credit card",
+      "CASH": "Cash",
+      "SAVINGS": "Savings",
+      "DEPOSIT": "Deposit",
+      "LOAN": "Loan",
+      "DEBT": "Debts with people",
+      "INVESTMENT": "Investments"
+    },
+    "empty": {
+      "title": "No accounts yet",
+      "text": "Add an account by hand or connect Monobank in Import."
+    },
+    "menu": {
+      "edit": "Edit",
+      "transactions": "Account transactions",
+      "newTransaction": "New transaction",
+      "archive": "Archive",
+      "unarchive": "Restore from archive"
+    },
+    "form": {
+      "newTitle": "New account",
+      "editTitle": "Edit account",
+      "name": "Name",
+      "type": "Type",
+      "currency": "Currency",
+      "currencyLocked": "The account currency cannot be changed",
+      "openingBalance": "Opening balance",
+      "creditLimit": "Credit limit",
+      "creditLimitHint": "0 — no limit",
+      "interestRate": "Interest rate",
+      "inBudget": "Include in the budget",
+      "archived": "Archived"
+    }
   }
 }
