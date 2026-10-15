@@ -11,6 +11,7 @@ describe('periodOf', () => {
   it('covers three months back and the year to date', () => {
     expect(periodOf('quarter', today)).toEqual({ from: '2026-07-16', to: '2026-10-15' });
     expect(periodOf('year', today)).toEqual({ from: '2026-01-01', to: '2026-10-15' });
+    expect(periodOf('twelveMonths', today)).toEqual({ from: '2025-11-01', to: '2026-10-15' });
   });
 
   it('is unbounded for all time and keeps a custom range', () => {

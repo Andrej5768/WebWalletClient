@@ -199,6 +199,7 @@
       "prevMonth": "Last month",
       "quarter": "3 months",
       "year": "This year",
+      "twelveMonths": "12 months",
       "all": "All",
       "custom": "Custom"
     },
@@ -300,5 +301,27 @@
     "ahead": "ahead of pace by {{percent}}%",
     "today": "Today's day of the month",
     "assignTo": "Assigned: {{name}}"
+  },
+  "reports": {
+    "tabs": {
+      "spending": "Spending by category",
+      "income": "Income and expenses",
+      "networth": "Net worth",
+      "payees": "Payees"
+    },
+    "empty": "No data for this period",
+    "total": "Total",
+    "expand": "Show subcategories of {{name}}",
+    "collapse": "Hide subcategories of {{name}}",
+    "income": "Income",
+    "expense": "Expenses",
+    "net": "Difference",
+    "savingsRate": "Savings rate",
+    "month": "Month",
+    "netWorth": "Net worth",
+    "assets": "Assets",
+    "debts": "Debts",
+    "change": "{{amount}} over the period",
+    "operations": "Transactions"
   }
 }

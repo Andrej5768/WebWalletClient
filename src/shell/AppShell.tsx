@@ -1,6 +1,7 @@
-import { ActionIcon, Avatar, Button, Group, Text, Tooltip } from '@mantine/core';
+import { ActionIcon, Avatar, Button, Group, Skeleton, Text, Tooltip } from '@mantine/core';
 import { useLocalStorage } from '@mantine/hooks';
 import { LogOut, PanelLeftClose, PanelLeftOpen, Plus } from 'lucide-react';
+import { Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NavLink, Outlet, useNavigate } from 'react-router';
 import { useAuth } from '../auth/context';
@@ -132,7 +133,9 @@ export function AppShell() {
           </Button>
         </header>
         <main className={classes.content}>
-          <Outlet />
+          <Suspense fallback={<Skeleton height={320} radius="md" maw={1200} />}>
+            <Outlet />
+          </Suspense>
         </main>
       </div>
     </div>

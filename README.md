@@ -78,7 +78,7 @@ expenses red and income green, [Fixel](https://github.com/MacPaw/Fixel) for text
 
 ### 7. Reports
 
-- [ ] Spending by category, income and expenses, net worth, payees
+- [x] Spending by category, income and expenses, net worth, payees
 
 ### 8. Dashboard
 
