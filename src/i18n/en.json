@@ -216,7 +216,8 @@
       "tag": "Tag",
       "allTags": "All tags",
       "type": "Transaction type",
-      "reset": "Reset"
+      "reset": "Reset",
+      "toggle": "Filters"
     },
     "types": {
       "all": "All",

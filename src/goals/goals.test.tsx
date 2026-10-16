@@ -131,11 +131,8 @@ it('marks a goal as achieved, keeping its other fields', async () => {
   });
   renderApp('/goals');
 
-  // Goals on an account grow with transfers to it, so they offer no manual top-up.
   await userEvent.click(await screen.findByRole('button', { name: 'Дії з ціллю' }));
-  const achieve = await screen.findByRole('menuitem', { name: 'Позначити досягнутою' });
-  expect(screen.queryByRole('menuitem', { name: 'Поповнити' })).not.toBeInTheDocument();
-  await userEvent.click(achieve);
+  await userEvent.click(await screen.findByRole('menuitem', { name: 'Позначити досягнутою' }));
 
   await waitFor(() => expect(requests.some((request) => request.method === 'PUT')).toBe(true));
   expect(await bodyOf(requests, 'PUT', '/api/v1/goals/1')).toEqual({
@@ -162,4 +159,19 @@ it('shows an achieved goal without the monthly amount', async () => {
   expect(await screen.findByText('Досягнуто')).toBeInTheDocument();
   expect(screen.getByText(/Ціль досягнута 30 вер\. 2026/)).toBeInTheDocument();
   expect(screen.queryByText(/Відкладати щомісяця/)).not.toBeInTheDocument();
+});
+
+it('tops up a goal on an account with a transfer to it', async () => {
+  mockApi({
+    ...signedInApi,
+    'GET /api/v1/accounts': () => json(accounts),
+    'GET /api/v1/goals': () => json(goalsOf([trip])),
+  });
+  const router = renderApp('/goals');
+
+  await userEvent.click(await screen.findByRole('button', { name: 'Дії з ціллю' }));
+  await userEvent.click(await screen.findByRole('menuitem', { name: 'Поповнити' }));
+
+  await waitFor(() => expect(router.state.location.pathname).toBe('/transactions'));
+  expect(router.state.location.search).toBe('?new=1&newType=TRANSFER&toAccountId=7');
 });

@@ -1,8 +1,8 @@
 import { Button, Card, Group, Pagination, Skeleton, Stack, Text, Title } from '@mantine/core';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import dayjs from 'dayjs';
-import { Plus } from 'lucide-react';
-import { useMemo } from 'react';
+import { Plus, Repeat } from 'lucide-react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
 import { check } from '../api/http';
@@ -20,6 +20,11 @@ import { locale } from '../i18n';
 import { formatMoney } from '../lib/money';
 import { kyivToday } from '../lib/periods';
 import { intParam } from '../lib/useUrlParams';
+import { useConfirmOccurrence, useOccurrences, type Occurrence } from '../recurring/api';
+import { ConfirmModal } from '../recurring/ConfirmModal';
+import { LinkModal } from '../recurring/LinkModal';
+import { PlannedGroup } from '../recurring/PlannedGroup';
+import { RecurringDrawer, type RecurringView } from '../recurring/RecurringDrawer';
 import { displayCategory, groupByDay, toRequest, type Transaction } from './model';
 import { TransactionDrawer } from './TransactionDrawer';
 import { TransactionFiltersBar } from './TransactionFiltersBar';
@@ -31,7 +36,7 @@ export function TransactionsPage() {
   const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
   const filters = useTransactionFilters();
-  const { params, page, query, update } = filters;
+  const { params, page, query, period, update } = filters;
 
   const transactions = useTransactions(query);
   const accounts = useAccounts();
@@ -66,6 +71,39 @@ export function TransactionsPage() {
   const total = transactions.data?.totalItems ?? 0;
   const days = groupByDay(transactions.data?.items ?? []);
   const today = kyivToday();
+  const todayIso = today.format('YYYY-MM-DD');
+
+  // Planned payments sit above today's operations: only on the first page of a period with today
+  // and without filters they could not be matched against.
+  const showPlanned =
+    page === 1 &&
+    !params.get('q') &&
+    !params.get('categoryId') &&
+    !params.get('payeeId') &&
+    !params.get('tagId') &&
+    (!period.from || period.from <= todayIso) &&
+    (!period.to || period.to >= todayIso);
+  const occurrences = useOccurrences(showPlanned);
+  const accountFilter = intParam(params, 'accountId');
+  const typeFilter = params.get('type');
+  const planned = (occurrences.data ?? []).filter(
+    (item) =>
+      item.status === 'PENDING' &&
+      (!accountFilter || item.accountId === accountFilter || item.toAccountId === accountFilter) &&
+      (!typeFilter || item.type === typeFilter),
+  );
+  const [linkFor, setLinkFor] = useState<Occurrence | null>(null);
+  const [confirmFor, setConfirmFor] = useState<Occurrence | null>(null);
+  const confirm = useConfirmOccurrence();
+  const recurringParam = params.get('recurring');
+  const recurringView: RecurringView | null =
+    recurringParam === 'list' || recurringParam === 'new'
+      ? recurringParam
+      : recurringParam
+        ? Number(recurringParam)
+        : null;
+  const openRecurring = (view: RecurringView | null) =>
+    update({ recurring: view === null ? null : String(view), page: params.get('page') });
 
   const dayLabel = (date: string) => {
     const day = dayjs(date);
@@ -86,12 +124,17 @@ export function TransactionsPage() {
           </Title>
           <Text c="dimmed">{t('transactions.count', { count: total })}</Text>
         </Stack>
-        <Button
-          leftSection={<Plus size={16} />}
-          onClick={() => update({ new: '1', edit: null, page: params.get('page') })}
-        >
-          {t('shell.addTransaction')}
-        </Button>
+        <Group gap="xs">
+          <Button variant="default" leftSection={<Repeat size={16} />} onClick={() => openRecurring('list')}>
+            {t('recurring.button')}
+          </Button>
+          <Button
+            leftSection={<Plus size={16} />}
+            onClick={() => update({ new: '1', edit: null, page: params.get('page') })}
+          >
+            {t('shell.addTransaction')}
+          </Button>
+        </Group>
       </Group>
 
       <TransactionFiltersBar filters={filters} />
@@ -101,6 +144,18 @@ export function TransactionsPage() {
       <Card withBorder radius="md" p={0} style={{ overflowX: 'auto' }}>
         <div style={{ minWidth: 760 }}>
           {transactions.isLoading && <Skeleton height={240} m="md" />}
+          {showPlanned && (
+            <PlannedGroup
+              occurrences={planned}
+              accountsById={accountsById}
+              categoriesById={categoriesById}
+              onConfirm={(occurrence) =>
+                occurrence.variableAmount ? setConfirmFor(occurrence) : confirm.mutate({ occurrence })
+              }
+              onLink={setLinkFor}
+              onEditSeries={(id) => openRecurring(id)}
+            />
+          )}
           {transactions.isSuccess && days.length === 0 && (
             <Stack align="center" gap={6} py={48}>
               <Text fw={500}>{t('transactions.empty.title')}</Text>
@@ -161,9 +216,23 @@ export function TransactionsPage() {
           key={editing?.id ?? 'new'}
           transaction={params.get('new') ? null : editing}
           defaultAccountId={intParam(params, 'accountId')}
-          onClose={() => update({ new: null, edit: null, page: params.get('page') })}
+          defaults={
+            params.get('newType') === 'TRANSFER'
+              ? { type: 'TRANSFER', toAccountId: params.get('toAccountId') }
+              : undefined
+          }
+          onClose={() =>
+            update({ new: null, edit: null, newType: null, toAccountId: null, page: params.get('page') })
+          }
         />
       )}
+      {recurringView !== null && (
+        <RecurringDrawer view={recurringView} onView={openRecurring} onClose={() => openRecurring(null)} />
+      )}
+      {linkFor && (
+        <LinkModal occurrence={linkFor} accountsById={accountsById} onClose={() => setLinkFor(null)} />
+      )}
+      {confirmFor && <ConfirmModal occurrence={confirmFor} onClose={() => setConfirmFor(null)} />}
     </Stack>
   );
 }

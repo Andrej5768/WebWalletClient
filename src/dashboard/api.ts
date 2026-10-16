@@ -11,9 +11,4 @@ export function useForecast() {
   });
 }
 
-export function useRecurringPayments() {
-  return useQuery({
-    queryKey: queryKeys.recurring,
-    queryFn: () => unwrap(api.GET('/api/v1/recurring')),
-  });
-}
+export { useRecurringPayments } from '../recurring/api';

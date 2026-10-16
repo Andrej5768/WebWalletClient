@@ -4,6 +4,8 @@ import goalsEn from '../goals/locales/en.json';
 import goalsUk from '../goals/locales/uk.json';
 import importsEn from '../imports/locales/en.json';
 import importsUk from '../imports/locales/uk.json';
+import recurringEn from '../recurring/locales/en.json';
+import recurringUk from '../recurring/locales/uk.json';
 import reportsEn from '../reports/locales/en.json';
 import reportsUk from '../reports/locales/uk.json';
 import settingsEn from '../settings/locales/en.json';
@@ -28,8 +30,8 @@ function initialLanguage(): Language {
 void i18n.use(initReactI18next).init({
   // Feature folders keep their own strings; they are merged into one namespace.
   resources: {
-    uk: { translation: { ...uk, ...settingsUk, ...importsUk, ...goalsUk, ...reportsUk } },
-    en: { translation: { ...en, ...settingsEn, ...importsEn, ...goalsEn, ...reportsEn } },
+    uk: { translation: { ...uk, ...settingsUk, ...importsUk, ...goalsUk, ...reportsUk, ...recurringUk } },
+    en: { translation: { ...en, ...settingsEn, ...importsEn, ...goalsEn, ...reportsEn, ...recurringEn } },
   },
   lng: initialLanguage(),
   fallbackLng: 'uk',
