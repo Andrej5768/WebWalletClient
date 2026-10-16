@@ -345,6 +345,26 @@
     "paceHint": "The mark is today's day of the month",
     "recent": "Recent transactions",
     "allTransactions": "All transactions",
-    "noTransactions": "No transactions yet. Add one or import from a bank."
+    "noTransactions": "No transactions yet. Add one or import from a bank.",
+    "forecast": {
+      "title": "Money to the end of the month",
+      "now": "Available now (cards and cash)",
+      "expected": "Expected {{date}}",
+      "today": "Today",
+      "planned": "Planned",
+      "aria": "Cards and cash: now {{now}}, forecast for {{date}} — {{end}}",
+      "minimumLine": "minimum {{amount}}",
+      "dip": "On {{date}} the balance drops to {{amount}}, below the minimum of {{minimum}}",
+      "noDip": "The balance stays above the minimum",
+      "overdue": "Overdue",
+      "empty": "Recurring payments will appear here: rent, subscriptions, salary.",
+      "nothingLeft": "No more planned payments this month.",
+      "toTransactions": "Go to transactions",
+      "minimum": "Minimum {{amount}}",
+      "setMinimum": "Set a minimum balance",
+      "minimumLabel": "Minimum balance",
+      "minimumHint": "We will warn you when the forecast drops below it",
+      "clearMinimum": "Remove"
+    }
   }
 }

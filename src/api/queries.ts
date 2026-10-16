@@ -22,11 +22,13 @@ export const queryKeys = {
   reports: ['reports'] as const,
   report: (name: string, period: Period) => ['reports', name, period] as const,
   preview: (id: string, page: number) => ['imports', 'preview', id, page] as const,
+  forecast: ['forecast'] as const,
+  recurring: ['recurring'] as const,
 };
 
 /**
  * Refreshes everything a change of money can affect: transactions, balances, the budget, reports,
- * payees and tags. Used after adding, editing, importing or categorizing transactions and accounts.
+ * payees, tags, the forecast and recurring payments (a new transaction may pay one). Used after adding, editing, importing or categorizing transactions and accounts.
  */
 export function invalidateLedger(queryClient: QueryClient): Promise<unknown> {
   return Promise.all(
@@ -38,6 +40,8 @@ export function invalidateLedger(queryClient: QueryClient): Promise<unknown> {
       queryKeys.payees,
       queryKeys.tags,
       queryKeys.monobank,
+      queryKeys.forecast,
+      queryKeys.recurring,
     ].map((queryKey) => queryClient.invalidateQueries({ queryKey })),
   );
 }

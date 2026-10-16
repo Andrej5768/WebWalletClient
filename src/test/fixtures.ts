@@ -90,3 +90,21 @@ export function budgetRowOf(overrides: Partial<Schemas['CategoryRow']> = {}): Sc
     ...row,
   };
 }
+
+/** A forecast of today only, without planned payments, unless overridden. */
+export function forecastOf(
+  overrides: Partial<Schemas['ForecastResponse']> = {},
+): Schemas['ForecastResponse'] {
+  const today = overrides.today ?? '2026-10-15';
+  return {
+    currency: 'UAH',
+    today,
+    balance: 0,
+    dailySpending: 0,
+    days: [{ date: today, balance: 0, actual: true }],
+    events: [],
+    lowest: null,
+    unconvertedCurrencies: [],
+    ...overrides,
+  };
+}
