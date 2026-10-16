@@ -17,6 +17,7 @@ import { isoDate, kyivToday, periodOf } from '../lib/periods';
 import { useIncomeExpense, useSpending } from '../reports/api';
 import { displayCategory, signedAmount } from '../transactions/model';
 import classes from './dashboard.module.css';
+import { ForecastCard } from './ForecastCard';
 
 export function DashboardPage() {
   const { t } = useTranslation();
@@ -112,6 +113,8 @@ export function DashboardPage() {
           </Group>
         </Alert>
       )}
+
+      <ForecastCard />
 
       <div className={classes.columns}>
         <Stack gap="md">

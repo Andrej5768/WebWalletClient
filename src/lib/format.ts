@@ -16,6 +16,12 @@ export function formatDate(date?: string | null): string {
   return date ? dayjs(date).format('DD.MM.YYYY') : '';
 }
 
+/** "20 жовт." / "20 Oct". */
+export function formatDayShort(date?: string | null): string {
+  if (!date) return '';
+  return dayjs(date).toDate().toLocaleDateString(locale(), { day: 'numeric', month: 'short' });
+}
+
 /** "15 жовт., 14:45". */
 export function formatDateTime(value?: string | null): string {
   if (!value) return '';

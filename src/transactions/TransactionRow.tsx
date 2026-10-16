@@ -83,9 +83,21 @@ export function TransactionRow({
             />
           </div>
         ) : (
-          <Text size="xs" c="dimmed" truncate>
-            {subtitle}
-          </Text>
+          <Group gap={6} wrap="nowrap">
+            <Text size="xs" c="dimmed" truncate>
+              {subtitle}
+            </Text>
+            {transaction.recurring && (
+              <Badge
+                size="xs"
+                variant="light"
+                style={{ textTransform: 'none', flexShrink: 0 }}
+                title={transaction.recurring.name}
+              >
+                {t('recurring.chip')}
+              </Badge>
+            )}
+          </Group>
         )}
       </div>
       <Stack gap={2} align="flex-start">

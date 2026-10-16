@@ -20,3 +20,4 @@ export const BudgetPage = lazy(() => import('../budget/BudgetPage').then((m) => 
 export const ReportsPage = lazy(() =>
   import('../reports/ReportsPage').then((m) => ({ default: m.ReportsPage })),
 );
+export const GoalsPage = lazy(() => import('../goals/GoalsPage').then((m) => ({ default: m.GoalsPage })));

@@ -1,7 +1,9 @@
 import {
+  Badge,
   Button,
   Card,
   CloseButton,
+  Collapse,
   Group,
   Kbd,
   SegmentedControl,
@@ -12,7 +14,7 @@ import {
 } from '@mantine/core';
 import { DatePickerInput } from '@mantine/dates';
 import { useDebouncedValue, useHotkeys, useOs } from '@mantine/hooks';
-import { Search } from 'lucide-react';
+import { ListFilter, Search } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAccounts, useCategories, usePayees, useTags } from '../api/queries';
@@ -24,7 +26,9 @@ import type { TransactionFilters } from './useTransactionFilters';
 const PRESETS: Preset[] = ['month', 'prevMonth', 'quarter', 'year', 'twelveMonths', 'all', 'custom'];
 const TYPES = ['', 'EXPENSE', 'INCOME', 'TRANSFER'] as const;
 
-/** Period presets, search (hidden until asked for) and filters of the feed. */
+const FILTER_KEYS = ['accountId', 'categoryId', 'payeeId', 'tagId', 'type'];
+
+/** Period presets, search (hidden until asked for) and filters (folded away until asked for). */
 export function TransactionFiltersBar({ filters }: { filters: TransactionFilters }) {
   const { t } = useTranslation();
   const { params, preset, period, update } = filters;
@@ -39,6 +43,8 @@ export function TransactionFiltersBar({ filters }: { filters: TransactionFilters
   const [search, setSearch] = useState(urlSearch);
   const [debounced] = useDebouncedValue(search.trim(), 300);
   useHotkeys([['mod+K', () => setSearchOpen(true)]]);
+  const activeFilters = FILTER_KEYS.filter((key) => params.get(key)).length;
+  const [filtersOpen, setFiltersOpen] = useState(activeFilters > 0);
 
   // The debounced text goes to the URL, which also brings the feed back to the first page.
   useEffect(() => {
@@ -79,6 +85,22 @@ export function TransactionFiltersBar({ filters }: { filters: TransactionFilters
             </Text>
           )}
           <Group gap="sm" ml="auto">
+            <Button
+              variant={filtersOpen ? 'light' : 'default'}
+              size="sm"
+              leftSection={<ListFilter size={16} />}
+              rightSection={
+                activeFilters > 0 ? (
+                  <Badge size="xs" circle>
+                    {activeFilters}
+                  </Badge>
+                ) : undefined
+              }
+              aria-expanded={filtersOpen}
+              onClick={() => setFiltersOpen(!filtersOpen)}
+            >
+              {t('transactions.filters.toggle')}
+            </Button>
             {searchOpen ? (
               <TextInput
                 autoFocus
@@ -108,70 +130,72 @@ export function TransactionFiltersBar({ filters }: { filters: TransactionFilters
             )}
           </Group>
         </Group>
-        <Group gap="sm" wrap="wrap" align="flex-end">
-          <Select
-            size="sm"
-            w={210}
-            clearable
-            searchable
-            placeholder={t('transactions.filters.allAccounts')}
-            aria-label={t('transactions.filters.account')}
-            value={params.get('accountId')}
-            onChange={(value) => update({ accountId: value })}
-            data={(accounts.data ?? [])
-              .filter((account) => !account.archived)
-              .map((account) => ({ value: String(account.id), label: account.name }))}
-          />
-          <Select
-            size="sm"
-            w={230}
-            clearable
-            searchable
-            placeholder={t('transactions.filters.allCategories')}
-            aria-label={t('transactions.filters.category')}
-            value={params.get('categoryId')}
-            onChange={(value) => update({ categoryId: value })}
-            data={categorySelectData(categories.data ?? [])}
-          />
-          <Select
-            size="sm"
-            w={190}
-            clearable
-            searchable
-            placeholder={t('transactions.filters.allPayees')}
-            aria-label={t('transactions.filters.payee')}
-            value={params.get('payeeId')}
-            onChange={(value) => update({ payeeId: value })}
-            data={(payees.data ?? []).map((payee) => ({ value: String(payee.id), label: payee.name }))}
-          />
-          <Select
-            size="sm"
-            w={160}
-            clearable
-            placeholder={t('transactions.filters.allTags')}
-            aria-label={t('transactions.filters.tag')}
-            value={params.get('tagId')}
-            onChange={(value) => update({ tagId: value })}
-            data={(tags.data ?? []).map((tag) => ({ value: String(tag.id), label: `#${tag.name}` }))}
-          />
-          <SegmentedControl
-            aria-label={t('transactions.filters.type')}
-            value={params.get('type') ?? ''}
-            onChange={(value) => update({ type: value || null })}
-            data={TYPES.map((value) => ({ value, label: t(`transactions.types.${value || 'all'}`) }))}
-          />
-          <Button
-            variant="subtle"
-            color="gray"
-            size="sm"
-            onClick={() => {
-              setSearch('');
-              filters.reset();
-            }}
-          >
-            {t('transactions.filters.reset')}
-          </Button>
-        </Group>
+        <Collapse expanded={filtersOpen}>
+          <Group gap="sm" wrap="wrap" align="flex-end">
+            <Select
+              size="sm"
+              w={210}
+              clearable
+              searchable
+              placeholder={t('transactions.filters.allAccounts')}
+              aria-label={t('transactions.filters.account')}
+              value={params.get('accountId')}
+              onChange={(value) => update({ accountId: value })}
+              data={(accounts.data ?? [])
+                .filter((account) => !account.archived)
+                .map((account) => ({ value: String(account.id), label: account.name }))}
+            />
+            <Select
+              size="sm"
+              w={230}
+              clearable
+              searchable
+              placeholder={t('transactions.filters.allCategories')}
+              aria-label={t('transactions.filters.category')}
+              value={params.get('categoryId')}
+              onChange={(value) => update({ categoryId: value })}
+              data={categorySelectData(categories.data ?? [])}
+            />
+            <Select
+              size="sm"
+              w={190}
+              clearable
+              searchable
+              placeholder={t('transactions.filters.allPayees')}
+              aria-label={t('transactions.filters.payee')}
+              value={params.get('payeeId')}
+              onChange={(value) => update({ payeeId: value })}
+              data={(payees.data ?? []).map((payee) => ({ value: String(payee.id), label: payee.name }))}
+            />
+            <Select
+              size="sm"
+              w={160}
+              clearable
+              placeholder={t('transactions.filters.allTags')}
+              aria-label={t('transactions.filters.tag')}
+              value={params.get('tagId')}
+              onChange={(value) => update({ tagId: value })}
+              data={(tags.data ?? []).map((tag) => ({ value: String(tag.id), label: `#${tag.name}` }))}
+            />
+            <SegmentedControl
+              aria-label={t('transactions.filters.type')}
+              value={params.get('type') ?? ''}
+              onChange={(value) => update({ type: value || null })}
+              data={TYPES.map((value) => ({ value, label: t(`transactions.types.${value || 'all'}`) }))}
+            />
+            <Button
+              variant="subtle"
+              color="gray"
+              size="sm"
+              onClick={() => {
+                setSearch('');
+                filters.reset();
+              }}
+            >
+              {t('transactions.filters.reset')}
+            </Button>
+          </Group>
+        </Collapse>
       </Stack>
     </Card>
   );

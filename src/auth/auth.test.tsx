@@ -14,6 +14,7 @@ describe('session', () => {
       'GET /api/v1/accounts/summary': signedInApi['GET /api/v1/accounts/summary']!,
       'GET /api/v1/categories': () => json([]),
       'GET /api/v1/reports/spending': signedInApi['GET /api/v1/reports/spending']!,
+      'GET /api/v1/goals': signedInApi['GET /api/v1/goals']!,
     });
     const router = renderApp('/reports');
 

@@ -64,6 +64,7 @@ export function transactionOf(
     tagIds: [],
     source: 'MANUAL',
     createdAt: '2026-10-15T10:00:00Z',
+    recurring: null,
     ...overrides,
   } as Schemas['TransactionResponse'];
 }
@@ -88,5 +89,144 @@ export function budgetRowOf(overrides: Partial<Schemas['CategoryRow']> = {}): Sc
     activity: total(row.ownActivity, (child) => child.activity),
     available: total(row.ownAvailable, (child) => child.available),
     ...row,
+  };
+}
+
+/** A forecast of today only, without planned payments, unless overridden. */
+export function forecastOf(
+  overrides: Partial<Schemas['ForecastResponse']> = {},
+): Schemas['ForecastResponse'] {
+  const today = overrides.today ?? '2026-10-15';
+  return {
+    currency: 'UAH',
+    today,
+    balance: 0,
+    dailySpending: 0,
+    days: [{ date: today, balance: 0, actual: true }],
+    events: [],
+    lowest: null,
+    unconvertedCurrencies: [],
+    ...overrides,
+  };
+}
+
+export function planRowOf(overrides: Partial<Schemas['PlanRow']> = {}): Schemas['PlanRow'] {
+  return {
+    categoryId: 1,
+    name: 'Їжа',
+    planned: 0,
+    actual: 0,
+    difference: 0,
+    completion: null,
+    plannedRemaining: 0,
+    forecast: 0,
+    children: [],
+    ...overrides,
+  };
+}
+
+export function goalOf(overrides: Partial<Schemas['GoalResponse']> = {}): Schemas['GoalResponse'] {
+  return {
+    id: 1,
+    name: 'Ціль',
+    targetAmount: 10000,
+    currency: 'UAH',
+    targetDate: null,
+    accountId: null,
+    saved: 0,
+    remaining: 10000,
+    progress: 0,
+    startDate: '2026-10-01',
+    startAmount: 0,
+    expected: null,
+    monthsLeft: null,
+    monthlyNeeded: null,
+    status: 'NO_DATE',
+    achievedOn: null,
+    icon: null,
+    color: null,
+    sortOrder: 0,
+    ...overrides,
+  };
+}
+
+export function goalsOf(
+  goals: Schemas['GoalResponse'][],
+  overrides: Partial<Schemas['GoalsResponse']> = {},
+): Schemas['GoalsResponse'] {
+  return {
+    currency: 'UAH',
+    saved: goals.reduce((sum, goal) => sum + goal.saved, 0),
+    target: goals.reduce((sum, goal) => sum + goal.targetAmount, 0),
+    monthlyNeeded: goals.reduce((sum, goal) => sum + (goal.monthlyNeeded ?? 0), 0),
+    goals,
+    unconvertedCurrencies: [],
+    ...overrides,
+  };
+}
+
+export function monthSavingsOf(overrides: Partial<Schemas['MonthSavings']> = {}): Schemas['MonthSavings'] {
+  return {
+    month: '2026-09',
+    income: 0,
+    expense: 0,
+    net: 0,
+    savingsRate: null,
+    cumulative: 0,
+    complete: true,
+    destinations: [],
+    ...overrides,
+  };
+}
+
+export function occurrenceOf(
+  overrides: Partial<Schemas['OccurrenceResponse']> = {},
+): Schemas['OccurrenceResponse'] {
+  return {
+    recurringId: 1,
+    name: 'Оренда',
+    date: '2026-10-24',
+    status: 'PENDING',
+    overdue: false,
+    type: 'EXPENSE',
+    accountId: 1,
+    amount: 14000,
+    currency: 'UAH',
+    toAccountId: null,
+    toAmount: null,
+    categoryId: null,
+    payee: null,
+    autoCreate: false,
+    variableAmount: false,
+    transactionId: null,
+    ...overrides,
+  };
+}
+
+export function recurringOf(
+  overrides: Partial<Schemas['RecurringResponse']> = {},
+): Schemas['RecurringResponse'] {
+  return {
+    id: 1,
+    name: 'Оренда',
+    type: 'EXPENSE',
+    accountId: 1,
+    amount: 14000,
+    currency: 'UAH',
+    toAccountId: null,
+    toAmount: null,
+    toCurrency: null,
+    categoryId: null,
+    payee: null,
+    comment: null,
+    frequency: 'MONTHLY',
+    interval: 1,
+    startDate: '2026-09-24',
+    endDate: null,
+    autoCreate: false,
+    variableAmount: false,
+    tolerance: 10,
+    nextDate: '2026-10-24',
+    ...overrides,
   };
 }

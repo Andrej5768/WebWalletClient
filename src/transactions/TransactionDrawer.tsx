@@ -66,6 +66,8 @@ const FORM_FIELDS = [
 interface Props {
   transaction: Transaction | null;
   defaultAccountId?: number;
+  /** Values a new transaction starts with, e.g. a transfer to a goal's account. */
+  defaults?: Partial<TransactionValues>;
   onClose: () => void;
 }
 
@@ -98,7 +100,7 @@ export function TransactionDrawer(props: Props) {
   );
 }
 
-function TransactionForm({ transaction, defaultAccountId, onClose }: Props) {
+function TransactionForm({ transaction, defaultAccountId, defaults, onClose }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const accounts = useAccounts();
@@ -110,11 +112,14 @@ function TransactionForm({ transaction, defaultAccountId, onClose }: Props) {
   const imported = editing && transaction.source !== 'MANUAL';
 
   const form = useForm<TransactionValues>({
-    initialValues: initialTransactionValues(
-      transaction,
-      new Map((tags.data ?? []).map((tag) => [tag.id, tag.name])),
-      defaultAccountId,
-    ),
+    initialValues: {
+      ...initialTransactionValues(
+        transaction,
+        new Map((tags.data ?? []).map((tag) => [tag.id, tag.name])),
+        defaultAccountId,
+      ),
+      ...(transaction ? {} : defaults),
+    },
     validate: {
       amount: (value) => (toNumber(value) > 0 ? null : t('transactions.form.amountRequired')),
       date: (value) => (value ? null : t('validation.required')),
