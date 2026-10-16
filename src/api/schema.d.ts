@@ -15,9 +15,9 @@ export interface paths {
          * List accounts with current balances
          * @description balanceInBase is the balance in the base currency at today's NBU rate, null when there is no rate; availableCredit is the credit limit plus the balance of a credit card
          */
-        get: operations["list_4"];
+        get: operations["list_6"];
         put?: never;
-        post: operations["create_5"];
+        post: operations["create_7"];
         delete?: never;
         options?: never;
         head?: never;
@@ -51,15 +51,115 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["get_1"];
+        get: operations["get_3"];
         /**
          * Update an account; the currency cannot be changed
          * @description Omitted optional fields keep their values; a credit limit or interest rate of 0 removes it
          */
-        put: operations["update_3"];
+        put: operations["update_5"];
         post?: never;
         /** Delete an account without transactions; accounts with history should be archived */
-        delete: operations["delete_5"];
+        delete: operations["delete_7"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/analytics/compare": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Compare the spending of two periods
+         * @description Cumulative spending by day from the start of each period and the change per top-level category. Each period is at most 366 days.
+         */
+        get: operations["compare"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/analytics/needs-wants": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 50/30/20: needs, wants and savings as parts of the income
+         * @description By the needs / wants flag of the expense categories. Without a period, the current month.
+         */
+        get: operations["needsWants"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/analytics/plan/{month}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Plan vs actual per envelope with a forecast for the end of the month
+         * @description The plan is the money assigned to the envelopes, the actual value the spending in them. For the current month the forecast continues the spending at its pace so far to the end of the month and adds the planned payments still due.
+         */
+        get: operations["plan"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/analytics/savings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Money saved per month, the savings rate and where the saved money was moved
+         * @description Without a range, the last 12 months including the current one.
+         */
+        get: operations["savings"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/analytics/trends": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Monthly spending per top-level category, averages and anomalies
+         * @description Without a range, the last 12 complete months. At most 36 months.
+         */
+        get: operations["trends"];
+        put?: never;
+        post?: never;
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -353,7 +453,7 @@ export interface paths {
         /** List categories as a tree of top-level categories and their subcategories */
         get: operations["tree"];
         put?: never;
-        post: operations["create_4"];
+        post: operations["create_6"];
         delete?: never;
         options?: never;
         head?: never;
@@ -392,10 +492,10 @@ export interface paths {
          * Update a category
          * @description The parent is always applied (null makes a top-level category); other omitted optional fields keep their values. icon, color and necessity sent as null are removed. A necessity is allowed only on expense categories; it is removed when the category becomes income.
          */
-        put: operations["update_2"];
+        put: operations["update_4"];
         post?: never;
         /** Delete an unused category without subcategories; others should be archived */
-        delete: operations["delete_4"];
+        delete: operations["delete_6"];
         options?: never;
         head?: never;
         patch?: never;
@@ -409,9 +509,9 @@ export interface paths {
             cookie?: never;
         };
         /** List the rules, including the ones learned from manual category changes */
-        get: operations["list_3"];
+        get: operations["list_5"];
         put?: never;
-        post: operations["create_3"];
+        post: operations["create_5"];
         delete?: never;
         options?: never;
         head?: never;
@@ -443,9 +543,83 @@ export interface paths {
             cookie?: never;
         };
         get?: never;
-        put: operations["update_1"];
+        put: operations["update_3"];
         post?: never;
-        delete: operations["delete_3"];
+        delete: operations["delete_5"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/forecast": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Balance of cash and cards from the first of the month to the date: actual, then forecast
+         * @description The forecast takes away the everyday spending (the average of the last 90 days without recurring payments) and adds the pending occurrences of recurring payments. By default to the end of the current month, at most 366 days ahead.
+         */
+        get: operations["forecast"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/goals": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Savings goals with their progress and the totals in the base currency */
+        get: operations["list_4"];
+        put?: never;
+        post: operations["create_4"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/goals/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["get_2"];
+        /**
+         * Replace a goal
+         * @description Omitted achieved and sortOrder keep their values. Moved to another account, the pace starts again from its balance.
+         */
+        put: operations["update_2"];
+        post?: never;
+        delete: operations["delete_4"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/goals/{id}/contributions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Add to (or take from) the progress of a goal without an account */
+        post: operations["contribute"];
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -459,7 +633,7 @@ export interface paths {
             cookie?: never;
         };
         /** A page of the operations of an import preview, newest first; 404 when it expired */
-        get: operations["get_2"];
+        get: operations["get_4"];
         put?: never;
         post?: never;
         /** Discard an import preview */
@@ -482,7 +656,7 @@ export interface paths {
          * Import the previewed operations with the changes of the user
          * @description Operations not listed are imported as previewed. The preview is removed afterwards; 404 when it is unknown or expired.
          */
-        post: operations["confirm"];
+        post: operations["confirm_1"];
         delete?: never;
         options?: never;
         head?: never;
@@ -665,9 +839,9 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["list_2"];
+        get: operations["list_3"];
         put?: never;
-        post: operations["create_2"];
+        post: operations["create_3"];
         delete?: never;
         options?: never;
         head?: never;
@@ -685,7 +859,162 @@ export interface paths {
         put: operations["rename_1"];
         post?: never;
         /** Delete a payee; its transactions stay without a payee */
+        delete: operations["delete_3"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/recurring": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List recurring payments by name, with the next date of each */
+        get: operations["list_2"];
+        put?: never;
+        post: operations["create_2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/recurring/occurrences": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Occurrences of all recurring payments in the period, by date
+         * @description By default from 31 days ago to 31 days ahead, at most 400 days. Pending occurrences overdue for more than 31 days are left out. Due occurrences are matched with transactions first.
+         */
+        get: operations["occurrences"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/recurring/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["get_1"];
+        /**
+         * Replace a recurring payment
+         * @description Occurrences already paid or skipped stay.
+         */
+        put: operations["update_1"];
+        post?: never;
+        /** Delete a recurring payment; the transactions that paid it stay */
         delete: operations["delete_2"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/recurring/{id}/occurrences/{date}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Make an occurrence pending again
+         * @description Unlinks the transaction (which stays) or undoes the skip. The occurrence is then no longer matched or created automatically.
+         */
+        delete: operations["reset_1"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/recurring/{id}/occurrences/{date}/candidates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Transactions that could pay an occurrence, best first
+         * @description Of the same type, within 10 days of the date and with up to half the amount off, not paying another occurrence; those on the account of the recurring payment first.
+         */
+        get: operations["candidates"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/recurring/{id}/occurrences/{date}/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create the transaction of an occurrence and mark it as paid
+         * @description The body is optional; an occurrence already paid is rejected.
+         */
+        post: operations["confirm"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/recurring/{id}/occurrences/{date}/link": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Mark an occurrence as paid by an existing transaction
+         * @description The transaction must not pay another occurrence.
+         */
+        post: operations["link_1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/recurring/{id}/occurrences/{date}/skip": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Skip an occurrence */
+        post: operations["skip"];
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -875,12 +1204,27 @@ export interface components {
             readyToAssign: number;
             unconvertedCurrencies: string[];
         };
+        Anomaly: {
+            amount: number;
+            average: number;
+            month: string;
+            ratio: number;
+        };
         ApplyResponse: {
             /** Format: int32 */
             categorized: number;
         };
         AssignRequest: {
             assigned: number;
+        };
+        CategoryChange: {
+            a: number;
+            b: number;
+            /** Format: int64 */
+            categoryId: number | null;
+            change: number;
+            changeShare: number | null;
+            name: string | null;
         };
         CategoryOrderRequest: {
             /** Format: int64 */
@@ -946,9 +1290,42 @@ export interface components {
             name: string;
             share: number;
         };
+        CategoryTrend: {
+            amounts: number[];
+            anomalies: components["schemas"]["Anomaly"][];
+            average: number;
+            /** Format: int64 */
+            categoryId: number | null;
+            name: string | null;
+            total: number;
+        };
         ChangePasswordRequest: {
             currentPassword: string;
             newPassword: string;
+        };
+        CompareDay: {
+            a: number | null;
+            b: number | null;
+            /** Format: int32 */
+            day: number;
+        };
+        CompareResponse: {
+            categories: components["schemas"]["CategoryChange"][];
+            change: number;
+            changeShare: number | null;
+            currency: string;
+            days: components["schemas"]["CompareDay"][];
+            /** Format: date */
+            fromA: string;
+            /** Format: date */
+            fromB: string;
+            /** Format: date */
+            toA: string;
+            /** Format: date */
+            toB: string;
+            totalA: number;
+            totalB: number;
+            unconvertedCurrencies: string[];
         };
         ConfirmRequest: {
             operations?: components["schemas"]["OperationEdit"][];
@@ -1004,9 +1381,100 @@ export interface components {
              */
             windowStart: string;
         };
+        ContributionRequest: {
+            amount: number;
+        };
+        Destination: {
+            /** Format: int64 */
+            accountId: number;
+            amount: number;
+            name: string;
+        };
         EmailRequest: {
             /** Format: email */
             email: string;
+        };
+        ForecastDay: {
+            actual: boolean;
+            balance: number;
+            /** Format: date */
+            date: string;
+        };
+        ForecastEvent: {
+            amount: number;
+            /** Format: int64 */
+            categoryId: number | null;
+            /** Format: date */
+            date: string;
+            name: string;
+            overdue: boolean;
+            /** Format: int64 */
+            recurringId: number;
+        };
+        ForecastResponse: {
+            balance: number;
+            currency: string;
+            dailySpending: number;
+            days: components["schemas"]["ForecastDay"][];
+            events: components["schemas"]["ForecastEvent"][];
+            lowest: components["schemas"]["ForecastDay"] | null;
+            /** Format: date */
+            today: string;
+            unconvertedCurrencies: string[];
+        };
+        GoalRequest: {
+            /** Format: int64 */
+            accountId?: number;
+            achieved?: boolean;
+            /** @enum {string} */
+            color?: "blue" | "green" | "orange" | "violet" | "teal" | "pink" | "amber" | "slate" | "red" | "indigo" | "cyan" | "lime";
+            currency?: string;
+            icon?: string;
+            name: string;
+            saved?: number;
+            /** Format: int32 */
+            sortOrder?: number;
+            targetAmount: number;
+            /** Format: date */
+            targetDate?: string;
+        };
+        GoalResponse: {
+            /** Format: int64 */
+            accountId: number | null;
+            /** Format: date */
+            achievedOn: string | null;
+            /** @enum {string|null} */
+            color: "blue" | "green" | "orange" | "violet" | "teal" | "pink" | "amber" | "slate" | "red" | "indigo" | "cyan" | "lime" | null;
+            currency: string;
+            expected: number | null;
+            icon: string | null;
+            /** Format: int64 */
+            id: number;
+            monthlyNeeded: number | null;
+            /** Format: int32 */
+            monthsLeft: number | null;
+            name: string;
+            progress: number;
+            remaining: number;
+            saved: number;
+            /** Format: int32 */
+            sortOrder: number;
+            startAmount: number;
+            /** Format: date */
+            startDate: string;
+            /** @enum {string} */
+            status: "ACHIEVED" | "NO_DATE" | "ON_TRACK" | "BEHIND" | "OVERDUE";
+            targetAmount: number;
+            /** Format: date */
+            targetDate: string | null;
+        };
+        GoalsResponse: {
+            currency: string;
+            goals: components["schemas"]["GoalResponse"][];
+            monthlyNeeded: number;
+            saved: number;
+            target: number;
+            unconvertedCurrencies: string[];
         };
         ImportAccount: {
             created: boolean;
@@ -1121,6 +1589,20 @@ export interface components {
             readyToAssign: number;
             unconvertedCurrencies: string[];
         };
+        MonthSavings: {
+            complete: boolean;
+            cumulative: number;
+            destinations: components["schemas"]["Destination"][];
+            expense: number;
+            income: number;
+            month: string;
+            net: number;
+            savingsRate: number | null;
+        };
+        MonthTotal: {
+            month: string;
+            total: number;
+        };
         MoveRequest: {
             amount: number;
             /** Format: int64 */
@@ -1133,10 +1615,59 @@ export interface components {
             id: number;
             name: string;
         };
+        NeedsWantsResponse: {
+            currency: string;
+            /** Format: date */
+            from: string;
+            income: number;
+            needs: components["schemas"]["Part"];
+            savings: components["schemas"]["Part"];
+            /** Format: date */
+            to: string;
+            unclassified: components["schemas"]["Part"];
+            unconvertedCurrencies: string[];
+            wants: components["schemas"]["Part"];
+        };
         NetWorthResponse: {
             currency: string;
             months: components["schemas"]["MonthNetWorth"][];
             unconvertedCurrencies: string[];
+        };
+        OccurrenceConfirmRequest: {
+            amount?: number;
+            /** Format: date */
+            date?: string;
+            toAmount?: number;
+        };
+        OccurrenceLinkRequest: {
+            /** Format: int64 */
+            transactionId: number;
+        };
+        OccurrenceResponse: {
+            /** Format: int64 */
+            accountId: number;
+            amount: number;
+            autoCreate: boolean;
+            /** Format: int64 */
+            categoryId: number | null;
+            currency: string;
+            /** Format: date */
+            date: string;
+            name: string;
+            overdue: boolean;
+            payee: components["schemas"]["NamedResponse"] | null;
+            /** Format: int64 */
+            recurringId: number;
+            /** @enum {string} */
+            status: "PENDING" | "PAID" | "SKIPPED";
+            /** Format: int64 */
+            toAccountId: number | null;
+            toAmount: number | null;
+            /** Format: int64 */
+            transactionId: number | null;
+            /** @enum {string} */
+            type: "EXPENSE" | "INCOME" | "TRANSFER";
+            variableAmount: boolean;
         };
         OperationEdit: {
             /** Format: int64 */
@@ -1174,6 +1705,11 @@ export interface components {
             /** Format: int32 */
             totalPages: number;
         };
+        Part: {
+            amount: number;
+            share: number | null;
+            target: number | null;
+        };
         PayeeRequest: {
             name: string;
         };
@@ -1193,6 +1729,101 @@ export interface components {
             /** Format: date */
             to: string;
             unconvertedCurrencies: string[];
+        };
+        PlanResponse: {
+            actual: number;
+            categories: components["schemas"]["PlanRow"][];
+            currency: string;
+            /** Format: int32 */
+            daysElapsed: number;
+            /** Format: int32 */
+            daysInMonth: number;
+            difference: number;
+            forecast: number;
+            month: string;
+            planned: number;
+            unconvertedCurrencies: string[];
+        };
+        PlanRow: {
+            actual: number;
+            /** Format: int64 */
+            categoryId: number;
+            children: components["schemas"]["PlanRow"][];
+            completion: number | null;
+            difference: number;
+            forecast: number;
+            name: string;
+            planned: number;
+            plannedRemaining: number;
+        };
+        RecurringRef: {
+            /** Format: date */
+            dueDate: string;
+            /** Format: int64 */
+            id: number;
+            name: string;
+        };
+        RecurringRequest: {
+            /** Format: int64 */
+            accountId: number;
+            amount: number;
+            autoCreate?: boolean;
+            /** Format: int64 */
+            categoryId?: number;
+            comment?: string;
+            /** Format: date */
+            endDate?: string;
+            /** @enum {string} */
+            frequency: "DAILY" | "WEEKLY" | "MONTHLY" | "YEARLY";
+            /** Format: int32 */
+            interval?: number;
+            name: string;
+            /** Format: int64 */
+            payeeId?: number;
+            payeeName?: string;
+            /** Format: date */
+            startDate: string;
+            /** Format: int64 */
+            toAccountId?: number;
+            toAmount?: number;
+            /** Format: int32 */
+            tolerance?: number;
+            /** @enum {string} */
+            type: "EXPENSE" | "INCOME" | "TRANSFER";
+            variableAmount?: boolean;
+        };
+        RecurringResponse: {
+            /** Format: int64 */
+            accountId: number;
+            amount: number;
+            autoCreate: boolean;
+            /** Format: int64 */
+            categoryId: number | null;
+            comment: string | null;
+            currency: string;
+            /** Format: date */
+            endDate: string | null;
+            /** @enum {string} */
+            frequency: "DAILY" | "WEEKLY" | "MONTHLY" | "YEARLY";
+            /** Format: int64 */
+            id: number;
+            /** Format: int32 */
+            interval: number;
+            name: string;
+            /** Format: date */
+            nextDate: string | null;
+            payee: components["schemas"]["NamedResponse"] | null;
+            /** Format: date */
+            startDate: string;
+            /** Format: int64 */
+            toAccountId: number | null;
+            toAmount: number | null;
+            toCurrency: string | null;
+            /** Format: int32 */
+            tolerance: number;
+            /** @enum {string} */
+            type: "EXPENSE" | "INCOME" | "TRANSFER";
+            variableAmount: boolean;
         };
         RegisterRequest: {
             /** Format: email */
@@ -1230,6 +1861,17 @@ export interface components {
             mcc: number | null;
             payee: components["schemas"]["NamedResponse"] | null;
             payeePattern: string | null;
+        };
+        SavingsResponse: {
+            averageRate: number | null;
+            bestMonth: string | null;
+            currency: string;
+            from: string;
+            months: components["schemas"]["MonthSavings"][];
+            target: number;
+            to: string;
+            totalSaved: number;
+            unconvertedCurrencies: string[];
         };
         ScheduleRequest: {
             /**
@@ -1333,6 +1975,7 @@ export interface components {
             originalAmount: number | null;
             originalCurrency: string | null;
             payee: components["schemas"]["NamedResponse"] | null;
+            recurring: components["schemas"]["RecurringRef"] | null;
             /** @enum {string} */
             source: "MANUAL" | "ZENMONEY" | "MONOBANK" | "PRIVATBANK";
             splits: components["schemas"]["SplitResponse"][];
@@ -1343,6 +1986,15 @@ export interface components {
             toCurrency: string | null;
             /** @enum {string} */
             type: "EXPENSE" | "INCOME" | "TRANSFER";
+        };
+        TrendsResponse: {
+            average: number;
+            categories: components["schemas"]["CategoryTrend"][];
+            currency: string;
+            from: string;
+            months: components["schemas"]["MonthTotal"][];
+            to: string;
+            unconvertedCurrencies: string[];
         };
         UpdateProfileRequest: {
             baseCurrency: string;
@@ -1376,7 +2028,7 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    list_4: {
+    list_6: {
         parameters: {
             query?: never;
             header?: never;
@@ -1396,7 +2048,7 @@ export interface operations {
             };
         };
     };
-    create_5: {
+    create_7: {
         parameters: {
             query?: never;
             header?: never;
@@ -1440,7 +2092,7 @@ export interface operations {
             };
         };
     };
-    get_1: {
+    get_3: {
         parameters: {
             query?: never;
             header?: never;
@@ -1462,7 +2114,7 @@ export interface operations {
             };
         };
     };
-    update_3: {
+    update_5: {
         parameters: {
             query?: never;
             header?: never;
@@ -1488,7 +2140,7 @@ export interface operations {
             };
         };
     };
-    delete_5: {
+    delete_7: {
         parameters: {
             query?: never;
             header?: never;
@@ -1505,6 +2157,129 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    compare: {
+        parameters: {
+            query: {
+                fromA: string;
+                toA: string;
+                fromB: string;
+                toB: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CompareResponse"];
+                };
+            };
+        };
+    };
+    needsWants: {
+        parameters: {
+            query?: {
+                from?: string;
+                to?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["NeedsWantsResponse"];
+                };
+            };
+        };
+    };
+    plan: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example 2026-10 */
+                month: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PlanResponse"];
+                };
+            };
+        };
+    };
+    savings: {
+        parameters: {
+            query?: {
+                /** @example 2025-11 */
+                from?: string;
+                /** @example 2026-10 */
+                to?: string;
+                /** @description Wanted savings rate, 0..1 */
+                target?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["SavingsResponse"];
+                };
+            };
+        };
+    };
+    trends: {
+        parameters: {
+            query?: {
+                /** @example 2025-10 */
+                from?: string;
+                /** @example 2026-09 */
+                to?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TrendsResponse"];
+                };
             };
         };
     };
@@ -1916,7 +2691,7 @@ export interface operations {
             };
         };
     };
-    create_4: {
+    create_6: {
         parameters: {
             query?: never;
             header?: never;
@@ -1964,7 +2739,7 @@ export interface operations {
             };
         };
     };
-    update_2: {
+    update_4: {
         parameters: {
             query?: never;
             header?: never;
@@ -1990,7 +2765,7 @@ export interface operations {
             };
         };
     };
-    delete_4: {
+    delete_6: {
         parameters: {
             query?: never;
             header?: never;
@@ -2010,7 +2785,7 @@ export interface operations {
             };
         };
     };
-    list_3: {
+    list_5: {
         parameters: {
             query?: never;
             header?: never;
@@ -2030,7 +2805,7 @@ export interface operations {
             };
         };
     };
-    create_3: {
+    create_5: {
         parameters: {
             query?: never;
             header?: never;
@@ -2074,7 +2849,7 @@ export interface operations {
             };
         };
     };
-    update_1: {
+    update_3: {
         parameters: {
             query?: never;
             header?: never;
@@ -2100,7 +2875,7 @@ export interface operations {
             };
         };
     };
-    delete_3: {
+    delete_5: {
         parameters: {
             query?: never;
             header?: never;
@@ -2120,7 +2895,167 @@ export interface operations {
             };
         };
     };
+    forecast: {
+        parameters: {
+            query?: {
+                to?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ForecastResponse"];
+                };
+            };
+        };
+    };
+    list_4: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["GoalsResponse"];
+                };
+            };
+        };
+    };
+    create_4: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GoalRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["GoalResponse"];
+                };
+            };
+        };
+    };
     get_2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["GoalResponse"];
+                };
+            };
+        };
+    };
+    update_2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GoalRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["GoalResponse"];
+                };
+            };
+        };
+    };
+    delete_4: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    contribute: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ContributionRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["GoalResponse"];
+                };
+            };
+        };
+    };
+    get_4: {
         parameters: {
             query?: {
                 page?: number;
@@ -2165,7 +3100,7 @@ export interface operations {
             };
         };
     };
-    confirm: {
+    confirm_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -2441,7 +3376,7 @@ export interface operations {
             };
         };
     };
-    list_2: {
+    list_3: {
         parameters: {
             query?: never;
             header?: never;
@@ -2461,7 +3396,7 @@ export interface operations {
             };
         };
     };
-    create_2: {
+    create_3: {
         parameters: {
             query?: never;
             header?: never;
@@ -2511,6 +3446,141 @@ export interface operations {
             };
         };
     };
+    delete_3: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    list_2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["RecurringResponse"][];
+                };
+            };
+        };
+    };
+    create_2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RecurringRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["RecurringResponse"];
+                };
+            };
+        };
+    };
+    occurrences: {
+        parameters: {
+            query?: {
+                from?: string;
+                to?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["OccurrenceResponse"][];
+                };
+            };
+        };
+    };
+    get_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["RecurringResponse"];
+                };
+            };
+        };
+    };
+    update_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RecurringRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["RecurringResponse"];
+                };
+            };
+        };
+    };
     delete_2: {
         parameters: {
             query?: never;
@@ -2528,6 +3598,129 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    reset_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+                date: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["OccurrenceResponse"];
+                };
+            };
+        };
+    };
+    candidates: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+                date: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TransactionResponse"][];
+                };
+            };
+        };
+    };
+    confirm: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+                date: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["OccurrenceConfirmRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["OccurrenceResponse"];
+                };
+            };
+        };
+    };
+    link_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+                date: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OccurrenceLinkRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["OccurrenceResponse"];
+                };
+            };
+        };
+    };
+    skip: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+                date: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["OccurrenceResponse"];
+                };
             };
         };
     };
