@@ -3,7 +3,7 @@
     "value": "Portfolio value",
     "dayChange": "{{amount}} today",
     "invested": "Invested",
-    "investedNote": "cost of the positions",
+    "investedNote": "net deposits · result {{result}}",
     "unrealized": "Unrealized profit",
     "realized": "Realized in {{year}}",
     "realizedNote": "sales by FIFO",
@@ -41,6 +41,7 @@
       "byType": "Asset classes",
       "byCurrency": "Currencies",
       "empty": "No positions"
-    }
+    },
+    "unrealizedNote": "{{share}} of the cost of {{cost}}"
   }
 }

@@ -2618,11 +2618,13 @@
           },
           "splitFrom": {
             "format": "int32",
+            "maximum": 1000,
             "minimum": 1,
             "type": "integer"
           },
           "splitTo": {
             "format": "int32",
+            "maximum": 1000,
             "minimum": 1,
             "type": "integer"
           },
@@ -3161,6 +3163,9 @@
           "dayChange": {
             "type": "number"
           },
+          "deposited": {
+            "type": "number"
+          },
           "dividendsLast12Months": {
             "type": "number"
           },
@@ -3208,6 +3213,7 @@
           "cash",
           "currency",
           "dayChange",
+          "deposited",
           "dividendsLast12Months",
           "invested",
           "positions",
