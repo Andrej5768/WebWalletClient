@@ -109,6 +109,21 @@ export function forecastOf(
   };
 }
 
+export function planRowOf(overrides: Partial<Schemas['PlanRow']> = {}): Schemas['PlanRow'] {
+  return {
+    categoryId: 1,
+    name: 'Їжа',
+    planned: 0,
+    actual: 0,
+    difference: 0,
+    completion: null,
+    plannedRemaining: 0,
+    forecast: 0,
+    children: [],
+    ...overrides,
+  };
+}
+
 export function goalOf(overrides: Partial<Schemas['GoalResponse']> = {}): Schemas['GoalResponse'] {
   return {
     id: 1,
@@ -145,6 +160,20 @@ export function goalsOf(
     monthlyNeeded: goals.reduce((sum, goal) => sum + (goal.monthlyNeeded ?? 0), 0),
     goals,
     unconvertedCurrencies: [],
+    ...overrides,
+  };
+}
+
+export function monthSavingsOf(overrides: Partial<Schemas['MonthSavings']> = {}): Schemas['MonthSavings'] {
+  return {
+    month: '2026-09',
+    income: 0,
+    expense: 0,
+    net: 0,
+    savingsRate: null,
+    cumulative: 0,
+    complete: true,
+    destinations: [],
     ...overrides,
   };
 }
