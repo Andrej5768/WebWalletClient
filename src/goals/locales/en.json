@@ -63,6 +63,83 @@
       "withdraw": "Take out of the goal",
       "hint": "Saved so far: {{saved}}"
     },
-    "sidebar": "{{name}}: {{share}} saved"
+    "sidebar": "{{name}}: {{share}} saved",
+    "tabs": {
+      "goals": "Goals",
+      "fire": "FIRE",
+      "fym": "FYM",
+      "calc": "Compound interest calculator"
+    },
+    "fire": {
+      "inputs": "Inputs",
+      "reset": "Back to the data",
+      "expenses": "Yearly expenses",
+      "expensesHint": "Average of 12 months — {{amount}} a month",
+      "withdrawalRate": "Safe withdrawal rate",
+      "withdrawalRateHint": "How much of the capital can be spent each year",
+      "realReturn": "Expected real return",
+      "realReturnHint": "After inflation",
+      "monthlySavings": "Monthly savings",
+      "monthlySavingsHint": "Average of 12 months, savings rate {{rate}}",
+      "number": "FIRE number",
+      "numberNote": "Yearly expenses ÷ {{rate}}",
+      "years": "Years to FIRE",
+      "yearNote": "Around {{year}}",
+      "tooFar": "Over 60 years at the current pace",
+      "capitalNow": "Capital now {{amount}}",
+      "capital": "Capital",
+      "projection": "Capital projection",
+      "reachedIn": "FIRE in {{year}}",
+      "levels": {
+        "lean": "Lean FIRE",
+        "leanNote": "Modest expenses, 70%",
+        "regular": "FIRE",
+        "regularNote": "Current expenses",
+        "fat": "Fat FIRE",
+        "fatNote": "Expenses ×1.5",
+        "coast": "Coast FIRE",
+        "coastNote": "No contributions, 20 years of growth"
+      }
+    },
+    "fym": {
+      "liquidTitle": "What counts as available money",
+      "title": "FYM — freedom money",
+      "subtitle": "How many months you would live without income at your current expenses",
+      "noExpenses": "No expenses over 12 months to count with yet",
+      "monthsWithoutIncome": "months without income",
+      "liquidNote": "Available {{liquid}} · expenses {{expenses}} a month",
+      "milestone_one": "{{count}} month",
+      "milestone_other": "{{count}} months",
+      "target": "Target",
+      "need": "Needed: {{amount}}",
+      "left": "Still needed: {{amount}}",
+      "reached": "Target reached",
+      "eta": "Saving {{savings}} a month — {{months}} months",
+      "noSavings": "No savings over the last 12 months"
+    },
+    "calc": {
+      "parameters": "Parameters",
+      "initial": "Initial amount",
+      "monthly": "Monthly contribution",
+      "rate": "Rate per year",
+      "years": "Term, years",
+      "capitalization": "Compounding",
+      "capitalizations": {
+        "MONTHLY": "Monthly",
+        "QUARTERLY": "Quarterly",
+        "YEARLY": "Yearly"
+      },
+      "growth": "Yearly increase of the contribution",
+      "inflation": "Inflation",
+      "real": "Show in today's prices",
+      "final": "Final amount",
+      "contributed": "Contributed",
+      "interest": "Interest",
+      "interestTotal": "Interest earned",
+      "realFinal": "In today's prices",
+      "byYear": "Growth by year",
+      "year": "Year",
+      "balance": "Balance"
+    }
   }
 }
