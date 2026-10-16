@@ -62,6 +62,85 @@
       "withdraw": "Зняти з цілі",
       "hint": "Зараз зібрано {{saved}}"
     },
-    "sidebar": "{{name}}: {{share}} зібрано"
+    "sidebar": "{{name}}: {{share}} зібрано",
+    "tabs": {
+      "goals": "Цілі",
+      "fire": "FIRE",
+      "fym": "FYM",
+      "calc": "Калькулятор складних відсотків"
+    },
+    "fire": {
+      "inputs": "Вихідні дані",
+      "reset": "Повернути до даних",
+      "expenses": "Річні витрати",
+      "expensesHint": "Середнє за 12 місяців — {{amount}} на місяць",
+      "withdrawalRate": "Ставка безпечного вилучення",
+      "withdrawalRateHint": "Скільки капіталу можна витрачати щороку",
+      "realReturn": "Очікувана реальна дохідність",
+      "realReturnHint": "Після інфляції",
+      "monthlySavings": "Щомісячні заощадження",
+      "monthlySavingsHint": "Середнє за 12 місяців, норма заощаджень {{rate}}",
+      "number": "Число FIRE",
+      "numberNote": "Річні витрати ÷ {{rate}}",
+      "years": "Років до FIRE",
+      "yearNote": "Орієнтовно {{year}} рік",
+      "tooFar": "Понад 60 років за поточного темпу",
+      "capitalNow": "Капітал зараз {{amount}}",
+      "capital": "Капітал",
+      "projection": "Прогноз капіталу",
+      "reachedIn": "FIRE у {{year}}",
+      "levels": {
+        "lean": "Lean FIRE",
+        "leanNote": "Скромні витрати, 70 %",
+        "regular": "FIRE",
+        "regularNote": "Поточні витрати",
+        "fat": "Fat FIRE",
+        "fatNote": "Витрати ×1,5",
+        "coast": "Coast FIRE",
+        "coastNote": "Без внесків, 20 років росту"
+      }
+    },
+    "fym": {
+      "liquidTitle": "Що вважати доступними грошима",
+      "title": "FYM — гроші свободи",
+      "subtitle": "Скільки місяців ви проживете без доходу на поточних витратах",
+      "noExpenses": "Ще немає витрат за 12 місяців, щоб порахувати",
+      "monthsWithoutIncome": "міс. без доходу",
+      "liquidNote": "Доступно {{liquid}} · витрати {{expenses}} на місяць",
+      "milestone_one": "{{count}} місяць",
+      "milestone_few": "{{count}} місяці",
+      "milestone_many": "{{count}} місяців",
+      "milestone_other": "{{count}} місяця",
+      "target": "Мета",
+      "need": "Потрібно мати {{amount}}",
+      "left": "Ще потрібно {{amount}}",
+      "reached": "Мету досягнуто",
+      "eta": "Із заощадженнями {{savings}}/міс — {{months}} міс.",
+      "noSavings": "За останні 12 місяців заощаджень немає"
+    },
+    "calc": {
+      "parameters": "Параметри",
+      "initial": "Початкова сума",
+      "monthly": "Щомісячний внесок",
+      "rate": "Ставка, річних",
+      "years": "Строк, років",
+      "capitalization": "Капіталізація",
+      "capitalizations": {
+        "MONTHLY": "Щомісяця",
+        "QUARTERLY": "Щокварталу",
+        "YEARLY": "Щороку"
+      },
+      "growth": "Щорічне збільшення внеску",
+      "inflation": "Інфляція",
+      "real": "Показати в сьогоднішніх цінах",
+      "final": "Підсумкова сума",
+      "contributed": "Внесено",
+      "interest": "Відсотки",
+      "interestTotal": "Нараховано відсотків",
+      "realFinal": "У сьогоднішніх цінах",
+      "byYear": "Зростання по роках",
+      "year": "Рік",
+      "balance": "Баланс"
+    }
   }
 }
