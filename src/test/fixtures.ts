@@ -309,3 +309,47 @@ export function historyOf(overrides: Partial<Schemas['HistoryResponse']> = {}): 
     ...overrides,
   };
 }
+
+export function dividendEventOf(overrides: Partial<Schemas['CalendarEvent']> = {}): Schemas['CalendarEvent'] {
+  return {
+    date: '2026-11-15',
+    exDate: null,
+    status: 'FORECAST',
+    accountId: 1,
+    instrumentId: 1,
+    symbol: 'AAPL',
+    name: 'Apple Inc',
+    type: 'STOCK',
+    quantity: 10,
+    perShare: 0.26,
+    gross: 2.6,
+    tax: 0.39,
+    net: 2.21,
+    currency: 'USD',
+    grossInTarget: 2.6,
+    netInTarget: 2.21,
+    taxEstimated: true,
+    ...overrides,
+  };
+}
+
+export function dividendCalendarOf(
+  overrides: Partial<Schemas['CalendarResponse']> = {},
+): Schemas['CalendarResponse'] {
+  return {
+    currency: 'USD',
+    from: '2025-10-01',
+    to: '2027-10-31',
+    next12Months: 0,
+    next12MonthsNet: 0,
+    monthly: 0,
+    yield: null,
+    yieldOnCost: null,
+    received12Months: 0,
+    months: [],
+    receivedByInstrument: [],
+    events: [],
+    unconvertedCurrencies: [],
+    ...overrides,
+  };
+}
