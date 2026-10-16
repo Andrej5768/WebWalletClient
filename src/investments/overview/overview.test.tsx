@@ -1,7 +1,14 @@
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { kyivToday } from '../../lib/periods';
-import { accountOf, historyOf, instrumentOf, portfolioOf, positionOf } from '../../test/fixtures';
+import {
+  accountOf,
+  historyOf,
+  instrumentOf,
+  portfolioOf,
+  positionDetailOf,
+  positionOf,
+} from '../../test/fixtures';
 import { json, mockApi, plain, renderApp, signedInApi } from '../../test/render';
 import { rangeFrom, result } from './model';
 
@@ -120,6 +127,10 @@ it('says when the prices of the index are still loading', async () => {
 
 it('lists the positions with their cash and links to an instrument', async () => {
   api({
+    // The instrument page the link opens
+    'GET /api/v1/investments/instruments/7': () => json(instrumentOf({ id: 7 })),
+    'GET /api/v1/investments/positions': () =>
+      json(positionDetailOf({ instrument: instrumentOf({ id: 7 }) })),
     'GET /api/v1/investments/portfolio': () =>
       json(
         portfolioOf({
