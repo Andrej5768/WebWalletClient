@@ -4,6 +4,7 @@ import {
   LayoutGrid,
   SlidersHorizontal,
   Target,
+  TrendingUp,
   Upload,
   Wallet,
 } from 'lucide-react';
@@ -24,6 +25,7 @@ export const mainNav: NavItem[] = [
   { path: '/budget', key: 'budget', icon: DonutIcon },
   { path: '/reports', key: 'reports', icon: ChartColumn },
   { path: '/goals', key: 'goals', icon: Target },
+  { path: '/investments', key: 'investments', icon: TrendingUp },
   { path: '/imports', key: 'imports', icon: Upload },
 ];
 

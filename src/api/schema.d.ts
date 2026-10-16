@@ -17,7 +17,7 @@ export interface paths {
          */
         get: operations["list_6"];
         put?: never;
-        post: operations["create_7"];
+        post: operations["create_8"];
         delete?: never;
         options?: never;
         head?: never;
@@ -56,10 +56,10 @@ export interface paths {
          * Update an account; the currency cannot be changed
          * @description Omitted optional fields keep their values; a credit limit or interest rate of 0 removes it
          */
-        put: operations["update_5"];
+        put: operations["update_6"];
         post?: never;
         /** Delete an account without transactions; accounts with history should be archived */
-        delete: operations["delete_7"];
+        delete: operations["delete_8"];
         options?: never;
         head?: never;
         patch?: never;
@@ -453,7 +453,7 @@ export interface paths {
         /** List categories as a tree of top-level categories and their subcategories */
         get: operations["tree"];
         put?: never;
-        post: operations["create_6"];
+        post: operations["create_7"];
         delete?: never;
         options?: never;
         head?: never;
@@ -492,10 +492,10 @@ export interface paths {
          * Update a category
          * @description The parent is always applied (null makes a top-level category); other omitted optional fields keep their values. icon, color and necessity sent as null are removed. A necessity is allowed only on expense categories; it is removed when the category becomes income.
          */
-        put: operations["update_4"];
+        put: operations["update_5"];
         post?: never;
         /** Delete an unused category without subcategories; others should be archived */
-        delete: operations["delete_6"];
+        delete: operations["delete_7"];
         options?: never;
         head?: never;
         patch?: never;
@@ -511,7 +511,7 @@ export interface paths {
         /** List the rules, including the ones learned from manual category changes */
         get: operations["list_5"];
         put?: never;
-        post: operations["create_5"];
+        post: operations["create_6"];
         delete?: never;
         options?: never;
         head?: never;
@@ -543,9 +543,9 @@ export interface paths {
             cookie?: never;
         };
         get?: never;
-        put: operations["update_3"];
+        put: operations["update_4"];
         post?: never;
-        delete: operations["delete_5"];
+        delete: operations["delete_6"];
         options?: never;
         head?: never;
         patch?: never;
@@ -581,7 +581,7 @@ export interface paths {
         /** Savings goals with their progress and the totals in the base currency */
         get: operations["list_4"];
         put?: never;
-        post: operations["create_4"];
+        post: operations["create_5"];
         delete?: never;
         options?: never;
         head?: never;
@@ -600,9 +600,9 @@ export interface paths {
          * Replace a goal
          * @description Omitted achieved and sortOrder keep their values. Moved to another account, the pace starts again from its balance.
          */
-        put: operations["update_2"];
+        put: operations["update_3"];
         post?: never;
-        delete: operations["delete_4"];
+        delete: operations["delete_5"];
         options?: never;
         head?: never;
         patch?: never;
@@ -768,6 +768,214 @@ export interface paths {
          * @description Returns a summary (accounts, categories and payees to create, budgets) and the first page of the transactions; review them and import with POST /api/v1/imports/previews/{id}/confirm within an hour. The token is not stored.
          */
         post: operations["previewWithToken"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/investments/dividends": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Dividends and coupons: received, expected, declared and forecast, by day and by month
+         * @description By default from a year ago to a year ahead, at most 5 years. Received ones are the operations; expected ones were due to a holder on the ex-dividend date but are not recorded; declared ones come from the dividend provider or the coupon schedule of a bond; the forecast repeats the payments of the last 12 months for what is held now.
+         */
+        get: operations["dividends"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/investments/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The value of the brokerage accounts day by day, the net deposits and a benchmark
+         * @description Cash and positions at the closes of each day in the currency (by default the base one) at the NBU rates of the day. The benchmark is what the same deposits would be worth in the index fund, bought and sold at the closes of their days; its prices load within minutes after it is first asked for. Periods over 400 days are sampled weekly.
+         */
+        get: operations["history"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/investments/instruments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Instruments of the user's operations and those entered by hand, with the latest prices */
+        get: operations["instruments"];
+        put?: never;
+        /** Enter an instrument by hand, e.g. a Ukrainian government bond */
+        post: operations["createOwn"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/investments/instruments/market": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Add a market instrument found by a search, or get the one already known
+         * @description Its data come from the market data provider; prices load within minutes.
+         */
+        post: operations["addMarket"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/investments/instruments/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Find instruments by ticker, name or ISIN
+         * @description Own and known instruments first, then those of the market data provider; a result without an id is added with POST /instruments/market.
+         */
+        get: operations["search"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/investments/instruments/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["instrument"];
+        /** Replace an instrument entered by hand, e.g. with a new manual price */
+        put: operations["updateOwn"];
+        post?: never;
+        /** Delete an instrument entered by hand that has no operations */
+        delete: operations["deleteOwn"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/investments/instruments/{id}/prices": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Daily closes of a market instrument, by default of the last year */
+        get: operations["prices"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/investments/operations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Operations of the brokerage accounts, newest first */
+        get: operations["operations"];
+        put?: never;
+        /**
+         * Record a trade, a dividend or coupon, a fee or a split
+         * @description A sale of more than is held on its date is rejected.
+         */
+        post: operations["create_4"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/investments/operations/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["operation"];
+        put: operations["update_2"];
+        post?: never;
+        /** Delete an operation; deleting a purchase whose units were sold later is rejected */
+        delete: operations["delete_4"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/investments/portfolio": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The portfolio of the brokerage accounts in the base currency
+         * @description All brokerage accounts that are not archived, or the given one.
+         */
+        get: operations["portfolio"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/investments/positions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** One instrument on one account: the position, its lots (FIFO), sales and operations */
+        get: operations["position"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -1204,6 +1412,11 @@ export interface components {
             readyToAssign: number;
             unconvertedCurrencies: string[];
         };
+        AllocationPart: {
+            key: string;
+            share: number;
+            value: number;
+        };
         Anomaly: {
             amount: number;
             average: number;
@@ -1216,6 +1429,63 @@ export interface components {
         };
         AssignRequest: {
             assigned: number;
+        };
+        BenchmarkInfo: {
+            /** @enum {string} */
+            key: "SP500" | "MSCI_WORLD" | "NASDAQ100";
+            name: string;
+            /** Format: date */
+            pricesFrom: string | null;
+            symbol: string;
+        };
+        CalendarEvent: {
+            /** Format: int64 */
+            accountId: number;
+            currency: string;
+            /** Format: date */
+            date: string;
+            /** Format: date */
+            exDate: string | null;
+            gross: number;
+            grossInTarget: number;
+            /** Format: int64 */
+            instrumentId: number;
+            name: string;
+            net: number;
+            netInTarget: number;
+            perShare: number | null;
+            quantity: number;
+            /** @enum {string} */
+            status: "RECEIVED" | "EXPECTED" | "DECLARED" | "FORECAST";
+            symbol: string;
+            tax: number;
+            taxEstimated: boolean;
+            /** @enum {string} */
+            type: "STOCK" | "ETF" | "FUND" | "BOND" | "GOVERNMENT_BOND" | "CRYPTO" | "OTHER";
+        };
+        CalendarResponse: {
+            currency: string;
+            events: components["schemas"]["CalendarEvent"][];
+            /** Format: date */
+            from: string;
+            monthly: number;
+            months: components["schemas"]["MonthPayments"][];
+            next12Months: number;
+            next12MonthsNet: number;
+            received12Months: number;
+            receivedByInstrument: components["schemas"]["InstrumentIncome"][];
+            /** Format: date */
+            to: string;
+            unconvertedCurrencies: string[];
+            yield: number | null;
+            yieldOnCost: number | null;
+        };
+        CashResponse: {
+            /** Format: int64 */
+            accountId: number;
+            amount: number;
+            amountInBase: number | null;
+            currency: string;
         };
         CategoryChange: {
             a: number;
@@ -1476,6 +1746,23 @@ export interface components {
             target: number;
             unconvertedCurrencies: string[];
         };
+        HistoryPoint: {
+            benchmark: number | null;
+            /** Format: date */
+            date: string;
+            deposited: number;
+            value: number;
+        };
+        HistoryResponse: {
+            benchmark: components["schemas"]["BenchmarkInfo"] | null;
+            currency: string;
+            /** Format: date */
+            from: string;
+            points: components["schemas"]["HistoryPoint"][];
+            /** Format: date */
+            to: string;
+            unconvertedCurrencies: string[];
+        };
         ImportAccount: {
             created: boolean;
             currency: string;
@@ -1544,6 +1831,36 @@ export interface components {
             to: string;
             unconvertedCurrencies: string[];
         };
+        InstrumentIncome: {
+            amount: number;
+            /** Format: int64 */
+            instrumentId: number;
+            symbol: string;
+        };
+        InstrumentResponse: {
+            /** Format: int32 */
+            couponFrequency: number | null;
+            couponRate: number | null;
+            currency: string;
+            exchange: string | null;
+            /** Format: int64 */
+            id: number;
+            isin: string | null;
+            /** Format: date */
+            maturityDate: string | null;
+            micCode: string | null;
+            name: string;
+            nominal: number | null;
+            own: boolean;
+            price: number | null;
+            /** Format: date */
+            priceDate: string | null;
+            symbol: string;
+            /** @enum {string} */
+            type: "STOCK" | "ETF" | "FUND" | "BOND" | "GOVERNMENT_BOND" | "CRYPTO" | "OTHER";
+            /** @enum {string} */
+            valuation: "MARKET" | "NOMINAL" | "MANUAL";
+        };
         LinkRequest: {
             /** Format: int64 */
             accountId?: number | null;
@@ -1566,6 +1883,20 @@ export interface components {
             email: string;
             password: string;
         };
+        LotResponse: {
+            /** Format: date */
+            date: string;
+            /** Format: int64 */
+            operationId: number;
+            quantity: number;
+            remaining: number;
+            unitCost: number;
+            unrealized: number | null;
+        };
+        MarketInstrumentRequest: {
+            micCode?: string;
+            symbol: string;
+        };
         MonthIncomeExpense: {
             expense: number;
             income: number;
@@ -1578,6 +1909,13 @@ export interface components {
             liabilities: number;
             month: string;
             netWorth: number;
+        };
+        MonthPayments: {
+            declared: number;
+            expected: number;
+            forecast: number;
+            month: string;
+            received: number;
         };
         MonthResponse: {
             activity: number;
@@ -1683,8 +2021,84 @@ export interface components {
             /** @enum {string} */
             type?: "EXPENSE" | "INCOME" | "TRANSFER";
         };
+        OperationRequest: {
+            /** Format: int64 */
+            accountId: number;
+            amount?: number;
+            comment?: string;
+            currency?: string;
+            /** Format: date */
+            date: string;
+            fee?: number;
+            /** Format: int64 */
+            instrumentId?: number;
+            price?: number;
+            quantity?: number;
+            /** Format: int32 */
+            splitFrom?: number;
+            /** Format: int32 */
+            splitTo?: number;
+            tax?: number;
+            /** @enum {string} */
+            type: "BUY" | "SELL" | "DIVIDEND" | "COUPON" | "FEE" | "SPLIT";
+        };
+        OperationResponse: {
+            /** Format: int64 */
+            accountId: number;
+            amount: number;
+            cash: number;
+            comment: string | null;
+            currency: string;
+            /** Format: date */
+            date: string;
+            fee: number;
+            /** Format: int64 */
+            id: number;
+            /** Format: int64 */
+            instrumentId: number | null;
+            price: number | null;
+            quantity: number | null;
+            /** Format: int32 */
+            splitFrom: number | null;
+            /** Format: int32 */
+            splitTo: number | null;
+            symbol: string | null;
+            tax: number;
+            /** @enum {string} */
+            type: "BUY" | "SELL" | "DIVIDEND" | "COUPON" | "FEE" | "SPLIT";
+        };
+        OwnInstrumentRequest: {
+            /** Format: int32 */
+            couponFrequency?: number;
+            couponRate?: number;
+            currency: string;
+            isin?: string;
+            manualPrice?: number;
+            /** Format: date */
+            manualPriceDate?: string;
+            /** Format: date */
+            maturityDate?: string;
+            name: string;
+            nominal?: number;
+            symbol: string;
+            /** @enum {string} */
+            type: "STOCK" | "ETF" | "FUND" | "BOND" | "GOVERNMENT_BOND" | "CRYPTO" | "OTHER";
+            /** @enum {string} */
+            valuation: "MARKET" | "NOMINAL" | "MANUAL";
+        };
         PageResponseImportOperation: {
             items: components["schemas"]["ImportOperation"][];
+            /** Format: int32 */
+            page: number;
+            /** Format: int32 */
+            size: number;
+            /** Format: int64 */
+            totalItems: number;
+            /** Format: int32 */
+            totalPages: number;
+        };
+        PageResponseOperationResponse: {
+            items: components["schemas"]["OperationResponse"][];
             /** Format: int32 */
             page: number;
             /** Format: int32 */
@@ -1755,6 +2169,61 @@ export interface components {
             name: string;
             planned: number;
             plannedRemaining: number;
+        };
+        PortfolioResponse: {
+            byCurrency: components["schemas"]["AllocationPart"][];
+            byType: components["schemas"]["AllocationPart"][];
+            cash: components["schemas"]["CashResponse"][];
+            currency: string;
+            dayChange: number;
+            dividendsLast12Months: number;
+            invested: number;
+            positions: components["schemas"]["PositionResponse"][];
+            /** Format: date */
+            pricesAsOf: string | null;
+            realizedThisYear: number;
+            unconvertedCurrencies: string[];
+            unrealized: number;
+            unrealizedShare: number | null;
+            value: number;
+        };
+        PositionDetailResponse: {
+            /** Format: int64 */
+            accountId: number;
+            averagePrice: number | null;
+            cost: number;
+            dividends: number;
+            instrument: components["schemas"]["InstrumentResponse"];
+            lots: components["schemas"]["LotResponse"][];
+            operations: components["schemas"]["OperationResponse"][];
+            price: number | null;
+            quantity: number;
+            realized: number;
+            sales: components["schemas"]["SaleResponse"][];
+            unrealized: number;
+            value: number;
+        };
+        PositionResponse: {
+            /** Format: int64 */
+            accountId: number;
+            averagePrice: number;
+            cost: number;
+            dayChange: number | null;
+            instrument: components["schemas"]["InstrumentResponse"];
+            price: number | null;
+            /** Format: date */
+            priceDate: string | null;
+            quantity: number;
+            share: number | null;
+            unrealized: number;
+            unrealizedShare: number | null;
+            value: number;
+            valueInBase: number | null;
+        };
+        PricePoint: {
+            close: number;
+            /** Format: date */
+            date: string;
         };
         RecurringRef: {
             /** Format: date */
@@ -1862,6 +2331,25 @@ export interface components {
             payee: components["schemas"]["NamedResponse"] | null;
             payeePattern: string | null;
         };
+        SalePart: {
+            /** Format: date */
+            lotDate: string;
+            /** Format: int64 */
+            lotOperationId: number;
+            quantity: number;
+            unitCost: number;
+        };
+        SaleResponse: {
+            cost: number;
+            /** Format: date */
+            date: string;
+            /** Format: int64 */
+            operationId: number;
+            parts: components["schemas"]["SalePart"][];
+            proceeds: number;
+            quantity: number;
+            realized: number;
+        };
         SavingsResponse: {
             averageRate: number | null;
             bestMonth: string | null;
@@ -1891,6 +2379,22 @@ export interface components {
              * @example 08:00
              */
             windowStart?: string;
+        };
+        SearchResponse: {
+            providerEnabled: boolean;
+            results: components["schemas"]["SearchResult"][];
+        };
+        SearchResult: {
+            country: string | null;
+            currency: string;
+            exchange: string | null;
+            /** Format: int64 */
+            id: number | null;
+            micCode: string | null;
+            name: string;
+            symbol: string;
+            /** @enum {string} */
+            type: "STOCK" | "ETF" | "FUND" | "BOND" | "GOVERNMENT_BOND" | "CRYPTO" | "OTHER";
         };
         SpendingResponse: {
             categories: components["schemas"]["CategorySpending"][];
@@ -2048,7 +2552,7 @@ export interface operations {
             };
         };
     };
-    create_7: {
+    create_8: {
         parameters: {
             query?: never;
             header?: never;
@@ -2114,7 +2618,7 @@ export interface operations {
             };
         };
     };
-    update_5: {
+    update_6: {
         parameters: {
             query?: never;
             header?: never;
@@ -2140,7 +2644,7 @@ export interface operations {
             };
         };
     };
-    delete_7: {
+    delete_8: {
         parameters: {
             query?: never;
             header?: never;
@@ -2691,7 +3195,7 @@ export interface operations {
             };
         };
     };
-    create_6: {
+    create_7: {
         parameters: {
             query?: never;
             header?: never;
@@ -2739,7 +3243,7 @@ export interface operations {
             };
         };
     };
-    update_4: {
+    update_5: {
         parameters: {
             query?: never;
             header?: never;
@@ -2765,7 +3269,7 @@ export interface operations {
             };
         };
     };
-    delete_6: {
+    delete_7: {
         parameters: {
             query?: never;
             header?: never;
@@ -2805,7 +3309,7 @@ export interface operations {
             };
         };
     };
-    create_5: {
+    create_6: {
         parameters: {
             query?: never;
             header?: never;
@@ -2849,7 +3353,7 @@ export interface operations {
             };
         };
     };
-    update_3: {
+    update_4: {
         parameters: {
             query?: never;
             header?: never;
@@ -2875,7 +3379,7 @@ export interface operations {
             };
         };
     };
-    delete_5: {
+    delete_6: {
         parameters: {
             query?: never;
             header?: never;
@@ -2937,7 +3441,7 @@ export interface operations {
             };
         };
     };
-    create_4: {
+    create_5: {
         parameters: {
             query?: never;
             header?: never;
@@ -2983,7 +3487,7 @@ export interface operations {
             };
         };
     };
-    update_2: {
+    update_3: {
         parameters: {
             query?: never;
             header?: never;
@@ -3009,7 +3513,7 @@ export interface operations {
             };
         };
     };
-    delete_4: {
+    delete_5: {
         parameters: {
             query?: never;
             header?: never;
@@ -3282,6 +3786,402 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["ImportPreviewResponse"];
+                };
+            };
+        };
+    };
+    dividends: {
+        parameters: {
+            query?: {
+                accountId?: number;
+                from?: string;
+                to?: string;
+                currency?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CalendarResponse"];
+                };
+            };
+        };
+    };
+    history: {
+        parameters: {
+            query?: {
+                accountId?: number;
+                from?: string;
+                to?: string;
+                currency?: string;
+                benchmark?: "SP500" | "MSCI_WORLD" | "NASDAQ100";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HistoryResponse"];
+                };
+            };
+        };
+    };
+    instruments: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["InstrumentResponse"][];
+                };
+            };
+        };
+    };
+    createOwn: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OwnInstrumentRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["InstrumentResponse"];
+                };
+            };
+        };
+    };
+    addMarket: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MarketInstrumentRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["InstrumentResponse"];
+                };
+            };
+        };
+    };
+    search: {
+        parameters: {
+            query: {
+                q: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["SearchResponse"];
+                };
+            };
+        };
+    };
+    instrument: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["InstrumentResponse"];
+                };
+            };
+        };
+    };
+    updateOwn: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OwnInstrumentRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["InstrumentResponse"];
+                };
+            };
+        };
+    };
+    deleteOwn: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    prices: {
+        parameters: {
+            query?: {
+                from?: string;
+                to?: string;
+            };
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PricePoint"][];
+                };
+            };
+        };
+    };
+    operations: {
+        parameters: {
+            query?: {
+                accountId?: number;
+                instrumentId?: number;
+                page?: number;
+                size?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PageResponseOperationResponse"];
+                };
+            };
+        };
+    };
+    create_4: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OperationRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["OperationResponse"];
+                };
+            };
+        };
+    };
+    operation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["OperationResponse"];
+                };
+            };
+        };
+    };
+    update_2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OperationRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["OperationResponse"];
+                };
+            };
+        };
+    };
+    delete_4: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    portfolio: {
+        parameters: {
+            query?: {
+                accountId?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PortfolioResponse"];
+                };
+            };
+        };
+    };
+    position: {
+        parameters: {
+            query: {
+                accountId: number;
+                instrumentId: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PositionDetailResponse"];
                 };
             };
         };
