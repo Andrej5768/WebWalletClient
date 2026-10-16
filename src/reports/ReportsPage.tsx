@@ -1,5 +1,6 @@
-import { Group, SegmentedControl, Stack, Tabs, Text, Title } from '@mantine/core';
+import { Group, SegmentedControl, Skeleton, Stack, Tabs, Text, Title } from '@mantine/core';
 import { DatePickerInput } from '@mantine/dates';
+import { lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router';
 import { formatDate } from '../lib/format';
@@ -9,7 +10,12 @@ import { NetWorthReport } from './NetWorthReport';
 import { PayeesReport } from './PayeesReport';
 import { SpendingReport } from './SpendingReport';
 
-const tabs = ['spending', 'income', 'networth', 'payees'] as const;
+// Charts of the analytics are only loaded when the tab is opened.
+const AnalyticsReport = lazy(() =>
+  import('./analytics/AnalyticsReport').then((module) => ({ default: module.AnalyticsReport })),
+);
+
+const tabs = ['spending', 'income', 'networth', 'payees', 'analytics'] as const;
 type Tab = (typeof tabs)[number];
 
 const PRESETS: Preset[] = ['month', 'prevMonth', 'quarter', 'year', 'twelveMonths', 'custom'];
@@ -19,6 +25,7 @@ const DEFAULT_PRESET: Record<Tab, Preset> = {
   income: 'twelveMonths',
   networth: 'twelveMonths',
   payees: 'month',
+  analytics: 'month',
 };
 
 export function ReportsPage() {
@@ -46,7 +53,7 @@ export function ReportsPage() {
         <Title order={1} size="h2">
           {t('nav.reports')}
         </Title>
-        <Group gap="sm" wrap="wrap">
+        <Group gap="sm" wrap="wrap" display={tab === 'analytics' ? 'none' : undefined}>
           <SegmentedControl
             aria-label={t('transactions.period')}
             value={preset}
@@ -72,12 +79,12 @@ export function ReportsPage() {
 
       <Tabs
         value={tab}
-        onChange={(value) => update({ tab: value === 'spending' ? null : value, period: null })}
+        onChange={(value) => update({ tab: value === 'spending' ? null : value, period: null, view: null })}
       >
         <Tabs.List>
           {tabs.map((value) => (
             <Tabs.Tab key={value} value={value}>
-              {t(`reports.tabs.${value}`)}
+              {value === 'analytics' ? t('analytics.tab') : t(`reports.tabs.${value}`)}
             </Tabs.Tab>
           ))}
         </Tabs.List>
@@ -87,6 +94,11 @@ export function ReportsPage() {
       {tab === 'income' && <IncomeExpenseReport period={period} />}
       {tab === 'networth' && <NetWorthReport period={period} />}
       {tab === 'payees' && <PayeesReport period={period} />}
+      {tab === 'analytics' && (
+        <Suspense fallback={<Skeleton height={420} radius="md" />}>
+          <AnalyticsReport />
+        </Suspense>
+      )}
     </Stack>
   );
 }
