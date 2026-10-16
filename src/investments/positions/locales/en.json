@@ -1,1 +1,26 @@
-{}
+{
+  "invPositions": {
+    "value": "Value",
+    "unrealized": "Unrealized profit",
+    "day": "Today",
+    "grouping": "Grouping",
+    "byAccount": "By account",
+    "byType": "By class",
+    "columns": {
+      "instrument": "Instrument",
+      "quantity": "Quantity",
+      "average": "Avg. price",
+      "price": "Price",
+      "value": "Value",
+      "profit": "Profit",
+      "share": "Share"
+    },
+    "cash": "Cash {{currency}}",
+    "noPrice": "no price",
+    "valuation": {
+      "NOMINAL": "nominal + accrued",
+      "MANUAL": "valued by hand"
+    },
+    "empty": "No positions yet. Record the first purchase with the “Operation” button."
+  }
+}

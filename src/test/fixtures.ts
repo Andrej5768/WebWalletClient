@@ -230,3 +230,82 @@ export function recurringOf(
     ...overrides,
   };
 }
+
+export function instrumentOf(
+  overrides: Partial<Schemas['InstrumentResponse']> = {},
+): Schemas['InstrumentResponse'] {
+  return {
+    id: 1,
+    symbol: 'AAPL',
+    name: 'Apple Inc',
+    type: 'STOCK',
+    currency: 'USD',
+    exchange: 'NASDAQ',
+    micCode: 'XNGS',
+    isin: null,
+    valuation: 'MARKET',
+    own: false,
+    nominal: null,
+    couponRate: null,
+    couponFrequency: null,
+    maturityDate: null,
+    price: null,
+    priceDate: null,
+    ...overrides,
+  };
+}
+
+export function positionOf(
+  overrides: Partial<Schemas['PositionResponse']> = {},
+): Schemas['PositionResponse'] {
+  return {
+    accountId: 1,
+    instrument: instrumentOf(),
+    quantity: 0,
+    averagePrice: 0,
+    price: null,
+    priceDate: null,
+    dayChange: null,
+    value: 0,
+    cost: 0,
+    unrealized: 0,
+    unrealizedShare: null,
+    valueInBase: null,
+    share: null,
+    ...overrides,
+  };
+}
+
+export function portfolioOf(
+  overrides: Partial<Schemas['PortfolioResponse']> = {},
+): Schemas['PortfolioResponse'] {
+  return {
+    currency: 'UAH',
+    value: 0,
+    invested: 0,
+    unrealized: 0,
+    unrealizedShare: null,
+    realizedThisYear: 0,
+    dividendsLast12Months: 0,
+    dayChange: 0,
+    pricesAsOf: null,
+    positions: [],
+    cash: [],
+    byType: [],
+    byCurrency: [],
+    unconvertedCurrencies: [],
+    ...overrides,
+  };
+}
+
+export function historyOf(overrides: Partial<Schemas['HistoryResponse']> = {}): Schemas['HistoryResponse'] {
+  return {
+    currency: 'UAH',
+    from: '2026-01-01',
+    to: '2026-10-15',
+    benchmark: null,
+    points: [],
+    unconvertedCurrencies: [],
+    ...overrides,
+  };
+}
