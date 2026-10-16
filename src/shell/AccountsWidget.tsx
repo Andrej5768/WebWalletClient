@@ -3,7 +3,10 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import type { Schemas } from '../api/client';
 import { useAccounts, useBaseCurrency } from '../api/queries';
+import { ShareBar } from '../components/Figure';
+import { useGoals } from '../goals/api';
 import { accountColor } from '../lib/accounts';
+import { formatPercent } from '../lib/format';
 import { formatMoney } from '../lib/money';
 import classes from './shell.module.css';
 
@@ -12,11 +15,13 @@ type Account = Schemas['AccountResponse'];
 const SAVINGS: Account['type'][] = ['SAVINGS', 'DEPOSIT'];
 const SHOWN = 6;
 
-/** Everyday accounts under the menu and the savings total. */
+/** Everyday accounts under the menu, the savings total and the progress of the first open goal. */
 export function AccountsWidget() {
   const { t } = useTranslation();
   const { data, isLoading } = useAccounts();
   const baseCurrency = useBaseCurrency();
+  const goals = useGoals();
+  const goal = goals.data?.goals.find((item) => item.status !== 'ACHIEVED');
 
   if (isLoading) return <Skeleton height={120} radius="md" />;
   const active = (data ?? []).filter((account) => !account.archived);
@@ -63,6 +68,14 @@ export function AccountsWidget() {
             {savingsIncomplete && '*'}
           </span>
         </div>
+      )}
+      {goal && (
+        <Anchor component={Link} to="/goals" underline="never" c="inherit" className={classes.goal}>
+          <ShareBar share={goal.progress} />
+          <Text size="xs" c="dimmed" mt={4} truncate>
+            {t('goals.sidebar', { name: goal.name, share: formatPercent(goal.progress) })}
+          </Text>
+        </Anchor>
       )}
     </div>
   );

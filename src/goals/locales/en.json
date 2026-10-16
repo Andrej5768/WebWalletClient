@@ -1,0 +1,68 @@
+{
+  "goals": {
+    "subtitle": "Saving for what matters",
+    "add": "New goal",
+    "saved": "Saved for goals",
+    "savedOf": "of {{target}}",
+    "monthly": "To set aside",
+    "monthlyNote": "a month to make it in time",
+    "averageSavings": "Average savings",
+    "averageSavingsNote": "{{rate}} of income over 12 months",
+    "averageSavingsEmpty": "No income in the last 12 months yet",
+    "empty": "No goals yet. Add the first one, for example a trip or an emergency fund.",
+    "actions": "Goal actions",
+    "edit": "Edit",
+    "contribute": "Add money",
+    "markAchieved": "Mark as achieved",
+    "markActive": "Make active again",
+    "delete": "Delete",
+    "deleteTitle": "Delete the goal “{{name}}”?",
+    "deleteText": "The account and transactions stay.",
+    "progress": "of {{target}} · {{share}}",
+    "until": "by {{date}}",
+    "manual": "Tracked by hand",
+    "status": {
+      "ACHIEVED": "Achieved",
+      "NO_DATE": "No deadline",
+      "ON_TRACK": "On track",
+      "BEHIND": "Behind",
+      "OVERDUE": "Overdue"
+    },
+    "pace": {
+      "achieved": "Goal achieved",
+      "achievedOn": "Goal achieved on {{date}}",
+      "noDate": "{{remaining}} to go",
+      "ahead": "Ahead of schedule by {{amount}}",
+      "onPace": "Right on schedule",
+      "behind": "By today you should have {{expected}}, {{missing}} short",
+      "overdue": "The deadline has passed, {{remaining}} short"
+    },
+    "paceMarker": "Where you should be today",
+    "monthlyLabel_one": "Set aside monthly, {{count}} month",
+    "monthlyLabel_other": "Set aside monthly, {{count}} months",
+    "monthlyNow": "Needed now",
+    "form": {
+      "newTitle": "New goal",
+      "editTitle": "Edit goal",
+      "name": "Name",
+      "target": "Target amount",
+      "currency": "Currency",
+      "date": "Date",
+      "dateHint": "Without a date the goal has no deadline",
+      "account": "Account to save on",
+      "noAccount": "No account — track by hand",
+      "accountHint": "Progress follows the account balance",
+      "manualHint": "You record the money you add yourself",
+      "saved": "Already saved",
+      "icon": "Icon",
+      "color": "Color"
+    },
+    "contribution": {
+      "title": "Add money to “{{name}}”",
+      "amount": "Amount",
+      "withdraw": "Take out of the goal",
+      "hint": "Saved so far: {{saved}}"
+    },
+    "sidebar": "{{name}}: {{share}} saved"
+  }
+}

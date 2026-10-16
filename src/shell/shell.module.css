@@ -113,3 +113,8 @@
   flex: 1;
   padding: 28px 24px 48px;
 }
+
+.goal {
+  display: block;
+  padding-top: 2px;
+}

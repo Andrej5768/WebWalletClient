@@ -1,0 +1,33 @@
+.figures {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 12px;
+  align-items: start;
+}
+
+.footer {
+  padding-top: 10px;
+  border-top: 1px solid var(--ww-border);
+}
+
+/* The marker of where the progress should be today, over the bar. */
+.pace {
+  position: relative;
+}
+
+.pace > i {
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  width: 2px;
+  margin-left: -1px;
+  border-radius: 1px;
+  background: var(--ww-text);
+  opacity: 0.55;
+}

@@ -1,4 +1,4 @@
-import { MantineProvider } from '@mantine/core';
+import { MantineProvider, mergeThemeOverrides, Menu, Popover } from '@mantine/core';
 import { ModalsProvider } from '@mantine/modals';
 import { Notifications } from '@mantine/notifications';
 import { QueryClientProvider } from '@tanstack/react-query';
@@ -8,6 +8,7 @@ import { createMemoryRouter, MemoryRouter, RouterProvider } from 'react-router';
 import { createQueryClient } from '../app/queryClient';
 import { routes } from '../app/router';
 import { kyivToday } from '../lib/periods';
+import { forecastOf } from './fixtures';
 import { theme } from '../theme/theme';
 
 type Handler = (request: Request) => Response | Promise<Response>;
@@ -73,6 +74,8 @@ const emptyBudget = {
   unconvertedCurrencies: [],
 };
 
+const emptyForecast = forecastOf({ today: kyivToday().format('YYYY-MM-DD') });
+
 /** Handlers for a signed-in session with empty data. */
 export const signedInApi: Record<string, Handler> = {
   'GET /api/v1/banks/monobank': () => json({ code: 'NOT_FOUND' }, 404),
@@ -87,13 +90,29 @@ export const signedInApi: Record<string, Handler> = {
   'POST /api/v1/auth/refresh': () => json({ accessToken: 'token', tokenType: 'Bearer', expiresIn: 900 }),
   'GET /api/v1/me': () => json(user),
   'GET /api/v1/accounts': () => json([]),
+  'GET /api/v1/forecast': () => json(emptyForecast),
+  'GET /api/v1/recurring': () => json([]),
+  'GET /api/v1/recurring/occurrences': () => json([]),
+  'GET /api/v1/goals': () =>
+    json({ currency: 'UAH', saved: 0, target: 0, monthlyNeeded: 0, goals: [], unconvertedCurrencies: [] }),
   'GET /api/v1/accounts/summary': () =>
     json({ currency: 'UAH', netWorth: 0, available: 0, availableWithCredit: 0, readyToAssign: 0 }),
 };
 
+/**
+ * jsdom lays nothing out, so every element has an empty box; Floating UI then sometimes takes the
+ * target of a menu or a select for one scrolled out of view and hides the dropdown it opened.
+ */
+const testTheme = mergeThemeOverrides(theme, {
+  components: {
+    Menu: Menu.extend({ defaultProps: { hideDetached: false } }),
+    Popover: Popover.extend({ defaultProps: { hideDetached: false } }),
+  },
+});
+
 function Providers({ children }: { children: ReactNode }) {
   return (
-    <MantineProvider theme={theme}>
+    <MantineProvider theme={testTheme}>
       <Notifications />
       <QueryClientProvider client={createQueryClient({ retry: false })}>
         <ModalsProvider>{children}</ModalsProvider>
