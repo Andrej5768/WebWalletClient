@@ -159,11 +159,23 @@ it('adds an instrument by hand from the drawer', async () => {
   const requests = api({
     'GET /api/v1/investments/instruments/9': () =>
       json(
-        tradedInstrumentOf({ id: 9, symbol: 'UA4000227045', name: 'ОВДП 22.07.2027', currency: 'UAH', own: true }),
+        tradedInstrumentOf({
+          id: 9,
+          symbol: 'UA4000227045',
+          name: 'ОВДП 22.07.2027',
+          currency: 'UAH',
+          own: true,
+        }),
       ),
     'POST /api/v1/investments/instruments': () =>
       json(
-        tradedInstrumentOf({ id: 9, symbol: 'UA4000227045', name: 'ОВДП 22.07.2027', currency: 'UAH', own: true }),
+        tradedInstrumentOf({
+          id: 9,
+          symbol: 'UA4000227045',
+          name: 'ОВДП 22.07.2027',
+          currency: 'UAH',
+          own: true,
+        }),
         201,
       ),
   });
