@@ -8,6 +8,7 @@ import { createMemoryRouter, MemoryRouter, RouterProvider } from 'react-router';
 import { createQueryClient } from '../app/queryClient';
 import { routes } from '../app/router';
 import { kyivToday } from '../lib/periods';
+import { forecastOf } from './fixtures';
 import { theme } from '../theme/theme';
 
 type Handler = (request: Request) => Response | Promise<Response>;
@@ -73,6 +74,8 @@ const emptyBudget = {
   unconvertedCurrencies: [],
 };
 
+const emptyForecast = forecastOf({ today: kyivToday().format('YYYY-MM-DD') });
+
 /** Handlers for a signed-in session with empty data. */
 export const signedInApi: Record<string, Handler> = {
   'GET /api/v1/banks/monobank': () => json({ code: 'NOT_FOUND' }, 404),
@@ -87,6 +90,8 @@ export const signedInApi: Record<string, Handler> = {
   'POST /api/v1/auth/refresh': () => json({ accessToken: 'token', tokenType: 'Bearer', expiresIn: 900 }),
   'GET /api/v1/me': () => json(user),
   'GET /api/v1/accounts': () => json([]),
+  'GET /api/v1/forecast': () => json(emptyForecast),
+  'GET /api/v1/recurring': () => json([]),
   'GET /api/v1/accounts/summary': () =>
     json({ currency: 'UAH', netWorth: 0, available: 0, availableWithCredit: 0, readyToAssign: 0 }),
 };
