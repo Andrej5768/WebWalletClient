@@ -2,11 +2,11 @@ import { Button, Chip, Group, Skeleton, Stack, Tabs, Text, Title } from '@mantin
 import { Plus } from 'lucide-react';
 import { lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSearchParams } from 'react-router';
 import { useAccounts } from '../api/queries';
-import { intParam } from '../lib/useUrlParams';
+import { intParam, useUrlParams } from '../lib/useUrlParams';
 import { isBrokerage } from './api';
-import { OperationDrawer } from './operations/OperationDrawer';
+import { OperationDrawerFromUrl } from './operations/OperationDrawerFromUrl';
+import { useOpenOperation } from './operations/useOpenOperation';
 
 // The tabs and their charts load when opened.
 const OverviewTab = lazy(() => import('./overview/OverviewTab').then((m) => ({ default: m.OverviewTab })));
@@ -22,24 +22,18 @@ type Tab = (typeof tabs)[number];
 
 /**
  * The portfolio of the brokerage accounts. The URL keeps the tab (`tab`), the account (`accountId`, all by default)
- * and an open operation drawer (`operation=new` or an operation id, `instrumentId` to start a new one with).
+ * and an open operation drawer (see {@link OperationDrawerFromUrl}).
  */
 export function InvestmentsPage() {
   const { t } = useTranslation();
-  const [params, setParams] = useSearchParams();
+  const [params, update] = useUrlParams();
+  const openOperation = useOpenOperation();
   const accounts = useAccounts();
   const tab = (tabs as readonly string[]).includes(params.get('tab') ?? '')
     ? (params.get('tab') as Tab)
     : 'overview';
   const accountId = intParam(params, 'accountId');
   const brokerage = (accounts.data ?? []).filter((account) => isBrokerage(account) && !account.archived);
-
-  const update = (changes: Record<string, string | null>) => {
-    const next = new URLSearchParams(params);
-    Object.entries(changes).forEach(([key, value]) => (value ? next.set(key, value) : next.delete(key)));
-    setParams(next, { replace: true });
-  };
-  const operation = params.get('operation');
 
   return (
     <Stack gap="lg" maw={1200}>
@@ -50,7 +44,7 @@ export function InvestmentsPage() {
         <Button
           leftSection={<Plus size={16} />}
           disabled={brokerage.length === 0}
-          onClick={() => update({ operation: 'new', instrumentId: null })}
+          onClick={() => openOperation({ accountId })}
         >
           {t('investments.addOperation')}
         </Button>
@@ -94,14 +88,7 @@ export function InvestmentsPage() {
         </>
       )}
 
-      {operation && (
-        <OperationDrawer
-          operationId={operation === 'new' ? null : Number(operation)}
-          accountId={accountId ?? brokerage[0]?.id}
-          instrumentId={intParam(params, 'instrumentId')}
-          onClose={() => update({ operation: null, instrumentId: null })}
-        />
-      )}
+      <OperationDrawerFromUrl defaultAccountId={accountId ?? brokerage[0]?.id} />
     </Stack>
   );
 }

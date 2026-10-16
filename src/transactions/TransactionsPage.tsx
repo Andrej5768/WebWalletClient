@@ -1,7 +1,7 @@
 import { Button, Card, Group, Pagination, Skeleton, Stack, Text, Title } from '@mantine/core';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import dayjs from 'dayjs';
-import { Plus, Repeat } from 'lucide-react';
+import { Repeat } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
@@ -128,12 +128,6 @@ export function TransactionsPage() {
           <Button variant="default" leftSection={<Repeat size={16} />} onClick={() => openRecurring('list')}>
             {t('recurring.button')}
           </Button>
-          <Button
-            leftSection={<Plus size={16} />}
-            onClick={() => update({ new: '1', edit: null, page: params.get('page') })}
-          >
-            {t('shell.addTransaction')}
-          </Button>
         </Group>
       </Group>
 
@@ -154,6 +148,11 @@ export function TransactionsPage() {
               }
               onLink={setLinkFor}
               onEditSeries={(id) => openRecurring(id)}
+              busy={(occurrence) =>
+                confirm.isPending &&
+                confirm.variables?.occurrence.recurringId === occurrence.recurringId &&
+                confirm.variables.occurrence.date === occurrence.date
+              }
             />
           )}
           {transactions.isSuccess && days.length === 0 && (

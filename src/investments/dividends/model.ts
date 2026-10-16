@@ -13,6 +13,32 @@ export const STATUS_COLORS: Record<DividendStatus, string> = {
   FORECAST: 'blue.3',
 };
 
+/** Bonds pay by a known schedule: their declared coupons are shown as "on schedule". */
+const BONDS = new Set<DividendEvent['type']>(['BOND', 'GOVERNMENT_BOND']);
+
+/** The key of the status label: a declared coupon of a bond is "on schedule". */
+export function statusKey(event: Pick<DividendEvent, 'status' | 'type'>): DividendStatus | 'SCHEDULED' {
+  return event.status === 'DECLARED' && BONDS.has(event.type) ? 'SCHEDULED' : event.status;
+}
+
+/** How an instrument is named in short: the ticker of a security, the name of a bond (its symbol is an ISIN). */
+export function shortName(event: Pick<DividendEvent, 'symbol' | 'name' | 'type'>): string {
+  return BONDS.has(event.type) ? event.name : event.symbol;
+}
+
+/**
+ * The month the calendar opens on: the current one when it has payments, else the nearest later month with some,
+ * else the current one.
+ */
+export function openingMonth(events: DividendEvent[], currentMonth: string): string {
+  if (events.some((event) => event.date.startsWith(currentMonth))) return currentMonth;
+  const later = events
+    .map((event) => event.date.slice(0, 7))
+    .filter((month) => month > currentMonth)
+    .sort();
+  return later[0] ?? currentMonth;
+}
+
 /** The days of a month by weeks starting on Monday; days of the neighbouring months are null. */
 export function monthWeeks(month: string): (string | null)[][] {
   const first = dayjs(`${month}-01`);

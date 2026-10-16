@@ -77,3 +77,12 @@ describe('spentShare', () => {
     expect(spentShare({ activity: 0, available: 0 })).toBe(0);
   });
 });
+
+it('marks a category without subcategories as a single row', () => {
+  const groups = groupEnvelopes([
+    budgetRowOf({ categoryId: 1, name: 'Кафе' }),
+    budgetRowOf({ categoryId: 2, name: 'Їжа', children: [budgetRowOf({ categoryId: 3, name: 'Продукти' })] }),
+  ]);
+
+  expect(groups.map((group) => group.single)).toEqual([true, false]);
+});

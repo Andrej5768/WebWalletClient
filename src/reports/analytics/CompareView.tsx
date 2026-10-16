@@ -1,4 +1,5 @@
 import { LineChart } from '@mantine/charts';
+import { moneyAxis } from '../../components/chartAxis';
 import {
   Card,
   Checkbox,
@@ -146,6 +147,7 @@ function CompareResult({
           connectNulls={false}
           curveType="linear"
           valueFormatter={(value) => money(value)}
+          yAxisProps={moneyAxis}
           gridAxis="y"
           tickLine="none"
         />

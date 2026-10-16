@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { formatMoney } from '../../lib/money';
 import type { DividendEvent } from '../api';
 import classes from './dividends.module.css';
-import { byDay, monthWeeks } from './model';
+import { byDay, monthWeeks, shortName, statusKey } from './model';
 
 /** A month by weeks from Monday with the payments of each day, colored by status. */
 export function MonthCalendar({
@@ -44,12 +44,12 @@ export function MonthCalendar({
               {(days.get(date) ?? []).map((event, item) => (
                 <Tooltip
                   key={`${event.instrumentId}-${event.accountId}-${item}`}
-                  label={`${event.name} · ${t(`invDividends.status.${event.status}`)}`}
+                  label={`${event.name} · ${t(`invDividends.status.${statusKey(event)}`)}`}
                   withArrow
                   openDelay={300}
                 >
                   <div className={`${classes.payment} ${classes[event.status]}`} data-status={event.status}>
-                    <span>{event.symbol}</span>
+                    <span>{shortName(event)}</span>
                     <Text component="span" size="11px" className="num" truncate>
                       {formatMoney(event.grossInTarget, currency)}
                     </Text>

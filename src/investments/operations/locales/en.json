@@ -1,6 +1,6 @@
 {
   "invOperations": {
-    "newTitle": "New operation",
+    "newTitle": "New trade",
     "editTitle": "Operation",
     "type": "Operation type",
     "account": "Brokerage account",
@@ -37,6 +37,9 @@
     "cashChange": "Change of free cash",
     "comment": "Comment",
     "positive": "Enter a number above zero",
-    "deleteTitle": "Delete the operation?"
+    "deleteTitle": "Delete the operation?",
+    "position": "Position",
+    "positionPlaceholder": "What you sell",
+    "noPositions": "No positions on the account"
   }
 }

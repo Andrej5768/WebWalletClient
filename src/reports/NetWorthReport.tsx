@@ -1,4 +1,5 @@
 import { AreaChart } from '@mantine/charts';
+import { moneyAxis } from '../components/chartAxis';
 import { Card, SimpleGrid, Skeleton, Stack } from '@mantine/core';
 import { useTranslation } from 'react-i18next';
 import { formatMonthShort } from '../lib/format';
@@ -68,6 +69,7 @@ export function NetWorthReport({ period }: { period: Period }) {
           fillOpacity={0.15}
           curveType="monotone"
           valueFormatter={(value) => formatMoney(value, currency)}
+          yAxisProps={moneyAxis}
           gridAxis="y"
           tickLine="none"
         />

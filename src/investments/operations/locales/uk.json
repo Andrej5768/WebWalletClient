@@ -1,6 +1,6 @@
 {
   "invOperations": {
-    "newTitle": "Нова операція",
+    "newTitle": "Нова угода",
     "editTitle": "Операція",
     "type": "Тип операції",
     "account": "Брокерський рахунок",
@@ -39,6 +39,9 @@
     "cashChange": "Зміна вільних коштів",
     "comment": "Коментар",
     "positive": "Вкажіть число більше за нуль",
-    "deleteTitle": "Видалити операцію?"
+    "deleteTitle": "Видалити операцію?",
+    "position": "Позиція",
+    "positionPlaceholder": "Що продаєте",
+    "noPositions": "На рахунку немає позицій"
   }
 }

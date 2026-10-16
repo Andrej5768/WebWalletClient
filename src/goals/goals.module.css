@@ -16,22 +16,6 @@
   border-top: 1px solid var(--ww-border);
 }
 
-/* The marker of where the progress should be today, over the bar. */
-.pace {
-  position: relative;
-}
-
-.pace > i {
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  width: 2px;
-  margin-left: -1px;
-  border-radius: 1px;
-  background: var(--ww-text);
-  opacity: 0.55;
-}
-
 /* Inputs on the left, results on the right; stacked on narrow screens. */
 .two {
   display: grid;
@@ -44,32 +28,6 @@
   .two {
     grid-template-columns: minmax(0, 1fr);
   }
-}
-
-/* FYM: months on a track of milestones (1, 3, 6, 12, 24). */
-.track {
-  position: relative;
-  height: 8px;
-  margin: 8px 8px 30px;
-  border-radius: 4px;
-  background: var(--ww-subtle);
-  border: 1px solid var(--ww-border);
-}
-
-.track > span {
-  position: absolute;
-  inset: 0 auto 0 0;
-  border-radius: 4px;
-  background: var(--mantine-primary-color-filled);
-}
-
-.track > i {
-  position: absolute;
-  top: -6px;
-  width: 2px;
-  height: 18px;
-  margin-left: -1px;
-  background: var(--ww-border-strong);
 }
 
 .track > i > b {

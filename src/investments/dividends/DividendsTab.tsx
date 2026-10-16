@@ -1,4 +1,5 @@
 import { BarChart } from '@mantine/charts';
+import { moneyAxis } from '../../components/chartAxis';
 import {
   ActionIcon,
   Alert,
@@ -16,17 +17,26 @@ import dayjs from 'dayjs';
 import { ChevronLeft, ChevronRight, CircleAlert } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSearchParams } from 'react-router';
-import { useAccounts, useBaseCurrency } from '../../api/queries';
+import { useAccounts } from '../../api/queries';
 import { Figure, ShareBar } from '../../components/Figure';
 import { QueryError, UnconvertedAlert } from '../../components/feedback';
-import { locale } from '../../i18n';
-import { formatDayShort, formatMonthLong, formatMonthShort, formatPercent } from '../../lib/format';
+import { formatDayShort, formatMonthTitle, formatMonthShort, formatPercent } from '../../lib/format';
 import { formatMoney } from '../../lib/money';
 import { isoDate, kyivToday } from '../../lib/periods';
 import { useDividends, type DividendEvent } from '../api';
+import { CurrencySwitch } from '../CurrencySwitch';
+import { useDisplayCurrency } from '../useDisplayCurrency';
+import { useOpenOperation } from '../operations/useOpenOperation';
 import { MonthCalendar } from './MonthCalendar';
-import { monthsFrom, ofMonth, receivedByMonth, STATUS_COLORS, STATUSES } from './model';
+import {
+  monthsFrom,
+  ofMonth,
+  openingMonth,
+  receivedByMonth,
+  shortName,
+  STATUS_COLORS,
+  STATUSES,
+} from './model';
 import { PaymentsList } from './PaymentsList';
 
 /** Expected payments warned about above the calendar at most. */
@@ -38,14 +48,14 @@ const MAX_WARNINGS = 3;
  */
 export function DividendsTab({ accountId }: { accountId?: number }) {
   const { t } = useTranslation();
-  const [, setParams] = useSearchParams();
-  const baseCurrency = useBaseCurrency();
+  const openOperation = useOpenOperation();
+  const display = useDisplayCurrency();
   const accounts = useAccounts();
   const today = useMemo(() => kyivToday(), []);
   const currentMonth = today.format('YYYY-MM');
-  const [currency, setCurrency] = useState<string>('base');
   const [view, setView] = useState<'calendar' | 'list'>('calendar');
-  const [month, setMonth] = useState(currentMonth);
+  // Null until chosen: the calendar opens on the nearest month with payments
+  const [chosenMonth, setMonth] = useState<string | null>(null);
 
   // A year back for what was received, a year ahead for the calendar
   const from = today.startOf('month').subtract(12, 'month').format('YYYY-MM-DD');
@@ -54,7 +64,7 @@ export function DividendsTab({ accountId }: { accountId?: number }) {
     accountId,
     from,
     to,
-    currency: currency === 'base' ? undefined : currency,
+    currency: display.requested,
   });
   const accountNames = new Map((accounts.data ?? []).map((account) => [account.id, account.name]));
 
@@ -73,6 +83,7 @@ export function DividendsTab({ accountId }: { accountId?: number }) {
     );
   }
 
+  const month = chosenMonth ?? openingMonth(events, currentMonth);
   const label = (status: (typeof STATUSES)[number]) => t(`invDividends.status.${status}`);
   const chartData = monthsFrom(currentMonth, 13).map((key) => {
     const totals = data.months.find((item) => item.month === key);
@@ -95,16 +106,14 @@ export function DividendsTab({ accountId }: { accountId?: number }) {
   const maxMonth = dayjs(to).format('YYYY-MM');
   const shift = (months: number) => setMonth(dayjs(`${month}-01`).add(months, 'month').format('YYYY-MM'));
 
+  // On the account that holds it, as a coupon for a bond
   const addDividend = (event: DividendEvent) =>
-    setParams(
-      (params) => {
-        const next = new URLSearchParams(params);
-        next.set('operation', 'new');
-        next.set('instrumentId', String(event.instrumentId));
-        return next;
-      },
-      { replace: true },
-    );
+    openOperation({
+      type: event.type === 'BOND' || event.type === 'GOVERNMENT_BOND' ? 'COUPON' : 'DIVIDEND',
+      instrumentId: event.instrumentId,
+      accountId: event.accountId,
+    });
+  const names = new Map(events.map((event) => [event.instrumentId, shortName(event)]));
 
   return (
     <Stack gap="md">
@@ -113,18 +122,7 @@ export function DividendsTab({ accountId }: { accountId?: number }) {
         <Text size="sm" c="dimmed" maw={720}>
           {t('invDividends.sources')}
         </Text>
-        {baseCurrency !== 'USD' && (
-          <SegmentedControl
-            size="xs"
-            aria-label={t('invDividends.currency')}
-            value={currency}
-            onChange={setCurrency}
-            data={[
-              { value: 'base', label: symbolOf(baseCurrency) },
-              { value: 'USD', label: symbolOf('USD') },
-            ]}
-          />
-        )}
+        <CurrencySwitch label={t('invDividends.currency')} />
       </Group>
       <SimpleGrid cols={{ base: 1, xs: 2, md: 4 }} spacing="sm">
         <Figure
@@ -163,6 +161,7 @@ export function DividendsTab({ accountId }: { accountId?: number }) {
           series={STATUSES.map((status) => ({ name: label(status), color: STATUS_COLORS[status] }))}
           withLegend
           valueFormatter={money}
+          yAxisProps={moneyAxis}
           gridAxis="y"
           tickLine="none"
           barChartProps={{
@@ -181,7 +180,7 @@ export function DividendsTab({ accountId }: { accountId?: number }) {
           color="yellow"
           variant="light"
           icon={<CircleAlert size={18} />}
-          title={t('invDividends.expected', { symbol: event.symbol, date: formatDayShort(event.date) })}
+          title={t('invDividends.expected', { symbol: shortName(event), date: formatDayShort(event.date) })}
         >
           <Group justify="space-between" wrap="wrap" gap="sm">
             <Text size="sm">{t('invDividends.expectedHint')}</Text>
@@ -205,7 +204,7 @@ export function DividendsTab({ accountId }: { accountId?: number }) {
               <ChevronLeft size={18} />
             </ActionIcon>
             <Text fw={600} miw={150} ta="center" data-testid="calendar-month">
-              {capitalize(formatMonthLong(dayjs(`${month}-01`)))}
+              {formatMonthTitle(dayjs(`${month}-01`))}
             </Text>
             <ActionIcon
               variant="subtle"
@@ -262,6 +261,7 @@ export function DividendsTab({ accountId }: { accountId?: number }) {
             dataKey="month"
             series={[{ name: label('RECEIVED'), color: STATUS_COLORS.RECEIVED }]}
             valueFormatter={money}
+            yAxisProps={moneyAxis}
             gridAxis="y"
             tickLine="none"
           />
@@ -275,7 +275,7 @@ export function DividendsTab({ accountId }: { accountId?: number }) {
               <div key={item.instrumentId} data-testid="payer">
                 <Group justify="space-between" mb={4}>
                   <Text size="sm" fw={600} ff="monospace">
-                    {item.symbol}
+                    {names.get(item.instrumentId) ?? item.symbol}
                   </Text>
                   <Text size="sm" className="num">
                     {money(item.amount)}
@@ -289,18 +289,4 @@ export function DividendsTab({ accountId }: { accountId?: number }) {
       </SimpleGrid>
     </Stack>
   );
-}
-
-function capitalize(text: string): string {
-  return text.charAt(0).toUpperCase() + text.slice(1);
-}
-
-/** "₴", "$": the narrow symbol of a currency, else its code. */
-function symbolOf(currency: string): string {
-  const parts = new Intl.NumberFormat(locale(), {
-    style: 'currency',
-    currency,
-    currencyDisplay: 'narrowSymbol',
-  }).formatToParts(0);
-  return parts.find((part) => part.type === 'currency')?.value ?? currency;
 }

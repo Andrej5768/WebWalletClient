@@ -16,7 +16,8 @@
       "RECEIVED": "Received",
       "EXPECTED": "Expected",
       "DECLARED": "Declared",
-      "FORECAST": "Forecast"
+      "FORECAST": "Forecast",
+      "SCHEDULED": "On schedule"
     },
     "expected": "{{symbol}}: the payment of {{date}} is not recorded yet",
     "expectedHint": "You held the security on the ex-dividend date. Add the operation or import the broker report.",

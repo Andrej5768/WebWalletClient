@@ -16,7 +16,7 @@ import { useAccounts } from '../../api/queries';
 import { Figure } from '../../components/Figure';
 import { QueryError, UnconvertedAlert } from '../../components/feedback';
 import { formatPercent } from '../../lib/format';
-import { formatMoney } from '../../lib/money';
+import { formatMoney, formatQuantity } from '../../lib/money';
 import { usePortfolio, type Portfolio, type Position } from '../api';
 import classes from './positions.module.css';
 
@@ -42,12 +42,14 @@ export function PositionsTab({ accountId }: { accountId?: number }) {
   const money = (value: number, signed = false) => formatMoney(value, data.currency, { signed });
   const accountName = (id: number) => accounts.data?.find((account) => account.id === id)?.name ?? '';
   const cash = data.cash.filter((item) => item.amount !== 0);
+  // Without two market closes there is no change of the day to speak of
+  const dayKnown = data.positions.some((position) => position.dayChange != null);
   const groups = grouping === 'account' ? byAccount(data, cash, accountName) : byType(data, cash, t);
 
   return (
     <Stack gap="md">
       <UnconvertedAlert currencies={data.unconvertedCurrencies} />
-      <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="sm">
+      <SimpleGrid cols={{ base: 1, sm: dayKnown ? 3 : 2 }} spacing="sm">
         <Figure label={t('invPositions.value')} value={money(data.value)} />
         <Figure
           label={t('invPositions.unrealized')}
@@ -55,11 +57,13 @@ export function PositionsTab({ accountId }: { accountId?: number }) {
           className={data.unrealized < 0 ? 'expense' : data.unrealized > 0 ? 'income' : ''}
           note={data.unrealizedShare != null ? formatPercent(data.unrealizedShare) : undefined}
         />
-        <Figure
-          label={t('invPositions.day')}
-          value={money(data.dayChange, true)}
-          className={data.dayChange < 0 ? 'expense' : data.dayChange > 0 ? 'income' : ''}
-        />
+        {dayKnown && (
+          <Figure
+            label={t('invPositions.day')}
+            value={money(data.dayChange, true)}
+            className={data.dayChange < 0 ? 'expense' : data.dayChange > 0 ? 'income' : ''}
+          />
+        )}
       </SimpleGrid>
       <Group justify="flex-end">
         <SegmentedControl
@@ -81,12 +85,14 @@ export function PositionsTab({ accountId }: { accountId?: number }) {
         </Card>
       ) : (
         <Card withBorder radius="md" p={0} className={classes.scroll}>
-          <Table verticalSpacing="sm" horizontalSpacing="md" miw={900}>
+          <Table verticalSpacing="sm" horizontalSpacing="md" miw={720}>
             <Table.Thead>
               <Table.Tr>
                 <Table.Th>{t('invPositions.columns.instrument')}</Table.Th>
                 <Table.Th ta="right">{t('invPositions.columns.quantity')}</Table.Th>
-                <Table.Th ta="right">{t('invPositions.columns.average')}</Table.Th>
+                <Table.Th ta="right" className={classes.wide}>
+                  {t('invPositions.columns.average')}
+                </Table.Th>
                 <Table.Th ta="right">{t('invPositions.columns.price')}</Table.Th>
                 <Table.Th ta="right">{t('invPositions.columns.value')}</Table.Th>
                 <Table.Th ta="right">{t('invPositions.columns.profit')}</Table.Th>
@@ -153,7 +159,7 @@ function GroupRows({ group, baseCurrency, total }: { group: Group; baseCurrency:
             <Text fw={500}>{t('invPositions.cash', { currency: item.currency })}</Text>
           </Table.Td>
           <Table.Td />
-          <Table.Td />
+          <Table.Td className={classes.wide} />
           <Table.Td />
           <Table.Td ta="right">
             <Text className="num" fw={500}>
@@ -198,7 +204,7 @@ function PositionRow({ position, baseCurrency }: { position: Position; baseCurre
           {formatQuantity(position.quantity)}
         </Text>
       </Table.Td>
-      <Table.Td ta="right">
+      <Table.Td ta="right" className={classes.wide}>
         <Text size="sm" className="num">
           {formatMoney(position.averagePrice, currency)}
         </Text>
@@ -257,9 +263,4 @@ function PositionRow({ position, baseCurrency }: { position: Position; baseCurre
       </Table.Td>
     </Table.Tr>
   );
-}
-
-/** Whole units without decimals, fractions with up to four. */
-function formatQuantity(quantity: number): string {
-  return new Intl.NumberFormat('uk-UA', { maximumFractionDigits: 4 }).format(quantity);
 }

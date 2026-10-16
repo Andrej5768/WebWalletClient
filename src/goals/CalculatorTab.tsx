@@ -1,13 +1,14 @@
 import { BarChart } from '@mantine/charts';
+import { moneyAxis } from '../components/chartAxis';
 import { Card, Checkbox, NumberInput, SegmentedControl, SimpleGrid, Stack, Table, Text } from '@mantine/core';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { formatMoney } from '../lib/money';
 import { useBaseCurrency } from '../api/queries';
 import { Figure } from '../components/Figure';
 import { MoneyInput } from '../components/MoneyInput';
 import { kyivToday } from '../lib/periods';
 import { compound, loadStored, store, type Capitalization, type CompoundInput } from './fire';
-import { wholeMoney } from './wholeMoney';
 import classes from './goals.module.css';
 
 const STORAGE_KEY = 'ww-compound';
@@ -60,7 +61,7 @@ export function CalculatorTab() {
     real: values.real,
   };
   const result = compound(input);
-  const money = (amount: number) => wholeMoney(amount, currency);
+  const money = (amount: number) => formatMoney(amount, currency, { decimals: 0 });
   const thisYear = kyivToday().year();
   const contributed = t('goals.calc.contributed');
   const interest = t('goals.calc.interest');
@@ -166,6 +167,7 @@ export function CalculatorTab() {
               { name: interest, color: 'teal.6' },
             ]}
             valueFormatter={(value) => money(value)}
+            yAxisProps={moneyAxis}
             withLegend
             gridAxis="y"
             tickLine="none"

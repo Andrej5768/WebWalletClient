@@ -1,5 +1,5 @@
 import { ActionIcon, Avatar, Button, Group, Skeleton, Text, Tooltip } from '@mantine/core';
-import { useLocalStorage } from '@mantine/hooks';
+import { useLocalStorage, useMediaQuery } from '@mantine/hooks';
 import { LogOut, PanelLeftClose, PanelLeftOpen, Plus } from 'lucide-react';
 import { Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -44,7 +44,13 @@ export function AppShell() {
   const { t } = useTranslation();
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
-  const [collapsed, setCollapsed] = useLocalStorage({ key: 'ww-sidebar-collapsed', defaultValue: false });
+  // Until the viewer chooses, the menu folds to icons on screens narrower than 1280 px, so tables keep their columns
+  const [chosen, setCollapsed] = useLocalStorage<boolean | null>({
+    key: 'ww-sidebar-collapsed',
+    defaultValue: null,
+  });
+  const narrow = useMediaQuery('(max-width: 1279.98px)', false, { getInitialValueInEffect: false });
+  const collapsed = chosen ?? narrow;
 
   return (
     <div className={classes.layout}>

@@ -165,6 +165,7 @@
       "text": "Add an account by hand or connect Monobank in Import."
     },
     "menu": {
+      "positions": "Positions",
       "edit": "Edit",
       "transactions": "Account transactions",
       "newTransaction": "New transaction",

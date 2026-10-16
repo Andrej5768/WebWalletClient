@@ -6,7 +6,7 @@ import { formatDayShort } from '../../lib/format';
 import { formatMoney } from '../../lib/money';
 import { isoDate, kyivToday } from '../../lib/periods';
 import { useDividends } from '../api';
-import { upcoming } from './model';
+import { upcoming, shortName } from './model';
 import { StatusBadge } from './StatusBadge';
 
 /** The next payments of the brokerage accounts, with a link to the dividend calendar. */
@@ -35,7 +35,7 @@ export function UpcomingPayments({ accountId }: { accountId?: number }) {
             <Group key={`${event.date}-${event.instrumentId}-${index}`} justify="space-between" wrap="nowrap">
               <Stack gap={0} style={{ minWidth: 0 }}>
                 <Text size="sm" fw={600} ff="monospace">
-                  {event.symbol}
+                  {shortName(event)}
                 </Text>
                 <Text size="xs" c="dimmed">
                   {formatDayShort(event.date)}
@@ -45,7 +45,7 @@ export function UpcomingPayments({ accountId }: { accountId?: number }) {
                 <Text size="sm" fw={500} className="num">
                   {formatMoney(event.netInTarget, currency)}
                 </Text>
-                <StatusBadge status={event.status} />
+                <StatusBadge event={event} />
               </Group>
             </Group>
           ))}

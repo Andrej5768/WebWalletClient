@@ -3,10 +3,11 @@ import dayjs from 'dayjs';
 import { Fragment } from 'react';
 import { useTranslation } from 'react-i18next';
 import { locale } from '../../i18n';
-import { formatDayShort, formatMonthLong, formatPercent } from '../../lib/format';
-import { formatMoney } from '../../lib/money';
+import { formatDayShort, formatMonthTitle, formatPercent } from '../../lib/format';
+import { formatMoney, formatQuantity } from '../../lib/money';
 import type { DividendEvent } from '../api';
 import classes from './dividends.module.css';
+import { shortName } from './model';
 import { StatusBadge } from './StatusBadge';
 
 /** The payments by month: amounts in the currency of the security, totals in that of the calendar. */
@@ -47,7 +48,7 @@ export function PaymentsList({
         {[...months].map(([month, items]) => (
           <Fragment key={month}>
             <div className={classes.monthHeader}>
-              <span>{capitalize(formatMonthLong(dayjs(`${month}-01`)))}</span>
+              <span>{formatMonthTitle(dayjs(`${month}-01`))}</span>
               <span className="num muted">
                 {formatMoney(
                   items.reduce((sum, event) => sum + event.netInTarget, 0),
@@ -74,7 +75,7 @@ export function PaymentsList({
                 </div>
                 <div style={{ minWidth: 0 }}>
                   <Text size="sm" fw={600} ff="monospace">
-                    {event.symbol}
+                    {shortName(event)}
                   </Text>
                   <Text size="xs" c="dimmed" truncate>
                     {event.name} · {t(`investments.types.${event.type}`)}
@@ -103,7 +104,7 @@ export function PaymentsList({
                   {formatMoney(event.net, event.currency)}
                 </Text>
                 <div>
-                  <StatusBadge status={event.status} />
+                  <StatusBadge event={event} />
                 </div>
               </div>
             ))}
@@ -112,12 +113,4 @@ export function PaymentsList({
       </div>
     </div>
   );
-}
-
-function capitalize(text: string): string {
-  return text.charAt(0).toUpperCase() + text.slice(1);
-}
-
-function formatQuantity(quantity: number): string {
-  return new Intl.NumberFormat(locale(), { maximumFractionDigits: 4 }).format(quantity);
 }

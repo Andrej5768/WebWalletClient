@@ -1,5 +1,4 @@
 import {
-  ActionIcon,
   Alert,
   Anchor,
   Badge,
@@ -14,22 +13,23 @@ import {
   Text,
   Title,
 } from '@mantine/core';
-import { Info, Pencil } from 'lucide-react';
+import { Info } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useNavigate, useParams, useSearchParams } from 'react-router';
+import { Link, useParams, useSearchParams } from 'react-router';
 import { QueryError } from '../../components/feedback';
 import { Figure, ShareBar } from '../../components/Figure';
-import { formatDate, formatPercent } from '../../lib/format';
-import { formatMoney } from '../../lib/money';
+import { formatDay, formatPercent } from '../../lib/format';
+import { formatMoney, formatQuantity } from '../../lib/money';
 import { kyivToday } from '../../lib/periods';
 import { intParam } from '../../lib/useUrlParams';
 import { useInstrument, usePortfolio, usePosition, type Operation, type PositionDetail } from '../api';
+import { OperationDrawerFromUrl } from '../operations/OperationDrawerFromUrl';
+import { useOpenOperation } from '../operations/useOpenOperation';
 import { InstrumentModal } from './InstrumentModal';
 import { PriceChart } from './PriceChart';
 
-const quantity = (value: number) =>
-  new Intl.NumberFormat(undefined, { maximumFractionDigits: 8 }).format(value);
+const quantity = (value: number) => formatQuantity(value, 8);
 
 /**
  * One instrument (`/investments/instruments/:id?accountId=`): the position on the account with its lots, the
@@ -37,7 +37,7 @@ const quantity = (value: number) =>
  */
 export function InstrumentPage() {
   const { t } = useTranslation();
-  const navigate = useNavigate();
+  const openOperation = useOpenOperation();
   const { id } = useParams();
   const [params] = useSearchParams();
   const instrumentId = Number(id) || undefined;
@@ -58,10 +58,8 @@ export function InstrumentPage() {
   const currency = data.currency;
   const money = (amount: number | null | undefined, signed = false) =>
     amount == null ? '—' : formatMoney(amount, currency, { signed });
-  const open = (type: 'BUY' | 'SELL') =>
-    void navigate(
-      `/investments?operation=new&instrumentId=${data.id}&type=${type}${accountId ? `&accountId=${accountId}` : ''}`,
-    );
+  // The drawer opens here, so the instrument stays in view after saving
+  const open = (type: 'BUY' | 'SELL') => openOperation({ type, instrumentId: data.id, accountId });
   const dayChange =
     portfolio.data?.positions.find(
       (row) => row.instrument.id === data.id && (accountId === undefined || row.accountId === accountId),
@@ -98,19 +96,16 @@ export function InstrumentPage() {
               </span>
             )}
             {data.priceDate
-              ? t('invInstrument.priceOn', { date: formatDate(data.priceDate) })
+              ? t('invInstrument.priceOn', { date: formatDay(data.priceDate) })
               : t('invInstrument.noPrice')}
           </Text>
           <Group gap="xs">
             {data.own && (
-              <ActionIcon
-                variant="default"
-                size="lg"
-                aria-label={t('invInstrument.editInstrument')}
-                onClick={() => setEditing(true)}
-              >
-                <Pencil size={16} />
-              </ActionIcon>
+              <Button variant="default" onClick={() => setEditing(true)}>
+                {t(
+                  data.valuation === 'MANUAL' ? 'invInstrument.changePrice' : 'invInstrument.editInstrument',
+                )}
+              </Button>
             )}
             <Button variant="default" onClick={() => open('SELL')} disabled={!detail || detail.quantity <= 0}>
               {t('invInstrument.sell')}
@@ -160,7 +155,7 @@ export function InstrumentPage() {
             <Operations
               operations={detail.operations}
               money={money}
-              onEdit={(operation) => void navigate(`/investments?operation=${operation.id}`)}
+              onEdit={(operation) => openOperation({ operationId: operation.id })}
             />
           </Tabs.Panel>
           <Tabs.Panel value="dividends" pt="md">
@@ -175,6 +170,7 @@ export function InstrumentPage() {
         )
       )}
       {editing && <InstrumentModal instrument={data} onClose={() => setEditing(false)} />}
+      <OperationDrawerFromUrl defaultAccountId={accountId} />
     </Stack>
   );
 }
@@ -233,7 +229,7 @@ function Lots({ detail, money }: { detail: PositionDetail; money: Money }) {
                 c={closed ? 'dimmed' : undefined}
                 data-testid={`lot-${lot.operationId}`}
               >
-                <Table.Td>{formatDate(lot.date)}</Table.Td>
+                <Table.Td>{formatDay(lot.date)}</Table.Td>
                 <Table.Td ta="right" className="num">
                   {quantity(lot.quantity)}
                 </Table.Td>
@@ -297,7 +293,7 @@ function Operations({
             <Table.Tr key={operation.id}>
               <Table.Td>
                 <Anchor component="button" type="button" size="sm" onClick={() => onEdit(operation)}>
-                  {formatDate(operation.date)}
+                  {formatDay(operation.date)}
                 </Anchor>
               </Table.Td>
               <Table.Td>{t(`investments.operationTypes.${operation.type}`)}</Table.Td>
@@ -358,7 +354,7 @@ function Dividends({ operations, money }: { operations: Operation[]; money: Mone
           <Table.Tbody>
             {incomes.map((operation) => (
               <Table.Tr key={operation.id}>
-                <Table.Td>{formatDate(operation.date)}</Table.Td>
+                <Table.Td>{formatDay(operation.date)}</Table.Td>
                 <Table.Td ta="right" className="num">
                   {formatMoney(operation.amount, operation.currency)}
                 </Table.Td>

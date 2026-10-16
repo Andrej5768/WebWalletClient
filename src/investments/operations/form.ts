@@ -10,7 +10,10 @@ export interface OperationValues {
   quantity: number | string;
   price: number | string;
   fee: number | string;
-  /** A trade: empty means quantity × price. A dividend, coupon or fee: the amount. */
+  /**
+   * A trade: empty means quantity × price; an edited trade keeps its recorded amount (e.g. rounded by the broker)
+   * until its quantity or price changes. A dividend, coupon or fee: the amount.
+   */
   amount: number | string;
   tax: number | string;
   currency: string | null;
@@ -45,7 +48,7 @@ export function initialOperationValues(
     quantity: operation?.quantity ?? '',
     price: operation?.price ?? '',
     fee: operation && operation.fee ? operation.fee : '',
-    amount: operation && !TRADES.includes(operation.type) ? operation.amount : '',
+    amount: operation?.amount ?? '',
     tax: operation && operation.tax ? operation.tax : '',
     currency: operation?.currency ?? null,
     splitFrom: operation?.splitFrom ?? 1,
@@ -54,8 +57,9 @@ export function initialOperationValues(
   };
 }
 
-/** Quantity × price of a trade, rounded to cents. */
+/** The amount of a trade: the recorded one of an edited trade, else quantity × price rounded to 4 decimals. */
 export function tradeAmount(values: OperationValues): number {
+  if (values.amount !== '') return toNumber(values.amount);
   return round(toNumber(values.quantity) * toNumber(values.price), 4);
 }
 
@@ -115,14 +119,23 @@ export interface FifoPreview {
   realizedByAverage: number | null;
 }
 
-/** Which open lots a sale takes, oldest first (FIFO), and what it earns. */
+/**
+ * Which open lots a sale takes, oldest first (FIFO), and what it earns. When an existing sale is edited, the lots it
+ * took (`editedSale`) are open again for the preview, as the backend replays the sale with its new values.
+ */
 export function fifoPreview(
   position: Pick<PositionDetail, 'lots' | 'averagePrice'>,
   quantity: number,
   price: number,
   fee: number,
+  editedSale?: Pick<PositionDetail['sales'][number], 'parts'>,
 ): FifoPreview {
+  const returned = new Map<number, number>();
+  for (const part of editedSale?.parts ?? []) {
+    returned.set(part.lotOperationId, (returned.get(part.lotOperationId) ?? 0) + part.quantity);
+  }
   const open = position.lots
+    .map((lot) => ({ ...lot, remaining: lot.remaining + (returned.get(lot.operationId) ?? 0) }))
     .filter((lot) => lot.remaining > 0)
     .sort((a, b) => a.date.localeCompare(b.date) || a.operationId - b.operationId);
   let left = quantity;

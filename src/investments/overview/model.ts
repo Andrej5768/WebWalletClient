@@ -42,3 +42,9 @@ export function result(points: HistoryPoint[], pick: (point: HistoryPoint) => nu
   const stake = pick(first)! + deposits;
   return { profit, share: stake > 0 ? profit / stake : null };
 }
+
+/** The points from the first one with money on the accounts: the empty days before the history starts are left out. */
+export function fromFirstMoney(points: HistoryPoint[]): HistoryPoint[] {
+  const first = points.findIndex((point) => point.value !== 0 || point.deposited !== 0);
+  return first <= 0 ? points : points.slice(first);
+}

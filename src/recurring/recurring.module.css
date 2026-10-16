@@ -1,8 +1,10 @@
 .header {
   display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
   justify-content: space-between;
   align-items: center;
-  height: 36px;
+  min-height: 36px;
   padding: 0 20px;
   background: color-mix(in srgb, var(--mantine-primary-color-filled) 7%, var(--ww-surface));
   border-top: 1px solid var(--ww-border);
@@ -12,7 +14,7 @@
 
 .row {
   display: grid;
-  grid-template-columns: 32px minmax(240px, 1fr) 200px 160px;
+  grid-template-columns: 32px minmax(200px, 1fr) minmax(120px, 200px) minmax(140px, max-content);
   align-items: center;
   column-gap: 14px;
   padding: 8px 20px;
@@ -82,4 +84,17 @@
   padding: 10px 12px;
   border: 1px dashed var(--ww-border);
   border-radius: 8px;
+}
+
+/* The day of planned payments inside the group */
+.day {
+  padding: 6px 20px 2px;
+  border-top: 1px dashed var(--ww-border);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ww-muted);
+}
+
+.row .num {
+  white-space: nowrap;
 }

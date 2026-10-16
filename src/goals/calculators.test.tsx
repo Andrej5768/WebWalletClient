@@ -1,5 +1,6 @@
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { kyivToday } from '../lib/periods';
 import { accountOf } from '../test/fixtures';
 import { json, mockApi, plain, renderApp, signedInApi } from '../test/render';
 
@@ -125,4 +126,28 @@ it('switches the tabs of the goals page in the URL', async () => {
   await userEvent.click(screen.getByRole('tab', { name: 'FIRE' }));
   expect(router.state.location.search).toBe('?tab=fire');
   expect(screen.queryByRole('button', { name: 'Нова ціль' })).not.toBeInTheDocument();
+});
+
+it('averages over the complete months with data and warns when there are few', async () => {
+  const current = kyivToday();
+  const month = (offset: number, expense: number) => ({
+    month: current.subtract(offset, 'month').format('YYYY-MM'),
+    income: expense ? 40000 : 0,
+    expense,
+    net: expense ? 40000 - expense : 0,
+    savingsRate: null,
+  });
+  // Ten empty months before the history starts, two complete ones and the current one
+  const months = [
+    ...Array.from({ length: 9 }, (_, index) => month(11 - index, 0)),
+    month(2, 25000),
+    month(1, 27000),
+    month(0, 3000),
+  ];
+  api({ 'GET /api/v1/reports/income-expense': () => json({ ...incomeExpense, months }) });
+  renderApp('/goals?tab=fire');
+
+  expect(await screen.findByText(/лише за 2 повні місяці/)).toBeInTheDocument();
+  // 26 000 a month over the two complete months, not 55 000 / 12
+  expect(plain(screen.getByLabelText('Річні витрати').getAttribute('value'))).toBe('312 000');
 });

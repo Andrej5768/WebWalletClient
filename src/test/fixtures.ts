@@ -354,31 +354,6 @@ export function dividendCalendarOf(
   };
 }
 
-/** An instrument with a price, as the operations and the instrument page use it. */
-export function tradedInstrumentOf(
-  overrides: Partial<Schemas['InstrumentResponse']> = {},
-): Schemas['InstrumentResponse'] {
-  return {
-    id: 7,
-    symbol: 'AAPL',
-    name: 'Apple Inc',
-    type: 'STOCK',
-    currency: 'USD',
-    exchange: 'NASDAQ',
-    micCode: 'XNGS',
-    isin: null,
-    valuation: 'MARKET',
-    own: false,
-    nominal: null,
-    couponRate: null,
-    couponFrequency: null,
-    maturityDate: null,
-    price: 220,
-    priceDate: '2026-10-15',
-    ...overrides,
-  };
-}
-
 export function investmentOperationOf(
   overrides: Partial<Schemas['OperationResponse']> = {},
 ): Schemas['OperationResponse'] {
@@ -407,7 +382,7 @@ export function positionDetailOf(
   overrides: Partial<Schemas['PositionDetailResponse']> = {},
 ): Schemas['PositionDetailResponse'] {
   return {
-    instrument: tradedInstrumentOf(),
+    instrument: instrumentOf({ id: 7, price: 220, priceDate: '2026-10-15' }),
     accountId: 3,
     quantity: 0,
     averagePrice: null,

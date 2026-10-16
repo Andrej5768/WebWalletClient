@@ -14,9 +14,9 @@ import { ChevronDown, ChevronLeft, ChevronRight, TriangleAlert } from 'lucide-re
 import { Fragment, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Schemas } from '../../api/client';
-import { Figure } from '../../components/Figure';
+import { Figure, ShareBar } from '../../components/Figure';
 import { QueryError, UnconvertedAlert } from '../../components/feedback';
-import { formatMonthLong, formatPercent } from '../../lib/format';
+import { formatMonthTitle, formatPercent } from '../../lib/format';
 import { formatMoney } from '../../lib/money';
 import { kyivToday } from '../../lib/periods';
 import dayjs from 'dayjs';
@@ -51,8 +51,8 @@ export function PlanView() {
         >
           <ChevronLeft size={18} />
         </ActionIcon>
-        <Text fw={500} miw={130} ta="center" tt="capitalize">
-          {formatMonthLong(dayjs(`${month}-01`))}
+        <Text fw={500} miw={130} ta="center">
+          {formatMonthTitle(dayjs(`${month}-01`))}
         </Text>
         <ActionIcon
           variant="subtle"
@@ -254,19 +254,11 @@ export function PlanView() {
 /** Spent part of the envelope; red when over the plan, amber when the forecast goes over it. */
 function Completion({ row, marker }: { row: Row; marker: number | null }) {
   const share = row.planned > 0 ? row.actual / row.planned : row.actual > 0 ? 1 : 0;
-  const tone =
+  const color =
     row.actual > row.planned && row.planned >= 0
-      ? classes.fillOver
+      ? 'var(--ww-expense)'
       : marker != null && row.forecast > row.planned
-        ? classes.fillWarn
-        : '';
-  return (
-    <div className={classes.track} aria-hidden>
-      <div
-        className={`${classes.fill} ${tone}`}
-        style={{ width: `${Math.min(1, Math.max(0, share)) * 100}%` }}
-      />
-      {marker != null && <div className={classes.today} style={{ left: `${marker * 100}%` }} />}
-    </div>
-  );
+        ? 'var(--ww-warn-border)'
+        : undefined;
+  return <ShareBar share={share} color={color} marker={marker} height={8} />;
 }

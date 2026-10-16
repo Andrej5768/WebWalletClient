@@ -41,6 +41,8 @@ export interface EnvelopeGroup {
   available: number;
   /** The envelopes shown: the subcategories, and the group's own one when it has money or no subcategories. */
   envelopes: Envelope[];
+  /** A category without subcategories: one row, without a group heading repeating it. */
+  single: boolean;
 }
 
 /** The top-level rows with their envelopes; the server already sums the subcategories into the group. */
@@ -55,6 +57,7 @@ export function groupEnvelopes(rows: BudgetRow[]): EnvelopeGroup[] {
       spent: -head.activity,
       available: head.available,
       envelopes: children.length === 0 || hasMoney(own) ? [own, ...children] : children,
+      single: children.length === 0,
     };
   });
 }

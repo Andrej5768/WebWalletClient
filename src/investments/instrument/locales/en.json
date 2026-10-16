@@ -84,6 +84,7 @@
       "priceHint": "Update it once a month",
       "priceDate": "Date of the price",
       "deleteTitle": "Delete the instrument “{{name}}”?"
-    }
+    },
+    "changePrice": "Change the price"
   }
 }

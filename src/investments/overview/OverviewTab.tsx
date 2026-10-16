@@ -15,14 +15,16 @@ import {
 import { Info } from 'lucide-react';
 import { lazy, Suspense, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useBaseCurrency } from '../../api/queries';
 import { Figure } from '../../components/Figure';
 import { QueryError, UnconvertedAlert } from '../../components/feedback';
 import { formatDayShort, formatMonthShort, formatPercent } from '../../lib/format';
 import { formatMoney } from '../../lib/money';
+import { moneyAxis } from '../../components/chartAxis';
 import { kyivToday } from '../../lib/periods';
 import { useHistory, usePortfolio, type Benchmark, type Portfolio } from '../api';
-import { RANGES, rangeFrom, result, type Range, type Result } from './model';
+import { CurrencySwitch } from '../CurrencySwitch';
+import { useDisplayCurrency } from '../useDisplayCurrency';
+import { fromFirstMoney, RANGES, rangeFrom, result, type Range, type Result } from './model';
 import classes from './overview.module.css';
 
 // Provided by the dividends part: the next payments with a link to the calendar.
@@ -81,7 +83,12 @@ function Figures({ data }: { data: Portfolio }) {
       <Figure
         label={t('invOverview.value')}
         value={money(data.value)}
-        note={t('invOverview.dayChange', { amount: money(data.dayChange, true) })}
+        note={
+          // Without two market closes there is no change of the day to speak of
+          data.positions.some((position) => position.dayChange != null)
+            ? t('invOverview.dayChange', { amount: money(data.dayChange, true) })
+            : undefined
+        }
       />
       <Figure
         label={t('invOverview.invested')}
@@ -115,15 +122,6 @@ function formatSigned(share: number): string {
   return share > 0 ? `+${text}` : text;
 }
 
-/** "₴" for UAH, "$" for USD. */
-function symbol(currency: string): string {
-  return (
-    new Intl.NumberFormat('uk-UA', { style: 'currency', currency, currencyDisplay: 'narrowSymbol' })
-      .formatToParts(0)
-      .find((part) => part.type === 'currency')?.value ?? currency
-  );
-}
-
 interface Row {
   label: string;
   date: string;
@@ -134,25 +132,23 @@ interface Row {
 
 function ValueChart({ accountId }: { accountId?: number }) {
   const { t } = useTranslation();
-  const base = useBaseCurrency();
+  const display = useDisplayCurrency();
+  const currency = display.currency;
   const [range, setRange] = useState<Range>('1y');
-  // The base currency until another is chosen; the base is known once the summary has loaded
-  const [chosen, setCurrency] = useState<string | null>(null);
-  const currency = chosen ?? base;
   const [benchmark, setBenchmark] = useState<Benchmark | 'none'>('none');
   const today = useMemo(() => kyivToday(), []);
   const history = useHistory({
     accountId,
     from: rangeFrom(range, today),
-    currency,
+    currency: display.requested,
     benchmark: benchmark === 'none' ? undefined : benchmark,
   });
-  const currencies = [...new Set([base, 'USD'])];
   const data = history.data;
   const shownCurrency = data?.currency ?? currency;
   const benchmarkName = benchmark === 'none' ? '' : t(`invOverview.chart.benchmarks.${benchmark}`);
   const money = (value: number, signed = false) => formatMoney(value, shownCurrency, { signed });
-  const points = data?.points ?? [];
+  // A history shorter than the range starts at the first money on the accounts, not with empty months
+  const points = fromFirstMoney(data?.points ?? []);
   const long = points.length > 1 && points[0]!.date < today.subtract(13, 'month').format('YYYY-MM-DD');
   const rows: Row[] = points.map((point) => ({
     label: long ? formatMonthShort(point.date.slice(0, 7)) : formatDayShort(point.date),
@@ -165,8 +161,12 @@ function ValueChart({ accountId }: { accountId?: number }) {
   const depositedName = t('invOverview.chart.deposited');
   const benchmarkLine = t('invOverview.chart.benchmark', { name: benchmarkName });
   const withBenchmark = benchmark !== 'none' && points.some((point) => point.benchmark != null);
-  const portfolioResult = result(points, (point) => point.value);
-  const benchmarkResult = withBenchmark ? result(points, (point) => point.benchmark) : null;
+  // Compared over the same days: from the first one the index has a price on
+  const compared = withBenchmark
+    ? points.slice(points.findIndex((point) => point.benchmark != null))
+    : points;
+  const portfolioResult = result(compared, (point) => point.value);
+  const benchmarkResult = withBenchmark ? result(compared, (point) => point.benchmark) : null;
 
   return (
     <Card withBorder radius="md" padding="lg">
@@ -183,15 +183,7 @@ function ValueChart({ accountId }: { accountId?: number }) {
               onChange={(value) => setRange(value as Range)}
               data={RANGES.map((value) => ({ value, label: t(`invOverview.chart.ranges.${value}`) }))}
             />
-            {currencies.length > 1 && (
-              <SegmentedControl
-                size="xs"
-                aria-label={t('invOverview.chart.currency')}
-                value={currency}
-                onChange={setCurrency}
-                data={currencies.map((value) => ({ value, label: symbol(value) }))}
-              />
-            )}
+            <CurrencySwitch label={t('invOverview.chart.currency')} />
           </Group>
         </Group>
         <Group gap="xs">
@@ -201,7 +193,7 @@ function ValueChart({ accountId }: { accountId?: number }) {
           <Chip.Group value={benchmark} onChange={(value) => setBenchmark(value as Benchmark | 'none')}>
             <Group gap={6}>
               {(['none', ...BENCHMARKS] as const).map((value) => (
-                <Chip key={value} value={value} size="xs">
+                <Chip key={value} value={value} size="xs" type="radio">
                   {t(`invOverview.chart.benchmarks.${value}`)}
                 </Chip>
               ))}
@@ -243,6 +235,7 @@ function ValueChart({ accountId }: { accountId?: number }) {
             curveType="linear"
             connectNulls={false}
             valueFormatter={(value) => money(value)}
+            yAxisProps={moneyAxis}
             gridAxis="y"
             tickLine="none"
             tooltipProps={{
