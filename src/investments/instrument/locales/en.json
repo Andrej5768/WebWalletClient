@@ -1,1 +1,89 @@
-{}
+{
+  "invInstrument": {
+    "back": "Positions",
+    "buy": "Buy",
+    "sell": "Sell",
+    "editInstrument": "Edit the instrument",
+    "priceOn": "price of {{date}}",
+    "noPrice": "no price yet",
+    "valuedByNominal": "Valued at the nominal plus the accrued coupon",
+    "valuedByHand": "The price is entered by hand — update it once a month",
+    "quantity": "Quantity",
+    "averagePrice": "Average price",
+    "value": "Value",
+    "cost": "cost {{cost}}",
+    "unrealized": "Unrealized",
+    "realized": "Realized",
+    "realizedNote": "FIFO, all sales",
+    "fifoNote": "The average price is for the portfolio; the profit of a sale and the tax are counted by FIFO lots: a sale closes the oldest purchases first.",
+    "noPosition": "This account has no operations with the instrument.",
+    "noLots": "No purchases yet.",
+    "tabs": {
+      "lots": "Lots",
+      "operations": "Operations",
+      "dividends": "Dividends"
+    },
+    "chart": {
+      "title": "Price",
+      "price": "Price",
+      "range": "Chart period",
+      "ranges": {
+        "year": "1Y",
+        "threeYears": "3Y",
+        "all": "All"
+      },
+      "average": "average {{price}}",
+      "empty": "Prices are still loading — usually a few minutes after the first operation."
+    },
+    "lots": {
+      "date": "Date",
+      "quantity": "Quantity",
+      "unitCost": "Price with fee",
+      "remaining": "Left",
+      "unrealized": "Unrealized",
+      "closed": "realized",
+      "left": "{{remaining}} of {{quantity}}"
+    },
+    "operations": {
+      "date": "Date",
+      "type": "Operation",
+      "quantity": "Quantity",
+      "price": "Price",
+      "cash": "Cash"
+    },
+    "dividends": {
+      "none": "No dividends yet.",
+      "total": "Received over 12 months",
+      "date": "Date",
+      "gross": "Gross",
+      "tax": "Withheld",
+      "net": "Received"
+    },
+    "manual": {
+      "newTitle": "Instrument by hand",
+      "editTitle": "Edit the instrument",
+      "name": "Name",
+      "symbol": "Symbol",
+      "type": "Type",
+      "currency": "Currency",
+      "nominal": "Nominal",
+      "couponRate": "Coupon, per year",
+      "frequency": "Coupon payments",
+      "frequencies": {
+        "1": "Once a year",
+        "2": "Twice a year",
+        "4": "Quarterly",
+        "12": "Monthly"
+      },
+      "maturity": "Maturity",
+      "valuation": "Valuation",
+      "byNominal": "Nominal plus accrued coupon",
+      "byHand": "By hand",
+      "nominalPrice": "Now {{price}} per unit (on {{date}})",
+      "price": "Price per unit",
+      "priceHint": "Update it once a month",
+      "priceDate": "Date of the price",
+      "deleteTitle": "Delete the instrument “{{name}}”?"
+    }
+  }
+}
