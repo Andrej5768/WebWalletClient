@@ -18,7 +18,6 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSearchParams } from 'react-router';
 import { api } from '../../api/client';
 import { toProblem } from '../../api/errors';
 import { check, unwrap } from '../../api/http';
@@ -27,7 +26,7 @@ import { confirmDelete } from '../../components/confirm';
 import { ProblemAlert } from '../../components/feedback';
 import { FormFooter } from '../../components/FormFooter';
 import { MoneyInput } from '../../components/MoneyInput';
-import { formatDate } from '../../lib/format';
+import { formatDay } from '../../lib/format';
 import { formatMoney } from '../../lib/money';
 import {
   investmentKeys,
@@ -75,16 +74,14 @@ interface Props {
   operationId: number | null;
   accountId?: number;
   instrumentId?: number;
+  /** The type a new operation starts with. */
+  type?: OperationType;
   onClose(): void;
 }
 
-/**
- * Side panel to record or edit an operation of a brokerage account. A new one may start with a type from the URL
- * (`type=BUY|SELL|…`), e.g. from the buttons of an instrument.
- */
-export function OperationDrawer({ operationId, accountId, instrumentId, onClose }: Props) {
+/** Side panel to record or edit an operation of a brokerage account; see {@link OperationDrawerFromUrl}. */
+export function OperationDrawer({ operationId, accountId, instrumentId, type, onClose }: Props) {
   const { t } = useTranslation();
-  const [params] = useSearchParams();
   const accounts = useAccounts();
   const operation = useQuery({
     queryKey: [...investmentKeys.all, 'operation', operationId],
@@ -92,7 +89,6 @@ export function OperationDrawer({ operationId, accountId, instrumentId, onClose 
       unwrap(api.GET('/api/v1/investments/operations/{id}', { params: { path: { id: operationId! } } })),
     enabled: operationId !== null,
   });
-  const requested = params.get('type') as OperationType | null;
   const ready = accounts.isSuccess && (operationId === null || operation.isSuccess);
   return (
     <Drawer
@@ -108,7 +104,7 @@ export function OperationDrawer({ operationId, accountId, instrumentId, onClose 
           defaults={{
             accountId,
             instrumentId,
-            type: requested && TYPES.includes(requested) ? requested : undefined,
+            type,
           }}
           onClose={onClose}
         />
@@ -217,8 +213,26 @@ function OperationForm({
   const income = INCOMES.includes(values.type);
   const preview =
     values.type === 'SELL' && position.data && toNumber(values.quantity) > 0
-      ? fifoPreview(position.data, toNumber(values.quantity), toNumber(values.price), toNumber(values.fee))
+      ? fifoPreview(
+          position.data,
+          toNumber(values.quantity),
+          toNumber(values.price),
+          toNumber(values.fee),
+          operation ? position.data.sales.find((sale) => sale.operationId === operation.id) : undefined,
+        )
       : null;
+  // A sale picks one of the positions of the account: only what is held can be sold
+  const sellable = (portfolio.data?.positions ?? []).filter(
+    (row) => row.quantity > 0 && (!accountNumber || row.accountId === accountNumber),
+  );
+  // A new quantity or price makes the amount quantity × price again
+  const tradeInput = (field: 'quantity' | 'price') => ({
+    ...form.getInputProps(field),
+    onChange: (value: number | string) => {
+      form.setFieldValue(field, value);
+      form.setFieldValue('amount', '');
+    },
+  });
 
   return (
     <>
@@ -279,6 +293,25 @@ function OperationForm({
                   <span />
                 )}
               </div>
+            ) : values.type === 'SELL' ? (
+              <Select
+                label={t('invOperations.position')}
+                placeholder={t('invOperations.positionPlaceholder')}
+                nothingFoundMessage={t('invOperations.noPositions')}
+                searchable
+                data={sellable.map((row) => ({
+                  value: String(row.instrument.id),
+                  label: `${row.instrument.symbol} · ${row.instrument.name} · ${t('invOperations.held', {
+                    count: row.quantity,
+                  })}`,
+                }))}
+                error={form.errors.instrumentId}
+                onChange={(value) => {
+                  const picked = sellable.find((row) => String(row.instrument.id) === value);
+                  form.setFieldValue('instrumentId', value);
+                  form.setFieldValue('currency', picked?.instrument.currency ?? null);
+                }}
+              />
             ) : (
               <InstrumentPicker
                 held={held}
@@ -302,7 +335,7 @@ function OperationForm({
                 label={t('invOperations.quantity')}
                 min={0}
                 decimalScale={8}
-                {...form.getInputProps('quantity')}
+                {...tradeInput('quantity')}
               />
             )}
             {trade && (
@@ -310,7 +343,7 @@ function OperationForm({
                 label={t('invOperations.price')}
                 decimalScale={6}
                 currency={currency}
-                {...form.getInputProps('price')}
+                {...tradeInput('price')}
               />
             )}
             {trade && (
@@ -375,7 +408,7 @@ function OperationForm({
               <Stack gap={4}>
                 {preview.parts.map((part) => (
                   <div key={part.operationId} className={classes.previewRow}>
-                    <span>{t('invOperations.lotOf', { date: formatDate(part.date) })}</span>
+                    <span>{t('invOperations.lotOf', { date: formatDay(part.date) })}</span>
                     <span className="num">
                       {t('invOperations.lotTaken', {
                         quantity: part.quantity,
@@ -432,7 +465,10 @@ function OperationForm({
                     currency,
                   )}
                 </Text>
-                <Text size="xs" className={`num ${cashChange(values) < 0 ? 'expense' : 'income'}`}>
+                <Text
+                  size="xs"
+                  className={`num ${cashChange(values) < 0 ? 'expense' : cashChange(values) > 0 ? 'income' : 'muted'}`}
+                >
                   {formatMoney(cashChange(values), currency, { signed: true })}
                 </Text>
               </Stack>

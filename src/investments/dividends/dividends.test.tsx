@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { kyivToday } from '../../lib/periods';
 import { accountOf, dividendCalendarOf, dividendEventOf, instrumentOf } from '../../test/fixtures';
 import { json, mockApi, plain, renderApp, renderWithProviders, signedInApi } from '../../test/render';
-import { monthWeeks, upcoming } from './model';
+import { monthWeeks, openingMonth, shortName, statusKey, upcoming } from './model';
 import { UpcomingPayments } from './UpcomingPayments';
 
 const today = kyivToday();
@@ -114,7 +114,8 @@ it('shows the income, the calendar of the month and warns about an expected paym
   expect(screen.getByText(/KSPI: виплата .* ще не записана/)).toBeInTheDocument();
   await userEvent.click(screen.getByRole('button', { name: 'Додати дивіденд' }));
   await waitFor(() => expect(router.state.location.search).toContain('operation=new'));
-  expect(router.state.location.search).toContain('instrumentId=3');
+  expect(router.state.location.search).toContain('operationInstrumentId=3');
+  expect(router.state.location.search).toContain('operationType=DIVIDEND');
 
   // The next month has the declared and forecast ones
   await userEvent.click(screen.getByRole('button', { name: 'Наступний місяць' }));
@@ -164,4 +165,23 @@ it('shows the nearest payments with a link to the calendar', async () => {
     'href',
     '/investments?tab=dividends&accountId=1',
   );
+});
+
+it('opens the calendar on the nearest month with payments and names bonds by name', () => {
+  const coupon = dividendEventOf({
+    date: '2027-01-22',
+    status: 'DECLARED',
+    type: 'GOVERNMENT_BOND',
+    symbol: 'UA4000227045',
+    name: 'ОВДП 22.07.2027',
+  });
+  const stock = dividendEventOf({ date: '2026-12-15', status: 'DECLARED' });
+
+  expect(openingMonth([coupon, stock], '2026-10')).toBe('2026-12');
+  expect(openingMonth([dividendEventOf({ date: '2026-10-03' }), stock], '2026-10')).toBe('2026-10');
+  expect(openingMonth([], '2026-10')).toBe('2026-10');
+  expect(shortName(coupon)).toBe('ОВДП 22.07.2027');
+  expect(shortName(stock)).toBe('AAPL');
+  expect(statusKey(coupon)).toBe('SCHEDULED');
+  expect(statusKey(stock)).toBe('DECLARED');
 });

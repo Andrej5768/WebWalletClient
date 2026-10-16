@@ -10,7 +10,6 @@ import {
   Stack,
   Text,
   Title,
-  Tooltip,
 } from '@mantine/core';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeftRight, ChevronLeft, ChevronRight, CopyPlus, TriangleAlert } from 'lucide-react';
@@ -20,10 +19,10 @@ import { useSearchParams } from 'react-router';
 import { useCategoriesById } from '../api/queries';
 import { CategoryIcon } from '../components/CategoryIcon';
 import { ProblemAlert, QueryError, UnconvertedAlert } from '../components/feedback';
-import { Figure } from '../components/Figure';
+import { Figure, ShareBar } from '../components/Figure';
 import { MoneyInput } from '../components/MoneyInput';
 import type { CategoryInfo } from '../lib/categories';
-import { formatMonthLong } from '../lib/format';
+import { formatMonthTitle } from '../lib/format';
 import { formatMoney } from '../lib/money';
 import { assign, budgetChanged, copyPreviousMonth, useBudget } from './api';
 import { MoveMoneyModal } from './MoveMoneyModal';
@@ -90,8 +89,8 @@ export function BudgetPage() {
             >
               <ChevronLeft size={18} />
             </ActionIcon>
-            <Text fw={500} miw={140} ta="center" tt="capitalize">
-              {formatMonthLong(month)}
+            <Text fw={500} miw={140} ta="center">
+              {formatMonthTitle(month)}
             </Text>
             <ActionIcon
               variant="subtle"
@@ -180,12 +179,14 @@ export function BudgetPage() {
           {budget.isLoading && <Skeleton height={240} m="md" />}
           {groups.map((group) => (
             <div key={group.categoryId}>
-              <div className={`${classes.row} ${classes.group}`}>
-                <span>{group.name}</span>
-                <span className={`num ${classes.right}`}>{formatMoney(group.assigned, currency)}</span>
-                <span className={`num ${classes.right}`}>{formatMoney(group.spent, currency)}</span>
-                <span className={`num ${classes.right}`}>{formatMoney(group.available, currency)}</span>
-              </div>
+              {!group.single && (
+                <div className={`${classes.row} ${classes.group}`}>
+                  <span>{group.name}</span>
+                  <span className={`num ${classes.right}`}>{formatMoney(group.assigned, currency)}</span>
+                  <span className={`num ${classes.right}`}>{formatMoney(group.spent, currency)}</span>
+                  <span className={`num ${classes.right}`}>{formatMoney(group.available, currency)}</span>
+                </div>
+              )}
               {group.envelopes.map((row) => (
                 <EnvelopeRow
                   key={row.categoryId}
@@ -259,18 +260,13 @@ function EnvelopeRow({
               </Text>
             )}
           </Group>
-          <div className={classes.bar} aria-hidden>
-            <span
-              style={{
-                width: `${Math.min(share, 1) * 100}%`,
-                background: available < 0 ? 'var(--ww-expense)' : 'var(--mantine-primary-color-filled)',
-              }}
+          <div className={classes.barSpace}>
+            <ShareBar
+              share={share}
+              color={available < 0 ? 'var(--ww-expense)' : undefined}
+              marker={progress}
+              markerTitle={t('budget.today')}
             />
-            {progress !== null && (
-              <Tooltip label={t('budget.today')} withArrow>
-                <i className={classes.today} style={{ left: `${progress * 100}%` }} />
-              </Tooltip>
-            )}
           </div>
         </div>
       </Group>

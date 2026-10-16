@@ -2,12 +2,16 @@ import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {
   accountOf,
-  tradedInstrumentOf,
+  instrumentOf,
   investmentOperationOf,
   portfolioOf,
   positionDetailOf,
 } from '../../test/fixtures';
 import { bodyOf, json, mockApi, plain, renderApp, signedInApi } from '../../test/render';
+
+/** AAPL with a price, as the operations and the instrument page see it. */
+const traded = (overrides: Parameters<typeof instrumentOf>[0] = {}) =>
+  instrumentOf({ id: 7, price: 220, priceDate: '2026-10-15', ...overrides });
 
 const broker = accountOf({
   id: 3,
@@ -51,14 +55,14 @@ function api(extra = {}) {
   return mockApi({
     ...signedInApi,
     'GET /api/v1/accounts': () => json([broker]),
-    'GET /api/v1/investments/instruments/7': () => json(tradedInstrumentOf()),
+    'GET /api/v1/investments/instruments/7': () => json(traded()),
     'GET /api/v1/investments/portfolio': () =>
       json(
         portfolioOf({
           positions: [
             {
               accountId: 3,
-              instrument: tradedInstrumentOf(),
+              instrument: traded(),
               quantity: 15,
               averagePrice: 166.7,
               price: 220,
@@ -112,7 +116,7 @@ it('opens the operation drawer for a sale and edits a manual instrument', async 
   const requests = api({
     'GET /api/v1/investments/instruments/7': () =>
       json(
-        tradedInstrumentOf({
+        traded({
           symbol: 'UA4000227045',
           name: 'ОВДП 22.07.2027',
           type: 'GOVERNMENT_BOND',
@@ -124,11 +128,11 @@ it('opens the operation drawer for a sale and edits a manual instrument', async 
         }),
       ),
     'PUT /api/v1/investments/instruments/7': () =>
-      json(tradedInstrumentOf({ own: true, valuation: 'MANUAL', price: 995 })),
+      json(traded({ own: true, valuation: 'MANUAL', price: 995 })),
   });
   const router = renderApp('/investments/instruments/7?accountId=3');
 
-  await userEvent.click(await screen.findByRole('button', { name: 'Редагувати інструмент' }));
+  await userEvent.click(await screen.findByRole('button', { name: 'Змінити ціну' }));
   const dialog = await screen.findByRole('dialog');
   const price = within(dialog).getByLabelText(/Ціна за штуку/);
   await userEvent.clear(price);
@@ -142,7 +146,12 @@ it('opens the operation drawer for a sale and edits a manual instrument', async 
     }),
   );
 
+  // The drawer opens on the instrument page itself, so the instrument stays in view
   await userEvent.click(screen.getByRole('button', { name: 'Продати' }));
-  await waitFor(() => expect(router.state.location.pathname).toBe('/investments'));
-  expect(router.state.location.search).toBe('?operation=new&instrumentId=7&type=SELL&accountId=3');
+  await waitFor(() =>
+    expect(router.state.location.search).toBe(
+      '?accountId=3&operation=new&operationType=SELL&operationInstrumentId=7&operationAccountId=3',
+    ),
+  );
+  expect(router.state.location.pathname).toBe('/investments/instruments/7');
 });

@@ -23,7 +23,11 @@
       "daysAgo_many": "{{count}} днів тому",
       "daysAgo_other": "{{count}} дня тому",
       "notFound": "Не знайдено в банку",
-      "auto": "Створиться автоматично"
+      "auto": "Створиться автоматично",
+      "repeats_one": "×{{count}} до {{date}}",
+      "repeats_few": "×{{count}} до {{date}}",
+      "repeats_many": "×{{count}} до {{date}}",
+      "repeats_other": "×{{count}} до {{date}}"
     },
     "actions": {
       "label": "Дії з платежем «{{name}}»",

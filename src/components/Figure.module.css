@@ -1,0 +1,46 @@
+.bar {
+  position: relative;
+  background: var(--ww-subtle);
+  border: 1px solid var(--ww-border);
+}
+
+.fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: inherit;
+}
+
+.marker {
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  width: 2px;
+  margin-left: -1px;
+  border-radius: 1px;
+  background: var(--ww-text);
+  opacity: 0.55;
+}
+
+.withTicks {
+  margin: 8px 8px 30px;
+}
+
+.tick {
+  position: absolute;
+  top: -6px;
+  width: 2px;
+  height: 18px;
+  margin-left: -1px;
+  background: var(--ww-border-strong);
+}
+
+.tick > b {
+  position: absolute;
+  top: 22px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ww-faint);
+  white-space: nowrap;
+}

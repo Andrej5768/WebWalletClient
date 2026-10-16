@@ -57,3 +57,44 @@ it('builds the request of each type and the change of cash', () => {
   });
   expect(cashChange(split)).toBe(0);
 });
+
+it('opens again the lots an edited sale took, so its preview is the one the backend replays', () => {
+  // The sale being edited took 5 of the first lot, which is now closed
+  const afterSale = {
+    averagePrice: 200,
+    lots: [
+      { operationId: 1, date: '2026-01-10', quantity: 5, remaining: 0, unitCost: 100, unrealized: null },
+      { operationId: 2, date: '2026-06-10', quantity: 10, remaining: 10, unitCost: 200, unrealized: 200 },
+    ],
+  };
+  const sale = { parts: [{ lotOperationId: 1, lotDate: '2026-01-10', quantity: 5, unitCost: 100 }] };
+
+  expect(fifoPreview(afterSale, 5, 250, 0).parts[0]!.operationId).toBe(2);
+  const preview = fifoPreview(afterSale, 5, 250, 0, sale);
+  expect(preview.parts).toEqual([{ operationId: 1, date: '2026-01-10', quantity: 5, unitCost: 100 }]);
+  expect(preview.missing).toBe(0);
+});
+
+it('keeps the recorded amount of an edited trade until its quantity or price changes', () => {
+  const values = initialOperationValues({
+    id: 4,
+    type: 'BUY',
+    accountId: 3,
+    instrumentId: 7,
+    symbol: 'AAPL',
+    date: '2026-01-10',
+    quantity: 3,
+    price: 33.333333,
+    amount: 100,
+    fee: 0,
+    tax: 0,
+    currency: 'USD',
+    cash: -100,
+    splitFrom: null,
+    splitTo: null,
+    comment: null,
+  });
+
+  expect(toOperationBody({ ...values, comment: 'broker rounding' }).amount).toBe(100);
+  expect(toOperationBody({ ...values, quantity: 4, amount: '' }).amount).toBe(133.3333);
+});

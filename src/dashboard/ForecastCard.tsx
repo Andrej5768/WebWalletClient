@@ -9,7 +9,8 @@ import { MoneyInput } from '../components/MoneyInput';
 import { locale } from '../i18n';
 import { formatDayShort } from '../lib/format';
 import { formatMoney } from '../lib/money';
-import { useForecast, useRecurringPayments } from './api';
+import { useRecurringPayments, type Recurring } from '../recurring/api';
+import { useForecast } from './api';
 import { forecastChart, loadMinimum, plot, saveMinimum, type Forecast } from './forecast';
 import classes from './dashboard.module.css';
 
@@ -40,7 +41,11 @@ export function ForecastCard() {
             <Text size="xs" c="dimmed" fw={600} tt="uppercase" pb={6}>
               {t('dashboard.forecast.planned')}
             </Text>
-            <PlannedList forecast={forecast.data} hasRecurring={(recurring.data ?? []).length > 0} />
+            <PlannedList
+              forecast={forecast.data}
+              hasRecurring={(recurring.data ?? []).length > 0}
+              recurring={recurring.data ?? []}
+            />
           </Stack>
         </div>
       )}
@@ -175,7 +180,15 @@ function ForecastChartView({ forecast, minimum }: { forecast: Forecast; minimum:
   );
 }
 
-function PlannedList({ forecast, hasRecurring }: { forecast: Forecast; hasRecurring: boolean }) {
+function PlannedList({
+  forecast,
+  hasRecurring,
+  recurring,
+}: {
+  forecast: Forecast;
+  hasRecurring: boolean;
+  recurring: Recurring[];
+}) {
   const { t } = useTranslation();
   const categoriesById = useCategoriesById();
   if (forecast.events.length === 0) {
@@ -216,9 +229,11 @@ function PlannedList({ forecast, hasRecurring }: { forecast: Forecast; hasRecurr
             )}
           </Group>
         </Stack>
-        <Text size="sm" fw={500} className={`num ${event.amount < 0 ? 'expense' : 'income'}`}>
-          {formatMoney(event.amount, forecast.currency, { signed: true })}
-        </Text>
+        <PlannedAmount
+          event={event}
+          currency={forecast.currency}
+          series={recurring.find((item) => item.id === event.recurringId)}
+        />
       </Group>
     );
   });
@@ -291,5 +306,40 @@ function MinimumEditor({
         {t('common.save')}
       </Button>
     </Group>
+  );
+}
+
+/**
+ * The amount of a planned payment as the feed shows it, in the currency of its account; when that is not the
+ * currency of the forecast, the converted amount follows in grey ("≈ 448,42 ₴").
+ */
+function PlannedAmount({
+  event,
+  currency: forecastCurrency,
+  series,
+}: {
+  event: Forecast['events'][number];
+  currency: string;
+  series?: Recurring;
+}) {
+  const sign = event.amount < 0 ? 'expense' : 'income';
+  if (!series || series.currency === forecastCurrency) {
+    return (
+      <Text size="sm" fw={500} className={`num ${sign}`}>
+        {formatMoney(event.amount, forecastCurrency, { signed: true })}
+      </Text>
+    );
+  }
+  const own = event.amount < 0 ? -series.amount : series.amount;
+  return (
+    <Stack gap={0} align="flex-end">
+      <Text size="sm" fw={500} className={`num ${sign}`}>
+        {series.variableAmount && '≈ '}
+        {formatMoney(own, series.currency, { signed: true })}
+      </Text>
+      <Text size="xs" c="dimmed" className="num">
+        ≈ {formatMoney(event.amount, forecastCurrency, { signed: true })}
+      </Text>
+    </Stack>
   );
 }

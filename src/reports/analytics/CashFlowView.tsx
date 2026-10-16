@@ -1,8 +1,9 @@
 import { CompositeChart } from '@mantine/charts';
+import { moneyAxis } from '../../components/chartAxis';
 import { Card, Skeleton, Stack, Table, Text, Title } from '@mantine/core';
 import { useTranslation } from 'react-i18next';
 import { QueryError, UnconvertedAlert } from '../../components/feedback';
-import { formatMonthShort, formatPercent } from '../../lib/format';
+import { capitalize, formatMonthShort, formatPercent } from '../../lib/format';
 import { formatMoney } from '../../lib/money';
 import { kyivToday, periodOf } from '../../lib/periods';
 import { useIncomeExpense } from '../api';
@@ -50,6 +51,7 @@ export function CashFlowView() {
           withLegend
           referenceLines={[{ y: 0, color: 'gray.5' }]}
           valueFormatter={(value) => formatMoney(value, currency)}
+          yAxisProps={moneyAxis}
           gridAxis="y"
           tickLine="none"
         />
@@ -73,7 +75,7 @@ export function CashFlowView() {
           <Table.Tbody>
             {[...data.months].reverse().map((month) => (
               <Table.Tr key={month.month}>
-                <Table.Td tt="capitalize">{formatMonthShort(month.month)}</Table.Td>
+                <Table.Td>{capitalize(formatMonthShort(month.month))}</Table.Td>
                 <Table.Td ta="right" className="num income">
                   {formatMoney(month.income, currency)}
                 </Table.Td>

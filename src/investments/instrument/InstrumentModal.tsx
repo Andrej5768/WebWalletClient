@@ -10,7 +10,7 @@ import { confirmDelete } from '../../components/confirm';
 import { ProblemAlert } from '../../components/feedback';
 import { MoneyInput } from '../../components/MoneyInput';
 import { currencyOptions } from '../../lib/currencies';
-import { formatDate } from '../../lib/format';
+import { formatDay } from '../../lib/format';
 import { formatMoney } from '../../lib/money';
 import { investmentKeys, type Instrument, type InstrumentRequest } from '../api';
 import { formErrors } from '../operations/form';
@@ -201,7 +201,7 @@ export function InstrumentModal({
               <Text size="sm" c="dimmed">
                 {t('invInstrument.manual.nominalPrice', {
                   price: formatMoney(instrument.price, instrument.currency),
-                  date: formatDate(instrument.priceDate),
+                  date: formatDay(instrument.priceDate),
                 })}
               </Text>
             )}

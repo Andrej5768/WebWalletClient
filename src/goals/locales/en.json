@@ -7,8 +7,7 @@
     "monthly": "To set aside",
     "monthlyNote": "a month to make it in time",
     "averageSavings": "Average savings",
-    "averageSavingsNote": "{{rate}} of income over 12 months",
-    "averageSavingsEmpty": "No income in the last 12 months yet",
+    "averageSavingsEmpty": "No complete month with income yet",
     "empty": "No goals yet. Add the first one, for example a trip or an emergency fund.",
     "actions": "Goal actions",
     "edit": "Edit",
@@ -74,13 +73,11 @@
       "inputs": "Inputs",
       "reset": "Back to the data",
       "expenses": "Yearly expenses",
-      "expensesHint": "Average of 12 months — {{amount}} a month",
       "withdrawalRate": "Safe withdrawal rate",
       "withdrawalRateHint": "How much of the capital can be spent each year",
       "realReturn": "Expected real return",
       "realReturnHint": "After inflation",
       "monthlySavings": "Monthly savings",
-      "monthlySavingsHint": "Average of 12 months, savings rate {{rate}}",
       "number": "FIRE number",
       "numberNote": "Yearly expenses ÷ {{rate}}",
       "years": "Years to FIRE",
@@ -99,13 +96,17 @@
         "fatNote": "Expenses ×1.5",
         "coast": "Coast FIRE",
         "coastNote": "No contributions, 20 years of growth"
-      }
+      },
+      "expensesHint_one": "Average of {{count}} complete month — {{amount}} a month",
+      "expensesHint_other": "Average of {{count}} complete months — {{amount}} a month",
+      "monthlySavingsHint_one": "Average of {{count}} complete month, savings rate {{rate}}",
+      "monthlySavingsHint_other": "Average of {{count}} complete months, savings rate {{rate}}"
     },
     "fym": {
       "liquidTitle": "What counts as available money",
       "title": "FYM — freedom money",
       "subtitle": "How many months you would live without income at your current expenses",
-      "noExpenses": "No expenses over 12 months to count with yet",
+      "noExpenses": "No complete month with expenses to count with yet",
       "monthsWithoutIncome": "months without income",
       "liquidNote": "Available {{liquid}} · expenses {{expenses}} a month",
       "milestone_one": "{{count}} month",
@@ -115,7 +116,7 @@
       "left": "Still needed: {{amount}}",
       "reached": "Target reached",
       "eta": "Saving {{savings}} a month — {{months}} months",
-      "noSavings": "No savings over the last 12 months"
+      "noSavings": "No savings over the complete months of the last year"
     },
     "calc": {
       "parameters": "Parameters",
@@ -140,6 +141,10 @@
       "byYear": "Growth by year",
       "year": "Year",
       "balance": "Balance"
-    }
+    },
+    "averageSavingsNote_one": "{{rate}} of income over {{count}} complete month",
+    "averageSavingsNote_other": "{{rate}} of income over {{count}} complete months",
+    "shortHistory_one": "The averages rest on {{count}} complete month only — the estimates are rough.",
+    "shortHistory_other": "The averages rest on {{count}} complete months only — the estimates are rough."
   }
 }

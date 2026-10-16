@@ -1,8 +1,9 @@
 import { LineChart } from '@mantine/charts';
+import { moneyAxis } from '../../components/chartAxis';
 import { Group, SegmentedControl, Skeleton, Text } from '@mantine/core';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { formatDate, formatDayShort } from '../../lib/format';
+import { formatDay, formatDayShort } from '../../lib/format';
 import { formatMoney } from '../../lib/money';
 import { isoDate, kyivToday } from '../../lib/periods';
 import { usePrices, type Operation } from '../api';
@@ -66,8 +67,9 @@ export function PriceChart({
           tickLine="none"
           xAxisProps={{ tickFormatter: (value: string) => formatDayShort(value), minTickGap: 40 }}
           valueFormatter={(value) => formatMoney(value, currency)}
+          yAxisProps={moneyAxis}
           tooltipProps={{
-            labelFormatter: (value: unknown) => formatDate(String(value)),
+            labelFormatter: (value: unknown) => formatDay(String(value)),
           }}
           referenceLines={[
             ...(averagePrice != null

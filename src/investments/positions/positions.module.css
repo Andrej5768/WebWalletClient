@@ -25,3 +25,15 @@
   background: var(--ww-subtle);
   white-space: nowrap;
 }
+
+/* The average price is also on the instrument page: on narrow screens its column gives way */
+@media (max-width: 1199.98px) {
+  .wide {
+    display: none;
+  }
+}
+
+.scroll td,
+.scroll th {
+  white-space: nowrap;
+}

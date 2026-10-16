@@ -2,6 +2,7 @@ import { ActionIcon, Anchor, Badge, Group, Menu, Text, UnstyledButton } from '@m
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import dayjs from 'dayjs';
 import { ChevronDown, ChevronUp, EllipsisVertical } from 'lucide-react';
+import type { TFunction } from 'i18next';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api, type Schemas } from '../api/client';
@@ -14,6 +15,7 @@ import { formatDayShort } from '../lib/format';
 import { formatMoney } from '../lib/money';
 import { isoDate, kyivToday } from '../lib/periods';
 import type { Occurrence } from './api';
+import { byDayDescending, plannedRows } from './planned';
 import classes from './recurring.module.css';
 
 /** Upcoming payments shown when the group is collapsed, besides the overdue ones. */
@@ -26,11 +28,14 @@ interface Props {
   onConfirm(occurrence: Occurrence): void;
   onLink(occurrence: Occurrence): void;
   onEditSeries(recurringId: number): void;
+  /** Whether the occurrence is being saved as a transaction: its actions wait meanwhile. */
+  busy?(occurrence: Occurrence): boolean;
 }
 
 /**
- * Pending payments above today's operations, newest on top like the feed. Collapsed it shows the
- * overdue ones and the nearest upcoming ones; expanded everything up to a month ahead.
+ * Pending payments above today's operations, by day with the latest on top like the feed. Collapsed it shows the
+ * overdue ones and the nearest upcoming ones; expanded everything up to a month ahead, a frequent series by its
+ * nearest date only.
  */
 export function PlannedGroup({ occurrences, accountsById, categoriesById, ...actions }: Props) {
   const { t } = useTranslation();
@@ -40,11 +45,14 @@ export function PlannedGroup({ occurrences, accountsById, categoriesById, ...act
   const today = isoDate(kyivToday());
   const upcoming = occurrences.filter((item) => !item.overdue);
   const shown = expanded
-    ? occurrences
-    : [...upcoming.slice(0, NEAREST), ...occurrences.filter((item) => item.overdue)];
-  const hidden = occurrences.length - shown.length;
+    ? plannedRows(occurrences)
+    : [...upcoming.slice(0, NEAREST), ...occurrences.filter((item) => item.overdue)].map((occurrence) => ({
+        occurrence,
+        repeats: 1,
+        until: occurrence.date,
+      }));
+  const hidden = occurrences.length - shown.reduce((sum, row) => sum + row.repeats, 0);
   const last = occurrences[occurrences.length - 1]!.date;
-  const sorted = [...shown].sort((a, b) => b.date.localeCompare(a.date));
 
   const totals = (sign: 1 | -1) => {
     const byCurrency = new Map<string, number>();
@@ -68,16 +76,24 @@ export function PlannedGroup({ occurrences, accountsById, categoriesById, ...act
           {t('recurring.planned.more', { count: hidden, date: formatDayShort(last) })}
         </UnstyledButton>
       )}
-      {sorted.map((occurrence) => (
-        <OccurrenceRow
-          key={`${occurrence.recurringId}-${occurrence.date}`}
-          occurrence={occurrence}
-          today={today}
-          accountName={accountsById.get(occurrence.accountId)?.name}
-          toAccountName={occurrence.toAccountId ? accountsById.get(occurrence.toAccountId)?.name : undefined}
-          category={occurrence.categoryId ? categoriesById.get(occurrence.categoryId) : undefined}
-          {...actions}
-        />
+      {byDayDescending(shown).map((day) => (
+        <div key={day.date}>
+          <div className={classes.day}>{dayTitle(day.date, today, t)}</div>
+          {day.rows.map(({ occurrence, repeats, until }) => (
+            <OccurrenceRow
+              key={`${occurrence.recurringId}-${occurrence.date}`}
+              occurrence={occurrence}
+              repeats={repeats}
+              until={until}
+              accountName={accountsById.get(occurrence.accountId)?.name}
+              toAccountName={
+                occurrence.toAccountId ? accountsById.get(occurrence.toAccountId)?.name : undefined
+              }
+              category={occurrence.categoryId ? categoriesById.get(occurrence.categoryId) : undefined}
+              {...actions}
+            />
+          ))}
+        </div>
       ))}
       {expanded && occurrences.length > NEAREST && (
         <UnstyledButton className={classes.more} onClick={() => setExpanded(false)}>
@@ -89,18 +105,34 @@ export function PlannedGroup({ occurrences, accountsById, categoriesById, ...act
   );
 }
 
+/** "20 жовт., пт · через 5 днів": the day of planned payments with how far it is. */
+function dayTitle(date: string, today: string, t: TFunction): string {
+  const days = dayjs(date).diff(dayjs(today), 'day');
+  const weekday = dayjs(date).toDate().toLocaleDateString(locale(), { weekday: 'short' });
+  const when =
+    days === 0
+      ? t('recurring.planned.today')
+      : days > 0
+        ? t('recurring.planned.inDays', { count: days })
+        : t('recurring.planned.daysAgo', { count: -days });
+  return `${formatDayShort(date)}, ${weekday} · ${when}`;
+}
+
 function OccurrenceRow({
   occurrence,
-  today,
+  repeats,
+  until,
   accountName,
   toAccountName,
   category,
   onConfirm,
   onLink,
   onEditSeries,
+  busy,
 }: {
   occurrence: Occurrence;
-  today: string;
+  repeats: number;
+  until: string;
   accountName?: string;
   toAccountName?: string;
   category?: CategoryInfo;
@@ -118,17 +150,10 @@ function OccurrenceRow({
   });
 
   const transfer = occurrence.type === 'TRANSFER';
-  const days = dayjs(occurrence.date).diff(dayjs(today), 'day');
-  const weekday = dayjs(occurrence.date).toDate().toLocaleDateString(locale(), { weekday: 'short' });
-  const when =
-    days === 0
-      ? t('recurring.planned.today')
-      : days > 0
-        ? t('recurring.planned.inDays', { count: days })
-        : t('recurring.planned.daysAgo', { count: -days });
+  const saving = busy?.(occurrence) ?? false;
   const subtitle = [
-    `${formatDayShort(occurrence.date)}, ${weekday} · ${when}`,
     transfer ? `${accountName ?? ''} → ${toAccountName ?? ''}` : category?.path,
+    repeats > 1 ? t('recurring.planned.repeats', { count: repeats, date: formatDayShort(until) }) : null,
   ]
     .filter(Boolean)
     .join(' · ');
@@ -158,7 +183,14 @@ function OccurrenceRow({
             <Badge size="xs" variant="light" color="yellow" style={{ textTransform: 'none' }}>
               {t('recurring.planned.notFound')}
             </Badge>
-            <Anchor component="button" type="button" size="xs" onClick={() => onConfirm(occurrence)}>
+            <Anchor
+              component="button"
+              type="button"
+              size="xs"
+              disabled={saving}
+              aria-busy={saving}
+              onClick={() => !saving && onConfirm(occurrence)}
+            >
               {t('recurring.actions.confirm')}
             </Anchor>
           </>
@@ -190,7 +222,9 @@ function OccurrenceRow({
             </ActionIcon>
           </Menu.Target>
           <Menu.Dropdown>
-            <Menu.Item onClick={() => onConfirm(occurrence)}>{t('recurring.actions.confirm')}</Menu.Item>
+            <Menu.Item disabled={saving} onClick={() => onConfirm(occurrence)}>
+              {t('recurring.actions.confirm')}
+            </Menu.Item>
             <Menu.Item onClick={() => onLink(occurrence)}>{t('recurring.actions.link')}</Menu.Item>
             <Menu.Item onClick={() => skip.mutate()}>{t('recurring.actions.skip')}</Menu.Item>
             <Menu.Divider />

@@ -207,3 +207,34 @@ it('opens a transfer to a given account from a link', async () => {
     'Банка «Відпустка» · 32 000,00 ₴',
   );
 });
+
+it('keeps what the editor does not show when a series is saved', async () => {
+  const requests = api({
+    'GET /api/v1/recurring': () =>
+      json([
+        recurringOf({
+          id: 1,
+          name: 'Оренда',
+          comment: 'Договір до 2027',
+          payee: { id: 4, name: 'Landlord' },
+        }),
+      ]),
+    'PUT /api/v1/recurring/1': () => json(recurringOf({ id: 1 })),
+  });
+  renderApp('/transactions?recurring=1');
+
+  const drawer = await screen.findByRole('dialog');
+  const name = await within(drawer).findByLabelText('Назва');
+  await userEvent.clear(name);
+  await userEvent.type(name, 'Оренда квартири');
+  await userEvent.click(within(drawer).getByRole('button', { name: 'Зберегти' }));
+
+  await waitFor(async () =>
+    expect(await bodyOf(requests, 'PUT', '/api/v1/recurring/1')).toMatchObject({
+      name: 'Оренда квартири',
+      comment: 'Договір до 2027',
+      payeeName: 'Landlord',
+    }),
+  );
+  expect(await bodyOf(requests, 'PUT', '/api/v1/recurring/1')).not.toHaveProperty('payeeId');
+});

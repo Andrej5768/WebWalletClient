@@ -15,6 +15,7 @@ import {
   Stack,
   Text,
   TextInput,
+  Tooltip,
   UnstyledButton,
 } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
@@ -25,13 +26,21 @@ import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
 import { toProblem } from '../api/errors';
 import { check } from '../api/http';
-import { invalidateLedger, useAccounts, useCategories, useCategoriesById, usePayees } from '../api/queries';
+import {
+  invalidateLedger,
+  useAccounts,
+  useBaseCurrency,
+  useCategories,
+  useCategoriesById,
+  usePayees,
+} from '../api/queries';
 import { CategoryIcon } from '../components/CategoryIcon';
 import { confirmDelete } from '../components/confirm';
 import { Figure } from '../components/Figure';
 import { ProblemAlert } from '../components/feedback';
 import { MoneyInput } from '../components/MoneyInput';
 import { categorySelectData } from '../lib/categories';
+import { ratesFromAccounts } from '../lib/currencies';
 import { formatDayShort } from '../lib/format';
 import { formatMoney } from '../lib/money';
 import { isoDate, kyivToday } from '../lib/periods';
@@ -91,19 +100,37 @@ export function RecurringDrawer({
 function RecurringList({ payments, onView }: { payments: Recurring[]; onView(view: RecurringView): void }) {
   const { t } = useTranslation();
   const accounts = useAccounts();
+  const baseCurrency = useBaseCurrency();
   const categoriesById = useCategoriesById();
   const accountName = (id: number) => accounts.data?.find((account) => account.id === id)?.name ?? '';
   const today = isoDate(kyivToday());
   const active = payments.filter((item) => item.nextDate !== null);
   const stopped = payments.filter((item) => item.nextDate === null);
 
+  const rates = ratesFromAccounts(accounts.data ?? [], baseCurrency);
+  /** One total in the base currency at today's rates, with the amounts per currency for the tooltip. */
   const monthly = (type: Recurring['type']) => {
     const byCurrency = new Map<string, number>();
     for (const item of active.filter((payment) => payment.type === type)) {
       byCurrency.set(item.currency, (byCurrency.get(item.currency) ?? 0) + item.amount * perMonth(item));
     }
-    if (byCurrency.size === 0) return formatMoney(0, accounts.data?.[0]?.currency ?? 'UAH');
-    return [...byCurrency].map(([currency, amount]) => formatMoney(amount, currency)).join(' · ');
+    const breakdown = [...byCurrency].map(([currency, amount]) => formatMoney(amount, currency)).join(' · ');
+    const unknown = [...byCurrency.keys()].some((currency) => !rates.has(currency));
+    if (unknown) return { value: breakdown, breakdown: null };
+    const total = [...byCurrency].reduce((sum, [currency, amount]) => sum + amount * rates.get(currency)!, 0);
+    const mixed = byCurrency.size > 1 || (byCurrency.size === 1 && !byCurrency.has(baseCurrency));
+    return { value: formatMoney(total, baseCurrency), breakdown: mixed ? breakdown : null };
+  };
+  const figure = (label: string, type: Recurring['type']) => {
+    const { value, breakdown } = monthly(type);
+    const card = <Figure label={label} value={value} note={breakdown ?? undefined} />;
+    return breakdown ? (
+      <Tooltip label={breakdown} withArrow>
+        <div>{card}</div>
+      </Tooltip>
+    ) : (
+      card
+    );
   };
 
   const row = (item: Recurring) => {
@@ -151,8 +178,8 @@ function RecurringList({ payments, onView }: { payments: Recurring[]; onView(vie
   return (
     <Stack gap="md">
       <SimpleGrid cols={3} spacing="sm">
-        <Figure label={t('recurring.list.monthlyOut')} value={monthly('EXPENSE')} />
-        <Figure label={t('recurring.list.monthlyIn')} value={monthly('INCOME')} />
+        {figure(t('recurring.list.monthlyOut'), 'EXPENSE')}
+        {figure(t('recurring.list.monthlyIn'), 'INCOME')}
         <Figure label={t('recurring.list.active')} value={String(active.length)} />
       </SimpleGrid>
       <Text size="xs" c="dimmed">
@@ -288,7 +315,10 @@ function RecurringForm({ recurring, onDone }: { recurring: Recurring | null; onD
   };
   const save = useMutation({
     mutationFn: (input: FormValues) => {
-      const body = toRequest(input);
+      // PUT replaces every field: what the form does not show (the comment) is kept; the payee goes by the name
+      const body = recurring
+        ? { ...requestOf(recurring), payeeId: undefined, ...toRequest(input) }
+        : toRequest(input);
       return check(
         recurring
           ? api.PUT('/api/v1/recurring/{id}', { params: { path: { id: recurring.id } }, body })

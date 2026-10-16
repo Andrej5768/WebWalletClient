@@ -15,7 +15,9 @@
       "daysAgo_one": "{{count}} day ago",
       "daysAgo_other": "{{count}} days ago",
       "notFound": "Not found at the bank",
-      "auto": "Will be created automatically"
+      "auto": "Will be created automatically",
+      "repeats_one": "×{{count}} until {{date}}",
+      "repeats_other": "×{{count}} until {{date}}"
     },
     "actions": {
       "label": "Actions for “{{name}}”",

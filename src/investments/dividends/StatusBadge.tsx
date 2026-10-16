@@ -1,6 +1,7 @@
 import { Badge } from '@mantine/core';
 import { useTranslation } from 'react-i18next';
-import type { DividendStatus } from './model';
+import type { DividendEvent } from '../api';
+import { statusKey, type DividendStatus } from './model';
 
 const COLORS: Record<DividendStatus, string> = {
   RECEIVED: 'green',
@@ -9,7 +10,9 @@ const COLORS: Record<DividendStatus, string> = {
   FORECAST: 'gray',
 };
 
-export function StatusBadge({ status }: { status: DividendStatus }) {
+/** The status of a payment; a declared coupon of a bond reads "on schedule". */
+export function StatusBadge({ event }: { event: { status: DividendStatus; type: DividendEvent['type'] } }) {
+  const status = event.status;
   const { t } = useTranslation();
   return (
     <Badge
@@ -18,7 +21,7 @@ export function StatusBadge({ status }: { status: DividendStatus }) {
       color={COLORS[status]}
       style={{ textTransform: 'none' }}
     >
-      {t(`invDividends.status.${status}`)}
+      {t(`invDividends.status.${statusKey(event)}`)}
     </Badge>
   );
 }

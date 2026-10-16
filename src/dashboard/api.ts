@@ -10,5 +10,3 @@ export function useForecast() {
     queryFn: () => unwrap(api.GET('/api/v1/forecast')),
   });
 }
-
-export { useRecurringPayments } from '../recurring/api';

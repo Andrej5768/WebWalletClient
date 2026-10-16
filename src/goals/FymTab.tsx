@@ -4,11 +4,12 @@ import { useTranslation } from 'react-i18next';
 import type { Schemas } from '../api/client';
 import { useAccounts } from '../api/queries';
 import { locale } from '../i18n';
+import { ShareBar } from '../components/Figure';
 import { formatMoney } from '../lib/money';
 import { fym, FYM_MILESTONES, loadStored, store, trackPosition } from './fire';
 import classes from './goals.module.css';
+import { ShortHistory } from './ShortHistory';
 import { useAverages } from './useAverages';
-import { wholeMoney } from './wholeMoney';
 
 type Account = Schemas['AccountResponse'];
 
@@ -39,7 +40,7 @@ export function FymTab() {
     store(STORAGE_KEY, next);
   };
   const currency = averages.currency;
-  const money = (amount: number) => wholeMoney(amount, currency);
+  const money = (amount: number) => formatMoney(amount, currency, { decimals: 0 });
   const list = (accounts.data ?? []).filter(
     (account) => !account.archived && account.type !== 'CREDIT_CARD' && account.type !== 'LOAN',
   );
@@ -58,6 +59,7 @@ export function FymTab() {
     <div className={classes.two}>
       <Card withBorder radius="md" padding="lg">
         <Stack gap="sm">
+          <ShortHistory months={averages.months} />
           <Text fw={600}>{t('goals.fym.liquidTitle')}</Text>
           {list.map((account) => (
             <Group key={account.id} justify="space-between" wrap="nowrap">
@@ -100,14 +102,14 @@ export function FymTab() {
               <Text size="sm" c="dimmed">
                 {t('goals.fym.liquidNote', { liquid: money(liquid), expenses: money(expenses) })}
               </Text>
-              <div className={classes.track} aria-hidden>
-                <span style={{ width: `${trackPosition(months) * 100}%` }} />
-                {FYM_MILESTONES.map((milestone, index) => (
-                  <i key={milestone} style={{ left: `${(index / (FYM_MILESTONES.length - 1)) * 100}%` }}>
-                    <b>{t('goals.fym.milestone', { count: milestone })}</b>
-                  </i>
-                ))}
-              </div>
+              <ShareBar
+                share={trackPosition(months)}
+                height={8}
+                ticks={FYM_MILESTONES.map((milestone, index) => ({
+                  position: index / (FYM_MILESTONES.length - 1),
+                  label: t('goals.fym.milestone', { count: milestone }),
+                }))}
+              />
             </>
           )}
           <Group gap="sm" align="center">

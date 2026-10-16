@@ -2,9 +2,9 @@ import { Group, SegmentedControl, Skeleton, Stack, Tabs, Text, Title } from '@ma
 import { DatePickerInput } from '@mantine/dates';
 import { lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSearchParams } from 'react-router';
 import { formatDate } from '../lib/format';
 import { isPreset, kyivToday, periodOf, type Period, type Preset } from '../lib/periods';
+import { useUrlParams } from '../lib/useUrlParams';
 import { IncomeExpenseReport } from './IncomeExpenseReport';
 import { NetWorthReport } from './NetWorthReport';
 import { PayeesReport } from './PayeesReport';
@@ -30,7 +30,7 @@ const DEFAULT_PRESET: Record<Tab, Preset> = {
 
 export function ReportsPage() {
   const { t } = useTranslation();
-  const [params, setParams] = useSearchParams();
+  const [params, update] = useUrlParams();
   const tab = (tabs as readonly string[]).includes(params.get('tab') ?? '')
     ? (params.get('tab') as Tab)
     : 'spending';
@@ -40,12 +40,6 @@ export function ReportsPage() {
     from: params.get('from') ?? undefined,
     to: params.get('to') ?? undefined,
   });
-
-  const update = (changes: Record<string, string | null>) => {
-    const next = new URLSearchParams(params);
-    Object.entries(changes).forEach(([key, value]) => (value ? next.set(key, value) : next.delete(key)));
-    setParams(next, { replace: true });
-  };
 
   return (
     <Stack gap="lg" maw={1200}>

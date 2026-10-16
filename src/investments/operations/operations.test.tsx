@@ -1,7 +1,11 @@
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { accountOf, tradedInstrumentOf, portfolioOf, positionDetailOf } from '../../test/fixtures';
+import { accountOf, instrumentOf, portfolioOf, positionDetailOf } from '../../test/fixtures';
 import { bodyOf, json, mockApi, plain, renderApp, signedInApi } from '../../test/render';
+
+/** AAPL with a price, as the operations and the instrument page see it. */
+const traded = (overrides: Parameters<typeof instrumentOf>[0] = {}) =>
+  instrumentOf({ id: 7, price: 220, priceDate: '2026-10-15', ...overrides });
 
 const broker = accountOf({
   id: 3,
@@ -17,7 +21,7 @@ function api(extra = {}) {
     'GET /api/v1/accounts': () => json([broker]),
     'GET /api/v1/investments/portfolio': () =>
       json(portfolioOf({ cash: [{ accountId: 3, currency: 'USD', amount: 1200, amountInBase: 49560 }] })),
-    'GET /api/v1/investments/instruments/7': () => json(tradedInstrumentOf()),
+    'GET /api/v1/investments/instruments/7': () => json(traded()),
     ...extra,
   });
 }
@@ -44,7 +48,7 @@ it('buys a market instrument found by a search, adding it first', async () => {
           },
         ],
       }),
-    'POST /api/v1/investments/instruments/market': () => json(tradedInstrumentOf()),
+    'POST /api/v1/investments/instruments/market': () => json(traded()),
     'POST /api/v1/investments/operations': () => json({}, 201),
   });
   renderApp('/investments?operation=new&accountId=3');
@@ -119,7 +123,7 @@ it('previews the lots a sale closes and shows a shortfall on the field', async (
         400,
       ),
   });
-  renderApp('/investments?operation=new&accountId=3&instrumentId=7&type=SELL');
+  renderApp('/investments?operation=new&operationAccountId=3&operationInstrumentId=7&operationType=SELL');
 
   const panel = await drawer();
   await userEvent.type(await panel.findByLabelText('Кількість'), '8');
@@ -136,7 +140,7 @@ it('previews the lots a sale closes and shows a shortfall on the field', async (
 
 it('records a dividend with the withheld tax', async () => {
   const requests = api({ 'POST /api/v1/investments/operations': () => json({}, 201) });
-  renderApp('/investments?operation=new&accountId=3&instrumentId=7&type=DIVIDEND');
+  renderApp('/investments?operation=new&operationAccountId=3&operationInstrumentId=7&operationType=DIVIDEND');
 
   const panel = await drawer();
   await userEvent.type(await panel.findByLabelText('Нараховано'), '10');
@@ -159,7 +163,7 @@ it('adds an instrument by hand from the drawer', async () => {
   const requests = api({
     'GET /api/v1/investments/instruments/9': () =>
       json(
-        tradedInstrumentOf({
+        traded({
           id: 9,
           symbol: 'UA4000227045',
           name: 'ОВДП 22.07.2027',
@@ -169,7 +173,7 @@ it('adds an instrument by hand from the drawer', async () => {
       ),
     'POST /api/v1/investments/instruments': () =>
       json(
-        tradedInstrumentOf({
+        traded({
           id: 9,
           symbol: 'UA4000227045',
           name: 'ОВДП 22.07.2027',
@@ -204,4 +208,21 @@ it('adds an instrument by hand from the drawer', async () => {
     }),
   );
   expect(await panel.findByText('ОВДП 22.07.2027')).toBeInTheDocument();
+});
+
+it('clears every param of the drawer when it closes and ignores a malformed operation', async () => {
+  api({ 'GET /api/v1/investments/positions': () => json(positionDetailOf()) });
+  const router = renderApp(
+    '/investments?accountId=3&operation=new&operationType=SELL&operationInstrumentId=7&operationAccountId=3',
+  );
+
+  await drawer();
+  await userEvent.keyboard('{Escape}');
+  await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+  // The filter of the page stays, the drawer's own params go: the next operation starts fresh
+  expect(router.state.location.search).toBe('?accountId=3');
+
+  await router.navigate('/investments?operation=abc');
+  expect(await screen.findByRole('heading', { name: 'Інвестиції' })).toBeInTheDocument();
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
 });

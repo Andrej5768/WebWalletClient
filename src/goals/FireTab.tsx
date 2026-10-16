@@ -1,15 +1,17 @@
 import { LineChart } from '@mantine/charts';
+import { moneyAxis } from '../components/chartAxis';
 import { Anchor, Card, Group, NumberInput, SimpleGrid, Skeleton, Stack, Text } from '@mantine/core';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { formatMoney } from '../lib/money';
 import { useAccountsSummary } from '../api/queries';
 import { Figure, ShareBar } from '../components/Figure';
 import { MoneyInput } from '../components/MoneyInput';
 import { formatPercent } from '../lib/format';
 import { kyivToday } from '../lib/periods';
 import { fire, loadStored, store } from './fire';
+import { ShortHistory } from './ShortHistory';
 import { useAverages } from './useAverages';
-import { wholeMoney } from './wholeMoney';
 import classes from './goals.module.css';
 
 const STORAGE_KEY = 'ww-fire';
@@ -35,7 +37,7 @@ export function FireTab() {
   if (summary.isPending || averages.query.isPending) return <Skeleton height={420} radius="md" />;
 
   const currency = summary.data?.currency ?? averages.currency;
-  const money = (amount: number) => wholeMoney(amount, currency);
+  const money = (amount: number) => formatMoney(amount, currency, { decimals: 0 });
   const change = (field: keyof Overrides, value: number | string) => {
     const next = { ...overrides, [field]: typeof value === 'number' ? value : '' };
     setOverrides(next);
@@ -92,11 +94,15 @@ export function FireTab() {
               </Anchor>
             )}
           </Group>
+          <ShortHistory months={averages.months} />
           <MoneyInput
             label={t('goals.fire.expenses')}
             description={
               averages.monthlyExpenses != null
-                ? t('goals.fire.expensesHint', { amount: money(averages.monthlyExpenses) })
+                ? t('goals.fire.expensesHint', {
+                    amount: money(averages.monthlyExpenses),
+                    count: averages.months,
+                  })
                 : undefined
             }
             inputWrapperOrder={['label', 'input', 'description']}
@@ -130,7 +136,10 @@ export function FireTab() {
             label={t('goals.fire.monthlySavings')}
             description={
               averages.monthlySavings != null
-                ? t('goals.fire.monthlySavingsHint', { rate: formatPercent(averages.savingsRate) })
+                ? t('goals.fire.monthlySavingsHint', {
+                    rate: formatPercent(averages.savingsRate),
+                    count: averages.months,
+                  })
                 : undefined
             }
             inputWrapperOrder={['label', 'input', 'description']}
@@ -207,6 +216,7 @@ export function FireTab() {
                 : []),
             ]}
             valueFormatter={(value) => money(value)}
+            yAxisProps={moneyAxis}
             withDots={false}
             gridAxis="y"
             tickLine="none"
