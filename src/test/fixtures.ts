@@ -353,3 +353,73 @@ export function dividendCalendarOf(
     ...overrides,
   };
 }
+
+/** An instrument with a price, as the operations and the instrument page use it. */
+export function tradedInstrumentOf(
+  overrides: Partial<Schemas['InstrumentResponse']> = {},
+): Schemas['InstrumentResponse'] {
+  return {
+    id: 7,
+    symbol: 'AAPL',
+    name: 'Apple Inc',
+    type: 'STOCK',
+    currency: 'USD',
+    exchange: 'NASDAQ',
+    micCode: 'XNGS',
+    isin: null,
+    valuation: 'MARKET',
+    own: false,
+    nominal: null,
+    couponRate: null,
+    couponFrequency: null,
+    maturityDate: null,
+    price: 220,
+    priceDate: '2026-10-15',
+    ...overrides,
+  };
+}
+
+export function investmentOperationOf(
+  overrides: Partial<Schemas['OperationResponse']> = {},
+): Schemas['OperationResponse'] {
+  return {
+    id: 1,
+    type: 'BUY',
+    accountId: 3,
+    instrumentId: 7,
+    symbol: 'AAPL',
+    date: '2026-01-10',
+    quantity: 10,
+    price: 100,
+    amount: 1000,
+    fee: 0,
+    tax: 0,
+    currency: 'USD',
+    cash: -1000,
+    splitFrom: null,
+    splitTo: null,
+    comment: null,
+    ...overrides,
+  };
+}
+
+export function positionDetailOf(
+  overrides: Partial<Schemas['PositionDetailResponse']> = {},
+): Schemas['PositionDetailResponse'] {
+  return {
+    instrument: tradedInstrumentOf(),
+    accountId: 3,
+    quantity: 0,
+    averagePrice: null,
+    price: 220,
+    value: 0,
+    cost: 0,
+    unrealized: 0,
+    realized: 0,
+    dividends: 0,
+    lots: [],
+    sales: [],
+    operations: [],
+    ...overrides,
+  };
+}
