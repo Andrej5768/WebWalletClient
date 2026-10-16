@@ -1,5 +1,7 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
+import goalsEn from '../goals/locales/en.json';
+import goalsUk from '../goals/locales/uk.json';
 import importsEn from '../imports/locales/en.json';
 import importsUk from '../imports/locales/uk.json';
 import settingsEn from '../settings/locales/en.json';
@@ -24,8 +26,8 @@ function initialLanguage(): Language {
 void i18n.use(initReactI18next).init({
   // Feature folders keep their own strings; they are merged into one namespace.
   resources: {
-    uk: { translation: { ...uk, ...settingsUk, ...importsUk } },
-    en: { translation: { ...en, ...settingsEn, ...importsEn } },
+    uk: { translation: { ...uk, ...settingsUk, ...importsUk, ...goalsUk } },
+    en: { translation: { ...en, ...settingsEn, ...importsEn, ...goalsEn } },
   },
   lng: initialLanguage(),
   fallbackLng: 'uk',
