@@ -116,10 +116,6 @@
     "savings": "Savings",
     "unconverted": "No rate: {{currencies}}"
   },
-  "comingSoon": {
-    "title": "Coming soon",
-    "text": "This section arrives in the next steps"
-  },
   "accounts": {
     "subtitle_one": "{{count}} account · double-click a row to edit",
     "subtitle_other": "{{count}} accounts · double-click a row to edit",

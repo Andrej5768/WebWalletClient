@@ -108,3 +108,43 @@ export function forecastOf(
     ...overrides,
   };
 }
+
+export function goalOf(overrides: Partial<Schemas['GoalResponse']> = {}): Schemas['GoalResponse'] {
+  return {
+    id: 1,
+    name: 'Ціль',
+    targetAmount: 10000,
+    currency: 'UAH',
+    targetDate: null,
+    accountId: null,
+    saved: 0,
+    remaining: 10000,
+    progress: 0,
+    startDate: '2026-10-01',
+    startAmount: 0,
+    expected: null,
+    monthsLeft: null,
+    monthlyNeeded: null,
+    status: 'NO_DATE',
+    achievedOn: null,
+    icon: null,
+    color: null,
+    sortOrder: 0,
+    ...overrides,
+  };
+}
+
+export function goalsOf(
+  goals: Schemas['GoalResponse'][],
+  overrides: Partial<Schemas['GoalsResponse']> = {},
+): Schemas['GoalsResponse'] {
+  return {
+    currency: 'UAH',
+    saved: goals.reduce((sum, goal) => sum + goal.saved, 0),
+    target: goals.reduce((sum, goal) => sum + goal.targetAmount, 0),
+    monthlyNeeded: goals.reduce((sum, goal) => sum + (goal.monthlyNeeded ?? 0), 0),
+    goals,
+    unconvertedCurrencies: [],
+    ...overrides,
+  };
+}

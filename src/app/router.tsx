@@ -3,6 +3,7 @@ import {
   AccountsPage,
   BudgetPage,
   DashboardPage,
+  GoalsPage,
   ImportsPage,
   ReportsPage,
   SettingsPage,
@@ -15,10 +16,7 @@ import { RegisterPage } from '../auth/pages/RegisterPage';
 import { ResetPasswordPage } from '../auth/pages/ResetPasswordPage';
 import { VerifyEmailPage } from '../auth/pages/VerifyEmailPage';
 import { GuestOnly, RequireAuth } from '../auth/RequireAuth';
-import { ComingSoonPage } from '../pages/ComingSoonPage';
 import { AppShell } from '../shell/AppShell';
-
-const sections = ['goals'];
 
 export const routes = [
   {
@@ -60,9 +58,9 @@ export const routes = [
           { path: 'transactions', element: <TransactionsPage /> },
           { path: 'budget', element: <BudgetPage /> },
           { path: 'reports', element: <ReportsPage /> },
+          { path: 'goals', element: <GoalsPage /> },
           { path: 'settings', element: <SettingsPage /> },
           { path: 'imports', element: <ImportsPage /> },
-          ...sections.map((section) => ({ path: section, element: <ComingSoonPage section={section} /> })),
           { path: '*', element: <Navigate to="/" replace /> },
         ],
       },

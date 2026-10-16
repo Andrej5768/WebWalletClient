@@ -92,7 +92,8 @@ expenses red and income green, [Fixel](https://github.com/MacPaw/Fixel) for text
 ### Later, together with the backend phases
 
 - [ ] Analytics: plan vs actual, cash flow, period comparison, spending trends, savings and 50/30/20
-- [ ] Goals and Monobank jars, balance forecast with planned payments (planning phase)
+- [x] Goals on an account (e.g. a Monobank jar) or kept by hand, with the pace to the deadline
+- [ ] Balance forecast with planned payments (planning phase)
 - [ ] FIRE, FYM and the compound interest calculator (investments phase)
 
 ### Backend changes this client needs
