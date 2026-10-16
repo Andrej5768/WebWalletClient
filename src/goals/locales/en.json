@@ -62,6 +62,7 @@
       "amount": "Amount",
       "withdraw": "Take out of the goal",
       "hint": "Saved so far: {{saved}}"
-    }
+    },
+    "sidebar": "{{name}}: {{share}} saved"
   }
 }

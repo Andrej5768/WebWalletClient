@@ -1,0 +1,85 @@
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 36px;
+  padding: 0 20px;
+  background: color-mix(in srgb, var(--mantine-primary-color-filled) 7%, var(--ww-surface));
+  border-top: 1px solid var(--ww-border);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 32px minmax(240px, 1fr) 200px 160px;
+  align-items: center;
+  column-gap: 14px;
+  padding: 8px 20px;
+  min-height: 56px;
+  border-top: 1px dashed var(--ww-border);
+}
+
+.overdue {
+  background: var(--ww-warn-bg);
+}
+
+/* A planned payment is not money yet: its tile is outlined */
+.planned {
+  display: inline-flex;
+  border-radius: 9px;
+  outline: 1px dashed var(--ww-border-strong);
+  outline-offset: 2px;
+  opacity: 0.85;
+}
+
+.more {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 8px 20px;
+  border-top: 1px dashed var(--ww-border);
+  font-size: 13px;
+  color: var(--mantine-color-anchor);
+}
+
+.more:hover {
+  background: var(--ww-subtle);
+}
+
+.series {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 12px;
+  width: 100%;
+  padding: 10px 8px;
+  border-radius: 8px;
+  text-align: left;
+}
+
+.series:hover {
+  background: var(--ww-subtle);
+}
+
+.candidate {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--ww-border);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.candidate[data-checked] {
+  border-color: var(--mantine-primary-color-filled);
+}
+
+.plannedBox {
+  padding: 10px 12px;
+  border: 1px dashed var(--ww-border);
+  border-radius: 8px;
+}

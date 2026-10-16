@@ -93,7 +93,8 @@ expenses red and income green, [Fixel](https://github.com/MacPaw/Fixel) for text
 
 - [x] Analytics: plan vs actual, cash flow, period comparison, spending trends, savings and 50/30/20
 - [x] Goals on an account (e.g. a Monobank jar) or kept by hand, with the pace to the deadline
-- [ ] Balance forecast with planned payments (planning phase)
+- [x] Recurring payments in the feed: planned payments above today, matching with bank operations, linking,
+      saving as a transaction, the series editor; balance forecast with planned payments on the overview
 - [ ] FIRE, FYM and the compound interest calculator (investments phase)
 
 ### Backend changes this client needs

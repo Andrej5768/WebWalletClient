@@ -4,6 +4,7 @@ import type { TFunction } from 'i18next';
 import { EllipsisVertical, Plus } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router';
 import { api } from '../api/client';
 import { check } from '../api/http';
 import { queryKeys, useAccounts } from '../api/queries';
@@ -46,6 +47,12 @@ export function GoalsPage() {
   const income = useIncomeExpense(year);
   const [editing, setEditing] = useState<Goal | null | undefined>(undefined);
   const [contributing, setContributing] = useState<Goal | null>(null);
+  const navigate = useNavigate();
+  // A goal on an account grows by a transfer to it; one kept by hand by a contribution.
+  const contribute = (goal: Goal) =>
+    goal.accountId != null
+      ? void navigate(`/transactions?new=1&newType=TRANSFER&toAccountId=${goal.accountId}`)
+      : setContributing(goal);
   const accountNames = new Map((accounts.data ?? []).map((account) => [account.id, account.name]));
 
   const data = goals.data;
@@ -114,7 +121,7 @@ export function GoalsPage() {
               goal={goal}
               accountName={goal.accountId != null ? accountNames.get(goal.accountId) : undefined}
               onEdit={() => setEditing(goal)}
-              onContribute={() => setContributing(goal)}
+              onContribute={() => contribute(goal)}
             />
           ))}
         </div>
@@ -192,9 +199,7 @@ function GoalCard({
             </Menu.Target>
             <Menu.Dropdown>
               <Menu.Item onClick={onEdit}>{t('goals.edit')}</Menu.Item>
-              {goal.accountId == null && (
-                <Menu.Item onClick={onContribute}>{t('goals.contribute')}</Menu.Item>
-              )}
+              <Menu.Item onClick={onContribute}>{t('goals.contribute')}</Menu.Item>
               <Menu.Item onClick={() => toggleAchieved.mutate()}>
                 {t(goal.achievedOn ? 'goals.markActive' : 'goals.markAchieved')}
               </Menu.Item>

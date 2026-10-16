@@ -64,6 +64,7 @@ export function transactionOf(
     tagIds: [],
     source: 'MANUAL',
     createdAt: '2026-10-15T10:00:00Z',
+    recurring: null,
     ...overrides,
   } as Schemas['TransactionResponse'];
 }
@@ -174,6 +175,58 @@ export function monthSavingsOf(overrides: Partial<Schemas['MonthSavings']> = {})
     cumulative: 0,
     complete: true,
     destinations: [],
+    ...overrides,
+  };
+}
+
+export function occurrenceOf(
+  overrides: Partial<Schemas['OccurrenceResponse']> = {},
+): Schemas['OccurrenceResponse'] {
+  return {
+    recurringId: 1,
+    name: 'Оренда',
+    date: '2026-10-24',
+    status: 'PENDING',
+    overdue: false,
+    type: 'EXPENSE',
+    accountId: 1,
+    amount: 14000,
+    currency: 'UAH',
+    toAccountId: null,
+    toAmount: null,
+    categoryId: null,
+    payee: null,
+    autoCreate: false,
+    variableAmount: false,
+    transactionId: null,
+    ...overrides,
+  };
+}
+
+export function recurringOf(
+  overrides: Partial<Schemas['RecurringResponse']> = {},
+): Schemas['RecurringResponse'] {
+  return {
+    id: 1,
+    name: 'Оренда',
+    type: 'EXPENSE',
+    accountId: 1,
+    amount: 14000,
+    currency: 'UAH',
+    toAccountId: null,
+    toAmount: null,
+    toCurrency: null,
+    categoryId: null,
+    payee: null,
+    comment: null,
+    frequency: 'MONTHLY',
+    interval: 1,
+    startDate: '2026-09-24',
+    endDate: null,
+    autoCreate: false,
+    variableAmount: false,
+    tolerance: 10,
+    nextDate: '2026-10-24',
     ...overrides,
   };
 }

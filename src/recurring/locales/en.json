@@ -1,0 +1,125 @@
+{
+  "recurring": {
+    "title": "Recurring payments",
+    "button": "Recurring",
+    "chip": "recurring",
+    "planned": {
+      "title_one": "Planned until {{date}} · {{count}} payment",
+      "title_other": "Planned until {{date}} · {{count}} payments",
+      "more_one": "{{count}} more — until {{date}}",
+      "more_other": "{{count}} more — until {{date}}",
+      "less": "Show only the nearest",
+      "today": "today",
+      "inDays_one": "in {{count}} day",
+      "inDays_other": "in {{count}} days",
+      "daysAgo_one": "{{count}} day ago",
+      "daysAgo_other": "{{count}} days ago",
+      "notFound": "Not found at the bank",
+      "auto": "Will be created automatically"
+    },
+    "actions": {
+      "label": "Actions for “{{name}}”",
+      "confirm": "Save as a transaction",
+      "link": "Link to a transaction",
+      "skip": "Skip this time",
+      "editSeries": "Edit the series"
+    },
+    "confirm": {
+      "title": "Save “{{name}}” as a transaction",
+      "hint": "The amount of this payment varies — enter how much was paid.",
+      "date": "Date"
+    },
+    "link": {
+      "plannedOn": "Planned for {{date}} · {{account}} · {{amount}}",
+      "hint": "Matching found no similar transaction. Choose the transaction that paid this payment.",
+      "candidates": "Similar transactions",
+      "none": "No similar transactions within 10 days of the date",
+      "sameAccount": "Same account",
+      "otherAccount": "Another account",
+      "sameAmount": "same amount",
+      "moreBy": "{{amount}} more ({{share}}%)",
+      "lessBy": "{{amount}} less ({{share}}%)",
+      "earlier_one": "{{count}} day earlier",
+      "earlier_other": "{{count}} days earlier",
+      "later_one": "{{count}} day later",
+      "later_other": "{{count}} days later",
+      "updateAmount": "Change the amount of the series to {{amount}} from the next payment",
+      "submit": "Link"
+    },
+    "list": {
+      "monthlyOut": "Expenses per month",
+      "monthlyIn": "Income per month",
+      "active": "Active series",
+      "monthlyHint": "Weekly and yearly payments are converted to a month. Transfers between own accounts are left out.",
+      "add": "New payment",
+      "empty": "No recurring payments yet. Add rent, subscriptions or the salary — they will show up in the transactions and the forecast.",
+      "auto": "Automatic",
+      "unconfirmed": "Not confirmed",
+      "next": "next {{date}}",
+      "stoppedOn": "stopped {{date}}",
+      "stopped": "Stopped"
+    },
+    "schedule": {
+      "dayOfMonth": "on the {{day}}",
+      "every1": {
+        "DAILY": "daily",
+        "WEEKLY": "weekly on",
+        "MONTHLY": "monthly",
+        "YEARLY": "yearly on"
+      },
+      "everyN": {
+        "DAILY_one": "every {{count}} day",
+        "DAILY_other": "every {{count}} days",
+        "WEEKLY_one": "every {{count}} week,",
+        "WEEKLY_other": "every {{count}} weeks,",
+        "MONTHLY_one": "every {{count}} month,",
+        "MONTHLY_other": "every {{count}} months,",
+        "YEARLY_one": "every {{count}} year,",
+        "YEARLY_other": "every {{count}} years,"
+      }
+    },
+    "form": {
+      "newTitle": "New recurring payment",
+      "editTitle": "Recurring payment",
+      "name": "Name",
+      "amount": "Amount",
+      "variableAmount": "The amount varies — show it as an estimate in the forecast",
+      "schedule": "Schedule",
+      "every": "Every",
+      "unit": "Unit of the schedule",
+      "units": {
+        "DAILY_one": "day",
+        "DAILY_other": "days",
+        "WEEKLY_one": "week",
+        "WEEKLY_other": "weeks",
+        "MONTHLY_one": "month",
+        "MONTHLY_other": "months",
+        "YEARLY_one": "year",
+        "YEARLY_other": "years"
+      },
+      "startDate": "First payment",
+      "shortMonths": "In shorter months — the last day",
+      "end": "Ends",
+      "endNever": "Never",
+      "endDate": "On a date",
+      "endCount": "After a number",
+      "endDateLabel": "Last payment no later than",
+      "countLabel": "Number of payments",
+      "endBeforeStart": "The end cannot be before the first payment",
+      "preview": "Next: {{dates}}",
+      "mode": "How to handle it",
+      "remind": "Remind and match with the bank",
+      "remindHint": "When Monobank or an import brings a similar transaction, the payment is marked as paid. If nothing comes, it is shown as a reminder in the transactions.",
+      "auto": "Create automatically",
+      "autoHint": "The transaction appears on the day of the payment. Suits cash and accounts without synchronization.",
+      "match_one": "A similar transaction is on the same account, ±{{count}} day,",
+      "match_other": "A similar transaction is on the same account, ±{{count}} days,",
+      "tolerance": "Amount precision",
+      "exact": "exact amount",
+      "percent": "amount ±{{value}}%",
+      "stop": "Stop",
+      "deleteTitle": "Delete the payment “{{name}}”?",
+      "deleteText": "The transactions that paid it stay."
+    }
+  }
+}
