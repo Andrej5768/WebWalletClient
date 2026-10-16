@@ -282,6 +282,7 @@ export function portfolioOf(
   return {
     currency: 'UAH',
     value: 0,
+    deposited: 0,
     invested: 0,
     unrealized: 0,
     unrealizedShare: null,

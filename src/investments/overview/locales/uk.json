@@ -3,7 +3,7 @@
     "value": "Вартість портфеля",
     "dayChange": "{{amount}} за день",
     "invested": "Вкладено",
-    "investedNote": "собівартість позицій",
+    "investedNote": "чисті внески · результат {{result}}",
     "unrealized": "Нереалізований прибуток",
     "realized": "Реалізований за {{year}} рік",
     "realizedNote": "продажі за FIFO",
@@ -41,6 +41,7 @@
       "byType": "Класи активів",
       "byCurrency": "Валюти",
       "empty": "Немає позицій"
-    }
+    },
+    "unrealizedNote": "{{share}} від собівартості {{cost}}"
   }
 }

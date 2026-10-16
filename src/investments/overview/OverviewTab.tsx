@@ -90,16 +90,20 @@ function Figures({ data }: { data: Portfolio }) {
             : undefined
         }
       />
+      {/* What was brought minus what was taken out, so that value minus it is the whole result */}
       <Figure
         label={t('invOverview.invested')}
-        value={money(data.invested)}
-        note={t('invOverview.investedNote')}
+        value={money(data.deposited)}
+        note={t('invOverview.investedNote', { result: money(data.value - data.deposited, true) })}
       />
       <Figure
         label={t('invOverview.unrealized')}
         value={money(data.unrealized, true)}
         className={sign(data.unrealized)}
-        note={data.unrealizedShare != null ? formatSigned(data.unrealizedShare) : undefined}
+        note={t('invOverview.unrealizedNote', {
+          share: data.unrealizedShare != null ? formatSigned(data.unrealizedShare) : '—',
+          cost: money(data.invested),
+        })}
       />
       <Figure
         label={t('invOverview.realized', { year: kyivToday().year() })}

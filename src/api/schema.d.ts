@@ -2176,6 +2176,7 @@ export interface components {
             cash: components["schemas"]["CashResponse"][];
             currency: string;
             dayChange: number;
+            deposited: number;
             dividendsLast12Months: number;
             invested: number;
             positions: components["schemas"]["PositionResponse"][];

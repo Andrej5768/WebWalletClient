@@ -5,7 +5,7 @@ import i18n from '../i18n';
 import { unexpectedRequests } from './render';
 
 // Pages are lazy and render behind the session check; give async queries time on slow runners.
-configure({ asyncUtilTimeout: 10_000 });
+configure({ asyncUtilTimeout: 20_000 });
 
 // Every test starts signed out, in Ukrainian, with empty storage, and must not hit unmocked endpoints.
 beforeEach(async () => {

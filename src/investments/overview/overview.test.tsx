@@ -19,6 +19,7 @@ const accounts = [
 
 const portfolio = portfolioOf({
   value: 270000,
+  deposited: 240000,
   invested: 220000,
   unrealized: 40000,
   unrealizedShare: 0.1818,
@@ -69,9 +70,13 @@ it('shows the key figures, the allocation and the result of the period', async (
   renderApp('/investments');
 
   expect(await screen.findByText('Вартість портфеля', { selector: 'p' })).toBeInTheDocument();
-  expect(plain(screen.getByText('Нереалізований прибуток').parentElement?.textContent)).toContain(
-    '+40 000,00 ₴',
-  );
+  const unrealized = plain(screen.getByText('Нереалізований прибуток').parentElement?.textContent);
+  expect(unrealized).toContain('+40 000,00 ₴');
+  expect(unrealized).toContain('від собівартості 220 000,00 ₴');
+  // Net deposits, with the value above them as the whole result
+  const invested = plain(screen.getByText('Вкладено').parentElement?.textContent);
+  expect(invested).toContain('240 000,00 ₴');
+  expect(invested).toContain('результат +30 000,00 ₴');
   expect(plain(screen.getByText('Дивіденди за 12 місяців').parentElement?.textContent)).toContain(
     '20 656,00 ₴',
   );
