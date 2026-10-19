@@ -1,6 +1,6 @@
 import { useQuery, type QueryClient } from '@tanstack/react-query';
 import { api, type Schemas } from '../api/client';
-import { check, unwrap } from '../api/http';
+import { check, unwrap, unwrapOrNull } from '../api/http';
 import { queryKeys } from '../api/queries';
 
 export type TaxSettings = Schemas['TaxSettingsResponse'];
@@ -89,4 +89,45 @@ export const markDividendDocument = (operationId: number, document: boolean) =>
       params: { path: { operationId } },
       body: { document },
     }),
+  );
+
+export type TaxProfile = Schemas['TaxProfileData'];
+
+/** The taxpayer details of the declarations; null until entered. */
+export function useTaxProfile() {
+  return useQuery({
+    queryKey: [...queryKeys.taxes, 'profile'] as const,
+    queryFn: () => unwrapOrNull(api.GET('/api/v1/taxes/profile')),
+  });
+}
+
+export const saveTaxProfile = (body: TaxProfile) => unwrap(api.PUT('/api/v1/taxes/profile', { body }));
+
+/** Saves a downloaded declaration (one XML or a ZIP of several) under the name the server gave it. */
+async function saveDeclaration(call: Promise<{ data?: Blob; error?: unknown; response: Response }>) {
+  const { data, error, response } = await call;
+  if (error !== undefined || data === undefined || !response.ok) {
+    throw error ?? { status: response.status, code: 'EMPTY_RESPONSE' };
+  }
+  const name =
+    /filename="?([^";]+)"?/.exec(response.headers.get('Content-Disposition') ?? '')?.[1] ?? 'declaration.xml';
+  const url = URL.createObjectURL(data);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = name;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+export const downloadFopDeclaration = (year: number, quarter: number) =>
+  saveDeclaration(
+    api.GET('/api/v1/taxes/declarations/fop/{year}/{quarter}', {
+      params: { path: { year, quarter } },
+      parseAs: 'blob',
+    }),
+  );
+
+export const downloadPropertyDeclaration = (year: number) =>
+  saveDeclaration(
+    api.GET('/api/v1/taxes/declarations/property/{year}', { params: { path: { year } }, parseAs: 'blob' }),
   );

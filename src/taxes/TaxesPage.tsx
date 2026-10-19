@@ -1,5 +1,5 @@
 import { Button, Group, SegmentedControl, Skeleton, Stack, Tabs, Text, Title } from '@mantine/core';
-import { Percent } from 'lucide-react';
+import { Percent, UserRound } from 'lucide-react';
 import { lazy, Suspense, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { kyivToday } from '../lib/periods';
@@ -9,6 +9,7 @@ import { TAB_KEYS, taxYears, type TaxTab } from './model';
 
 const InvestmentTab = lazy(() => import('./InvestmentTab').then((m) => ({ default: m.InvestmentTab })));
 const RatesDrawer = lazy(() => import('./RatesDrawer').then((m) => ({ default: m.RatesDrawer })));
+const ProfileDrawer = lazy(() => import('./ProfileDrawer').then((m) => ({ default: m.ProfileDrawer })));
 
 /**
  * The taxes of the sole proprietor and of investment income for a year. The URL keeps the tab (`tab`) and the year
@@ -18,6 +19,7 @@ export function TaxesPage() {
   const { t } = useTranslation();
   const [params, update] = useUrlParams();
   const [ratesOpen, setRatesOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
   const current = kyivToday().year();
   const years = taxYears(current);
   const asked = intParam(params, 'year');
@@ -44,6 +46,13 @@ export function TaxesPage() {
             onChange={(value) => update({ year: Number(value) === current ? null : value })}
             data={years.map((value) => String(value))}
           />
+          <Button
+            variant="default"
+            leftSection={<UserRound size={16} />}
+            onClick={() => setProfileOpen(true)}
+          >
+            {t('taxes.profile.button')}
+          </Button>
           <Button variant="default" leftSection={<Percent size={16} />} onClick={() => setRatesOpen(true)}>
             {t('taxes.ratesButton', { year })}
           </Button>
@@ -62,11 +71,16 @@ export function TaxesPage() {
 
       <Suspense fallback={<Skeleton height={320} radius="md" />}>
         {tab === 'fop' ? (
-          <FopTab year={year} onRates={() => setRatesOpen(true)} />
+          <FopTab year={year} onRates={() => setRatesOpen(true)} onProfile={() => setProfileOpen(true)} />
         ) : (
-          <InvestmentTab year={year} onRates={() => setRatesOpen(true)} />
+          <InvestmentTab
+            year={year}
+            onRates={() => setRatesOpen(true)}
+            onProfile={() => setProfileOpen(true)}
+          />
         )}
         {ratesOpen && <RatesDrawer year={year} onClose={() => setRatesOpen(false)} />}
+        {profileOpen && <ProfileDrawer onClose={() => setProfileOpen(false)} />}
       </Suspense>
     </Stack>
   );

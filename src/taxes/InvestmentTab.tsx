@@ -12,21 +12,36 @@ import {
   Title,
 } from '@mantine/core';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Download, Info } from 'lucide-react';
+import { Download, FileCode, Info } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Figure } from '../components/Figure';
 import { QueryError, UnconvertedAlert } from '../components/feedback';
 import { formatDate, formatDay, formatPercent } from '../lib/format';
 import { formatMoney, formatQuantity } from '../lib/money';
-import { invalidateTaxes, markDividendDocument, useInvestmentTax, type InvestmentTaxReport } from './api';
+import {
+  downloadPropertyDeclaration,
+  invalidateTaxes,
+  markDividendDocument,
+  useInvestmentTax,
+  useTaxProfile,
+  type InvestmentTaxReport,
+} from './api';
 import { downloadCsv } from './model';
 
 const uah = (value: number, signed = false) => formatMoney(value, 'UAH', { signed });
 const rate = (value: number) => formatPercent(value / 100);
 
 /** The taxes of the dividends and sales of a year and what goes to the yearly declaration. */
-export function InvestmentTab({ year, onRates }: { year: number; onRates(): void }) {
+export function InvestmentTab({
+  year,
+  onRates,
+  onProfile,
+}: {
+  year: number;
+  onRates(): void;
+  onProfile(): void;
+}) {
   const { t } = useTranslation();
   const report = useInvestmentTax(year);
   const queryClient = useQueryClient();
@@ -36,6 +51,8 @@ export function InvestmentTab({ year, onRates }: { year: number; onRates(): void
     onSuccess: () => invalidateTaxes(queryClient),
   });
 
+  const profile = useTaxProfile();
+  const xml = useMutation({ mutationFn: () => downloadPropertyDeclaration(year) });
   if (report.isLoading) return <Skeleton height={420} radius="md" />;
   if (!report.data) return <QueryError error={report.error} onRetry={() => void report.refetch()} />;
   const data = report.data;
@@ -268,10 +285,22 @@ export function InvestmentTab({ year, onRates }: { year: number; onRates(): void
           )}
         </Stack>
         <Group justify="flex-end" mt="md">
+          <Button
+            size="xs"
+            variant="light"
+            leftSection={<FileCode size={14} />}
+            loading={xml.isPending}
+            onClick={() => (profile.data ? xml.mutate() : onProfile())}
+          >
+            {t('taxes.investments.xml')}
+          </Button>
           <Button size="xs" variant="default" leftSection={<Download size={14} />} onClick={exportCsv}>
             {t('taxes.csvAll')}
           </Button>
         </Group>
+        <Text size="xs" c="dimmed" ta="right" mt={6}>
+          {t('taxes.xmlHint')}
+        </Text>
       </Card>
     </Stack>
   );
