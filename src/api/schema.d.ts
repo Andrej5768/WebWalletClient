@@ -625,6 +625,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/imports/freedom/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Preview Freedom Finance reports (XLSX) without saving anything
+         * @description The trades report and the cash flows report, in any order; the cash flows give the currency of the fees, so both are needed for exact money. Without accountId the operations go to the brokerage account named Freedom Finance, created when there is none. Confirm with POST /previews/{id}/confirm within an hour, discard with DELETE /api/v1/imports/previews/{id}. Only the parsed reports are kept, not the files.
+         */
+        post: operations["preview_1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/imports/freedom/previews/{id}/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Import the previewed reports
+         * @description Tickers not listed get the suggested instruments, operations not excluded are imported; those imported before are skipped. Rejected when the reports sell more than they buy before. The preview is removed afterwards; 404 when it is unknown or expired.
+         */
+        post: operations["confirm_2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/imports/previews/{id}": {
         parameters: {
             query?: never;
@@ -1438,6 +1478,40 @@ export interface components {
             pricesFrom: string | null;
             symbol: string;
         };
+        BrokerConfirmRequest: {
+            excluded?: string[];
+            instruments?: components["schemas"]["TickerChoice"][];
+        };
+        BrokerImportResult: {
+            accountCreated: boolean;
+            /** Format: int64 */
+            accountId: number;
+            /** Format: int32 */
+            duplicates: number;
+            /** Format: int32 */
+            instrumentsCreated: number;
+            /** Format: int32 */
+            operationsImported: number;
+        };
+        BrokerPreviewResponse: {
+            account: components["schemas"]["PreviewAccount"];
+            cash: components["schemas"]["CashPreview"][];
+            /** Format: date-time */
+            expiresAt: string;
+            /** Format: date */
+            from: string | null;
+            /** Format: uuid */
+            id: string;
+            instruments: components["schemas"]["TickerPreview"][];
+            /** Format: int32 */
+            merged: number;
+            operations: components["schemas"]["OperationPreview"][];
+            providerUnavailable: boolean;
+            /** @enum {string} */
+            source: "PRIVATBANK" | "ZENMONEY" | "FREEDOM";
+            /** Format: date */
+            to: string | null;
+        };
         CalendarEvent: {
             /** Format: int64 */
             accountId: number;
@@ -1479,6 +1553,10 @@ export interface components {
             unconvertedCurrencies: string[];
             yield: number | null;
             yieldOnCost: number | null;
+        };
+        CashPreview: {
+            amount: number;
+            currency: string;
         };
         CashResponse: {
             /** Format: int64 */
@@ -1796,7 +1874,7 @@ export interface components {
             id: string;
             operations: components["schemas"]["PageResponseImportOperation"];
             /** @enum {string} */
-            source: "PRIVATBANK" | "ZENMONEY";
+            source: "PRIVATBANK" | "ZENMONEY" | "FREEDOM";
             summary: components["schemas"]["ImportResult"];
         };
         ImportResult: {
@@ -1830,6 +1908,18 @@ export interface components {
             /** Format: date */
             to: string;
             unconvertedCurrencies: string[];
+        };
+        InstrumentChoice: {
+            currency: string;
+            exchange: string | null;
+            /** Format: int64 */
+            instrumentId: number | null;
+            manual: boolean;
+            micCode: string | null;
+            name: string;
+            symbol: string;
+            /** @enum {string} */
+            type: "STOCK" | "ETF" | "FUND" | "BOND" | "GOVERNMENT_BOND" | "CRYPTO" | "OTHER";
         };
         InstrumentIncome: {
             amount: number;
@@ -2021,6 +2111,28 @@ export interface components {
             /** @enum {string} */
             type?: "EXPENSE" | "INCOME" | "TRANSFER";
         };
+        OperationPreview: {
+            amount: number;
+            cash: number;
+            currency: string;
+            /** Format: date */
+            date: string;
+            description: string;
+            fee: number;
+            key: string;
+            price: number | null;
+            quantity: number | null;
+            /** @enum {string|null} */
+            skip: "SERVICE" | "UNKNOWN" | null;
+            /** @enum {string} */
+            status: "NEW" | "DUPLICATE" | "SKIPPED";
+            tax: number;
+            ticker: string | null;
+            toAmount: number | null;
+            toCurrency: string | null;
+            /** @enum {string|null} */
+            type: "BUY" | "SELL" | "DIVIDEND" | "COUPON" | "FEE" | "SPLIT" | "DEPOSIT" | "WITHDRAWAL" | "EXCHANGE" | null;
+        };
         OperationRequest: {
             /** Format: int64 */
             accountId: number;
@@ -2039,8 +2151,10 @@ export interface components {
             /** Format: int32 */
             splitTo?: number;
             tax?: number;
+            toAmount?: number;
+            toCurrency?: string;
             /** @enum {string} */
-            type: "BUY" | "SELL" | "DIVIDEND" | "COUPON" | "FEE" | "SPLIT";
+            type: "BUY" | "SELL" | "DIVIDEND" | "COUPON" | "FEE" | "SPLIT" | "DEPOSIT" | "WITHDRAWAL" | "EXCHANGE";
         };
         OperationResponse: {
             /** Format: int64 */
@@ -2064,8 +2178,10 @@ export interface components {
             splitTo: number | null;
             symbol: string | null;
             tax: number;
+            toAmount: number | null;
+            toCurrency: string | null;
             /** @enum {string} */
-            type: "BUY" | "SELL" | "DIVIDEND" | "COUPON" | "FEE" | "SPLIT";
+            type: "BUY" | "SELL" | "DIVIDEND" | "COUPON" | "FEE" | "SPLIT" | "DEPOSIT" | "WITHDRAWAL" | "EXCHANGE";
         };
         OwnInstrumentRequest: {
             /** Format: int32 */
@@ -2220,6 +2336,12 @@ export interface components {
             unrealizedShare: number | null;
             value: number;
             valueInBase: number | null;
+        };
+        PreviewAccount: {
+            currency: string;
+            /** Format: int64 */
+            id: number | null;
+            name: string;
         };
         PricePoint: {
             close: number;
@@ -2433,6 +2555,21 @@ export interface components {
             /** Format: int64 */
             id: number;
             name: string;
+        };
+        TickerChoice: {
+            /** Format: int64 */
+            instrumentId?: number;
+            manual?: boolean;
+            micCode?: string;
+            symbol?: string;
+            ticker: string;
+        };
+        TickerPreview: {
+            currency: string;
+            quantityAfter: number;
+            shortfall: boolean;
+            suggestion: components["schemas"]["InstrumentChoice"];
+            ticker: string;
         };
         TokenRequest: {
             token: string;
@@ -3556,6 +3693,60 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["GoalResponse"];
+                };
+            };
+        };
+    };
+    preview_1: {
+        parameters: {
+            query?: {
+                accountId?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "multipart/form-data": {
+                    files: string[];
+                };
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["BrokerPreviewResponse"];
+                };
+            };
+        };
+    };
+    confirm_2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BrokerConfirmRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["BrokerImportResult"];
                 };
             };
         };

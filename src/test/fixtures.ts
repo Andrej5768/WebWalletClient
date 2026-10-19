@@ -372,6 +372,8 @@ export function investmentOperationOf(
     tax: 0,
     currency: 'USD',
     cash: -1000,
+    toAmount: null,
+    toCurrency: null,
     splitFrom: null,
     splitTo: null,
     comment: null,

@@ -90,6 +90,8 @@ it('keeps the recorded amount of an edited trade until its quantity or price cha
     tax: 0,
     currency: 'USD',
     cash: -100,
+    toAmount: null,
+    toCurrency: null,
     splitFrom: null,
     splitTo: null,
     comment: null,
