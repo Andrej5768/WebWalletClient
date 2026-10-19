@@ -22,6 +22,7 @@ import { Link } from 'react-router';
 import { invalidateLedger } from '../api/queries';
 import { FormFooter } from '../components/FormFooter';
 import { ProblemAlert } from '../components/feedback';
+import { locale } from '../i18n';
 import { investmentKeys } from '../investments/api';
 import { OPERATION_COLORS } from '../investments/operationColors';
 import { InstrumentPicker } from '../investments/operations/InstrumentPicker';
@@ -462,7 +463,7 @@ function OperationRow({
     case 'EXCHANGE':
       title = `${operation.currency} → ${operation.toCurrency}`;
       note = t('imports.broker.notes.rate', {
-        rate: new Intl.NumberFormat(undefined, { maximumFractionDigits: 6 }).format(
+        rate: new Intl.NumberFormat(locale(), { maximumFractionDigits: 6 }).format(
           operation.toAmount! / operation.amount,
         ),
       });
