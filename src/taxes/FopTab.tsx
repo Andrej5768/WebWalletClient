@@ -16,7 +16,7 @@ import {
   Title,
 } from '@mantine/core';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Download, Info, TriangleAlert } from 'lucide-react';
+import { Download, FileCode, Info, TriangleAlert } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
@@ -27,10 +27,12 @@ import { formatDate, formatDayShort, formatPercent } from '../lib/format';
 import { formatMoney } from '../lib/money';
 import { isoDate, kyivToday } from '../lib/periods';
 import {
+  downloadFopDeclaration,
   invalidateTaxes,
   markQuarterPaid,
   markTransaction,
   useFopReport,
+  useTaxProfile,
   useTaxSettings,
   type FopIncome,
   type FopReport,
@@ -41,7 +43,7 @@ const uah = (value: number, signed = false) => formatMoney(value, 'UAH', { signe
 const rate = (value: number) => formatPercent(value / 100);
 
 /** The taxes of the sole proprietor by quarter, with the incomes they come from. */
-export function FopTab({ year, onRates }: { year: number; onRates(): void }) {
+export function FopTab({ year, onRates, onProfile }: { year: number; onRates(): void; onProfile(): void }) {
   const { t } = useTranslation();
   const report = useFopReport(year);
   const settings = useTaxSettings(year);
@@ -144,7 +146,14 @@ export function FopTab({ year, onRates }: { year: number; onRates(): void }) {
         </Text>
       </Card>
 
-      <Quarters data={data} year={year} today={today} selected={quarter} onSelect={setPicked} />
+      <Quarters
+        data={data}
+        year={year}
+        today={today}
+        selected={quarter}
+        onSelect={setPicked}
+        onProfile={onProfile}
+      />
       <Incomes
         year={year}
         quarter={quarter}
@@ -161,15 +170,23 @@ function Quarters({
   today,
   selected,
   onSelect,
+  onProfile,
 }: {
   data: FopReport;
   year: number;
   today: string;
   selected: number;
   onSelect(quarter: number): void;
+  onProfile(): void;
 }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const profile = useTaxProfile();
+  // The declarations need the taxpayer details: without them the button opens their form
+  const xml = useMutation({
+    mutationFn: (quarter: number) => downloadFopDeclaration(year, quarter),
+  });
+  const download = (quarter: number) => (profile.data ? xml.mutate(quarter) : onProfile());
   const paid = useMutation({
     mutationFn: ({ quarter, value }: { quarter: number; value: boolean }) =>
       markQuarterPaid(year, quarter, value),
@@ -235,9 +252,23 @@ function Quarters({
                     {uah(quarter.esv)}
                   </Table.Td>
                   <Table.Td>
-                    <Text size="sm" c="dimmed">
-                      {quarter.declarationDue ? formatDayShort(quarter.declarationDue) : '—'}
-                    </Text>
+                    <Group gap={6} wrap="nowrap">
+                      <Text size="sm" c="dimmed">
+                        {quarter.declarationDue ? formatDayShort(quarter.declarationDue) : '—'}
+                      </Text>
+                      {data.rates.fopGroup === 3 && (
+                        <Button
+                          size="compact-xs"
+                          variant="light"
+                          leftSection={<FileCode size={12} />}
+                          loading={xml.isPending && xml.variables === quarter.quarter}
+                          aria-label={t('taxes.fop.xmlOf', { quarter: quarter.quarter })}
+                          onClick={() => download(quarter.quarter)}
+                        >
+                          XML
+                        </Button>
+                      )}
+                    </Group>
                   </Table.Td>
                   <Table.Td>
                     <Text size="sm" c="dimmed">
@@ -286,6 +317,9 @@ function Quarters({
           </Table.Tbody>
         </Table>
       </div>
+      <Text size="xs" c="dimmed" px="lg" py="sm">
+        {t('taxes.xmlHint')}
+      </Text>
     </Card>
   );
 }

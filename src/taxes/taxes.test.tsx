@@ -1,5 +1,6 @@
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { vi } from 'vitest';
 import { kyivToday } from '../lib/periods';
 import { accountOf, categoryOf, splitOf, transactionOf } from '../test/fixtures';
 import { bodyOf, json, mockApi, plain, renderApp, signedInApi } from '../test/render';
@@ -148,6 +149,7 @@ function api(extra = {}) {
     [`GET /api/v1/taxes/fop/${year}`]: () => json(fop),
     [`GET /api/v1/taxes/investments/${year}`]: () => json(investments),
     [`GET /api/v1/taxes/settings/${year}`]: () => json(settings),
+    'GET /api/v1/taxes/profile': () => json({ code: 'NOT_FOUND' }, 404),
     ...extra,
   });
 }
@@ -269,4 +271,56 @@ it('adds an income on another account to the income of the sole proprietor from 
   await waitFor(async () =>
     expect(await bodyOf(requests, 'PUT', '/api/v1/taxes/transactions/31')).toEqual({ included: true }),
   );
+});
+
+it('asks for the taxpayer details before writing a declaration, then downloads it', async () => {
+  const profile = {
+    tin: '1234567890',
+    name: 'Коваль Олена Петрівна',
+    regionCode: 26,
+    districtCode: 50,
+    taxOffice: 'ГУ ДПС у м. Києві',
+    city: 'м. Київ',
+    street: 'вул. Хрещатик',
+    kvedCode: '62.01',
+    kvedName: 'Комп’ютерне програмування',
+  };
+  let saved = false;
+  const requests = api({
+    'GET /api/v1/taxes/profile': () => (saved ? json(profile) : json({ code: 'NOT_FOUND' }, 404)),
+    'PUT /api/v1/taxes/profile': () => {
+      saved = true;
+      return json(profile);
+    },
+    [`GET /api/v1/taxes/declarations/fop/${year}/2`]: () =>
+      new Response('<DECLAR/>', {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/xml',
+          'Content-Disposition': 'attachment; filename="26501234567890F0103309100000000130620252650.xml"',
+        },
+      }),
+  });
+  const createObjectURL = vi.fn(() => 'blob:declaration');
+  Object.assign(URL, { createObjectURL, revokeObjectURL: vi.fn() });
+  renderApp(`/taxes?year=${year}`);
+
+  // Without the details the button opens their form
+  await userEvent.click(await screen.findByRole('button', { name: 'XML декларації за 2 квартал' }));
+  const drawer = within(await screen.findByRole('dialog'));
+  await userEvent.type(await drawer.findByLabelText(/РНОКПП/), '1234567890');
+  await userEvent.type(drawer.getByLabelText(/Прізвище, ім’я, по батькові/), 'Коваль Олена Петрівна');
+  await userEvent.type(drawer.getByLabelText(/Код ДПС/), '2650');
+  await userEvent.type(drawer.getByLabelText(/Назва податкової/), 'ГУ ДПС у м. Києві');
+  await userEvent.type(drawer.getByLabelText(/Населений пункт/), 'м. Київ');
+  await userEvent.type(drawer.getByLabelText(/Вулиця/), 'вул. Хрещатик');
+  await userEvent.type(drawer.getByLabelText('Назва КВЕД'), 'Комп’ютерне програмування');
+  await userEvent.type(drawer.getByLabelText('КВЕД'), '62.01');
+  await userEvent.click(drawer.getByRole('button', { name: 'Зберегти' }));
+  await waitFor(async () => expect(await bodyOf(requests, 'PUT', '/api/v1/taxes/profile')).toEqual(profile));
+  await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+
+  await userEvent.click(screen.getByRole('button', { name: 'XML декларації за 2 квартал' }));
+  await waitFor(() => expect(createObjectURL).toHaveBeenCalled());
+  expect(requests.some((request) => request.url.endsWith(`/declarations/fop/${year}/2`))).toBe(true);
 });

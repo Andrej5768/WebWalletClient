@@ -126,7 +126,8 @@ expenses red and income green, [Fixel](https://github.com/MacPaw/Fixel) for text
 - [x] Rates of each year with the defaults, a way back to them and links to the sources; income categories of the
       sole proprietor
 - [x] «ФОП» account type; a switch in the transaction panel adds an income on another account to the taxes
-- [ ] Declaration files for the tax service cabinet
+- [x] Declaration files for the tax service cabinet: XML of the quarter of the sole proprietor (group 3, with the
+      social contribution in the fourth quarter) and of the yearly declaration with Ф1; the taxpayer details they need
 
 ### Backend changes this client needs
 

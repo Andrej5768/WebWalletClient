@@ -1376,6 +1376,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/taxes/declarations/fop/{year}/{quarter}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The declaration of a sole proprietor of group 3 for a quarter, as XML of the tax service
+         * @description F0103309 with the amounts from the start of the year; for the fourth quarter with F0133109, the social contribution of the year, both in a ZIP. To be opened, checked and signed in the tax service cabinet.
+         */
+        get: operations["fop_1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/taxes/declarations/property/{year}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The yearly declaration of property and income, as XML of the tax service
+         * @description F0100215 with F0121215 (Ф1) when there were sales, in a ZIP: foreign dividends with the tax paid abroad and the investment profit. To be opened, checked and signed in the tax service cabinet.
+         */
+        get: operations["property"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/taxes/fop/{year}": {
         parameters: {
             query?: never;
@@ -1460,6 +1500,27 @@ export interface paths {
          */
         get: operations["investments"];
         put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/taxes/profile": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The taxpayer details for the declarations; 404 until they are entered */
+        get: operations["profile"];
+        /**
+         * Replace the taxpayer details for the declarations
+         * @description Kept encrypted. The tax office codes (region and district, C_REG and C_RAJ) are those of the office the taxpayer is registered with.
+         */
+        put: operations["saveProfile"];
         post?: never;
         delete?: never;
         options?: never;
@@ -2819,6 +2880,28 @@ export interface components {
             /** Format: int64 */
             id: number;
             name: string;
+        };
+        TaxProfileData: {
+            apartment?: string | null;
+            building?: string | null;
+            city: string;
+            corpus?: string | null;
+            district?: string | null;
+            /** Format: int32 */
+            districtCode: number;
+            /** Format: email */
+            email?: string | null;
+            kvedCode?: string | null;
+            kvedName?: string | null;
+            name: string;
+            phone?: string | null;
+            region?: string | null;
+            /** Format: int32 */
+            regionCode: number;
+            street: string;
+            taxOffice: string;
+            tin: string;
+            zip?: string | null;
         };
         TaxRates: {
             esvEnabled: boolean;
@@ -5316,6 +5399,51 @@ export interface operations {
             };
         };
     };
+    fop_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                year: number;
+                quarter: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": string;
+                };
+            };
+        };
+    };
+    property: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                year: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": string;
+                };
+            };
+        };
+    };
     fop: {
         parameters: {
             query?: never;
@@ -5429,6 +5557,50 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["InvestmentTaxReport"];
+                };
+            };
+        };
+    };
+    profile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TaxProfileData"];
+                };
+            };
+        };
+    };
+    saveProfile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TaxProfileData"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TaxProfileData"];
                 };
             };
         };

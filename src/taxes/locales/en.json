@@ -75,7 +75,8 @@
         "MANUAL": "added by hand"
       },
       "addHint": "Income on other accounts can be added in the transaction panel.",
-      "toTransactions": "To transactions"
+      "toTransactions": "To transactions",
+      "xmlOf": "XML declaration of quarter {{quarter}}"
     },
     "investments": {
       "summary": "Personal income tax {{pdfo}} and military levy {{military}} on dividends and the profit of sales, in hryvnias at the NBU rates of the dates. Government bonds are exempt.",
@@ -128,7 +129,8 @@
         "military": "Military levy {{rate}}",
         "total": "Total to pay"
       },
-      "carriedOut": "A loss of {{amount}} carries over to the following years."
+      "carriedOut": "A loss of {{amount}} carries over to the following years.",
+      "xml": "XML declaration"
     },
     "rates": {
       "title": "Rates of {{year}}",
@@ -165,6 +167,39 @@
       },
       "excluded": "Taken out of the income of the sole proprietor",
       "notCounted": "Not income of the sole proprietor"
-    }
+    },
+    "profile": {
+      "button": "Taxpayer details",
+      "title": "Taxpayer details for the declarations",
+      "subtitle": "Needed for the XML files uploaded to the tax service cabinet. Kept encrypted.",
+      "fields": {
+        "tin": "Tax number (RNOKPP)",
+        "name": "Full name",
+        "office": "Tax office code",
+        "taxOffice": "Tax office name",
+        "region": "Region",
+        "district": "District",
+        "city": "City or village",
+        "street": "Street",
+        "building": "Building",
+        "corpus": "Block",
+        "apartment": "Apartment",
+        "zip": "Postal code",
+        "phone": "Phone",
+        "email": "Email",
+        "kvedCode": "KVED",
+        "kvedName": "KVED name"
+      },
+      "officeHint": "4 digits: the region and district code, e.g. 2650",
+      "officeWhere": "The code and name of your tax office are shown in the tax service cabinet or on",
+      "address": "Address",
+      "fop": "Sole proprietor",
+      "privacy": "The declaration of a sole proprietor needs the code and name of the main KVED. Only you see these details; they go with the account.",
+      "tinInvalid": "10 digits, or the series and number of a passport",
+      "officeInvalid": "4 digits, e.g. 2650",
+      "zipInvalid": "5 digits",
+      "kvedInvalid": "E.g. 62.01"
+    },
+    "xmlHint": "Open the files in the tax service cabinet: check, sign and send them there."
   }
 }
