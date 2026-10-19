@@ -17,6 +17,9 @@ export interface OperationValues {
   amount: number | string;
   tax: number | string;
   currency: string | null;
+  /** What an exchange brings, in `toCurrency`. */
+  toAmount: number | string;
+  toCurrency: string | null;
   splitFrom: number | string;
   splitTo: number | string;
   comment: string;
@@ -24,6 +27,8 @@ export interface OperationValues {
 
 export const TRADES: OperationType[] = ['BUY', 'SELL'];
 export const INCOMES: OperationType[] = ['DIVIDEND', 'COUPON'];
+/** Movements of money: no instrument, any currency. */
+export const MONEY: OperationType[] = ['DEPOSIT', 'WITHDRAWAL', 'EXCHANGE'];
 
 export const toNumber = (value: number | string): number => (value === '' ? 0 : Number(value));
 const round = (value: number, digits = 2) => Math.round(value * 10 ** digits) / 10 ** digits;
@@ -51,6 +56,8 @@ export function initialOperationValues(
     amount: operation?.amount ?? '',
     tax: operation && operation.tax ? operation.tax : '',
     currency: operation?.currency ?? null,
+    toAmount: operation?.toAmount ?? '',
+    toCurrency: operation?.toCurrency ?? null,
     splitFrom: operation?.splitFrom ?? 1,
     splitTo: operation?.splitTo ?? '',
     comment: operation?.comment ?? '',
@@ -75,7 +82,12 @@ export function cashChange(values: OperationValues): number {
     case 'COUPON':
       return toNumber(values.amount) - toNumber(values.tax);
     case 'FEE':
+    case 'WITHDRAWAL':
       return -toNumber(values.amount);
+    case 'DEPOSIT':
+      return toNumber(values.amount);
+    case 'EXCHANGE':
+      return -(toNumber(values.amount) + fee);
     default:
       return 0;
   }
@@ -84,17 +96,21 @@ export function cashChange(values: OperationValues): number {
 export function toOperationBody(values: OperationValues): OperationRequest {
   const trade = TRADES.includes(values.type);
   const income = INCOMES.includes(values.type);
+  const exchange = values.type === 'EXCHANGE';
   return {
     type: values.type,
     accountId: Number(values.accountId),
-    instrumentId: values.instrumentId ? Number(values.instrumentId) : undefined,
+    instrumentId:
+      values.instrumentId && !MONEY.includes(values.type) ? Number(values.instrumentId) : undefined,
     date: values.date!,
     quantity: trade ? toNumber(values.quantity) : undefined,
     price: trade ? toNumber(values.price) : undefined,
-    fee: trade ? toNumber(values.fee) : undefined,
+    fee: trade || exchange ? toNumber(values.fee) : undefined,
     amount: trade ? tradeAmount(values) : values.type === 'SPLIT' ? undefined : toNumber(values.amount),
     tax: income ? toNumber(values.tax) : undefined,
     currency: values.currency ?? undefined,
+    toAmount: exchange ? toNumber(values.toAmount) : undefined,
+    toCurrency: exchange ? (values.toCurrency ?? undefined) : undefined,
     splitFrom: values.type === 'SPLIT' ? toNumber(values.splitFrom) : undefined,
     splitTo: values.type === 'SPLIT' ? toNumber(values.splitTo) : undefined,
     comment: values.comment.trim() || undefined,

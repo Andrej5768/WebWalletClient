@@ -13,7 +13,17 @@ export const OPERATION_KEYS = [
   'operationInstrumentId',
   'operationAccountId',
 ] as const;
-export const OPERATION_TYPES: OperationType[] = ['BUY', 'SELL', 'DIVIDEND', 'COUPON', 'FEE', 'SPLIT'];
+export const OPERATION_TYPES: OperationType[] = [
+  'BUY',
+  'SELL',
+  'DIVIDEND',
+  'COUPON',
+  'FEE',
+  'SPLIT',
+  'DEPOSIT',
+  'WITHDRAWAL',
+  'EXCHANGE',
+];
 
 export interface OpenOperation {
   /** An operation to edit; without it a new one is recorded. */

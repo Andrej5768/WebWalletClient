@@ -31,8 +31,7 @@ export const investmentKeys = {
   prices: (id: number, from?: string, to?: string) =>
     [...queryKeys.investments, 'prices', id, from ?? null, to ?? null] as const,
   search: (query: string) => [...queryKeys.investments, 'search', query] as const,
-  operations: (accountId?: number, instrumentId?: number, page = 0) =>
-    [...queryKeys.investments, 'operations', accountId ?? null, instrumentId ?? null, page] as const,
+  operations: (params: OperationsParams) => [...queryKeys.investments, 'operations', params] as const,
 };
 
 /** The portfolio in the currency, by default the base one. */
@@ -85,6 +84,35 @@ export function usePosition(accountId: number | undefined, instrumentId: number 
         }),
       ),
     enabled: accountId !== undefined && instrumentId !== undefined,
+  });
+}
+
+export interface OperationsParams {
+  accountId?: number;
+  /** All types when empty. */
+  types?: OperationType[];
+  page: number;
+  size: number;
+}
+
+/** Operations of the brokerage accounts, newest first. */
+export function useOperations(params: OperationsParams) {
+  return useQuery({
+    queryKey: investmentKeys.operations(params),
+    queryFn: () =>
+      unwrap(
+        api.GET('/api/v1/investments/operations', {
+          params: {
+            query: {
+              accountId: params.accountId,
+              types: params.types?.length ? params.types : undefined,
+              page: params.page,
+              size: params.size,
+            },
+          },
+        }),
+      ),
+    placeholderData: keepPreviousData,
   });
 }
 

@@ -110,8 +110,8 @@ expenses red and income green, [Fixel](https://github.com/MacPaw/Fixel) for text
 - [x] Instrument page with lots (FIFO) and sales; side panel for trades, dividends, coupons, fees and splits,
       instruments entered by hand (e.g. government bonds)
 - [x] Freedom Finance import (see step 5)
-- [ ] The operations of an account: deposits, withdrawals, currency exchanges and fees without an instrument
-      (imported ones are counted in the portfolio but not listed yet), and entering them by hand
+- [x] Operations tab: every operation of the accounts with filters by kind; deposits, withdrawals and currency
+      exchanges entered by hand in the operation panel
 - [ ] Interactive Brokers import
 - [ ] XIRR / TWR, allocation by sector and country, rebalancing
 

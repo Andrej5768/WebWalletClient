@@ -100,3 +100,28 @@ it('keeps the recorded amount of an edited trade until its quantity or price cha
   expect(toOperationBody({ ...values, comment: 'broker rounding' }).amount).toBe(100);
   expect(toOperationBody({ ...values, quantity: 4, amount: '' }).amount).toBe(133.3333);
 });
+
+it('records movements of money without an instrument', () => {
+  const exchange = {
+    ...initialOperationValues(null, { accountId: 3, instrumentId: 7, type: 'EXCHANGE' }),
+    amount: 100,
+    fee: 1,
+    currency: 'EUR',
+    toAmount: 108,
+    toCurrency: 'USD',
+  };
+  expect(cashChange(exchange)).toBe(-101);
+  expect(toOperationBody(exchange)).toMatchObject({
+    type: 'EXCHANGE',
+    instrumentId: undefined,
+    amount: 100,
+    fee: 1,
+    currency: 'EUR',
+    toAmount: 108,
+    toCurrency: 'USD',
+  });
+  const deposit = { ...initialOperationValues(null, { accountId: 3, type: 'DEPOSIT' }), amount: 500 };
+  expect(cashChange(deposit)).toBe(500);
+  expect(toOperationBody(deposit)).toMatchObject({ amount: 500, fee: undefined, toAmount: undefined });
+  expect(cashChange({ ...deposit, type: 'WITHDRAWAL' })).toBe(-500);
+});

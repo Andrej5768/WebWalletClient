@@ -16,8 +16,11 @@ const PositionsTab = lazy(() =>
 const DividendsTab = lazy(() =>
   import('./dividends/DividendsTab').then((m) => ({ default: m.DividendsTab })),
 );
+const OperationsTab = lazy(() =>
+  import('./operations/OperationsTab').then((m) => ({ default: m.OperationsTab })),
+);
 
-const tabs = ['overview', 'positions', 'dividends'] as const;
+const tabs = ['overview', 'positions', 'dividends', 'operations'] as const;
 type Tab = (typeof tabs)[number];
 
 /**
@@ -84,6 +87,7 @@ export function InvestmentsPage() {
             {tab === 'overview' && <OverviewTab accountId={accountId} />}
             {tab === 'positions' && <PositionsTab accountId={accountId} />}
             {tab === 'dividends' && <DividendsTab accountId={accountId} />}
+            {tab === 'operations' && <OperationsTab accountId={accountId} />}
           </Suspense>
         </>
       )}
