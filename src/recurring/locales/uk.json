@@ -130,6 +130,12 @@
         "YEARLY_other": "року"
       },
       "startDate": "Перший платіж",
+      "weekday": "День тижня",
+      "yearDay": "Число",
+      "yearMonth": "Місяць",
+      "badDay": "У місяці немає такого числа",
+      "startFrom": "Починаючи з",
+      "firstPayment": "Перший платіж: {{date}}",
       "shortMonths": "У коротших місяцях — останній день",
       "end": "Закінчення",
       "endNever": "Ніколи",

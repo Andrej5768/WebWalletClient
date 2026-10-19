@@ -43,6 +43,34 @@ export function endDateForCount(
   return occurrenceDate(start, frequency, interval, Math.max(0, count - 1));
 }
 
+/**
+ * The first date on or after `from` that falls on the weekday (0 = Sunday, as in dayjs) of a weekly
+ * schedule or on the day and month (1-based) of a yearly one; the 29th of February falls on the 28th
+ * in other years, as the backend does. Other schedules start on `from`.
+ */
+export function alignedStart(
+  from: string,
+  frequency: Frequency,
+  anchor: { weekday: number; month: number; day: number },
+): string {
+  const start = dayjs(from);
+  if (frequency === 'WEEKLY') {
+    return start.add((anchor.weekday - start.day() + 7) % 7, 'day').format('YYYY-MM-DD');
+  }
+  if (frequency === 'YEARLY') {
+    const inYear = (year: number) => {
+      const month = start
+        .year(year)
+        .month(anchor.month - 1)
+        .date(1);
+      return month.date(Math.min(anchor.day, month.daysInMonth()));
+    };
+    const date = inYear(start.year());
+    return (date.isBefore(start, 'day') ? inYear(start.year() + 1) : date).format('YYYY-MM-DD');
+  }
+  return from;
+}
+
 /** How many payments happen in a month on average. */
 export function perMonth(recurring: Pick<Recurring, 'frequency' | 'interval'>): number {
   return PER_MONTH[recurring.frequency] / recurring.interval;

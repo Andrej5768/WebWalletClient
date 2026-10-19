@@ -18,6 +18,8 @@ import { QueryError, UnconvertedAlert } from '../../components/feedback';
 import { formatPercent } from '../../lib/format';
 import { formatMoney, formatQuantity } from '../../lib/money';
 import { usePortfolio, type Portfolio, type Position } from '../api';
+import { CurrencySwitch } from '../CurrencySwitch';
+import { useDisplayCurrency } from '../useDisplayCurrency';
 import classes from './positions.module.css';
 
 type Grouping = 'account' | 'type';
@@ -33,7 +35,8 @@ interface Group {
 /** The holdings of the brokerage accounts with their cash, grouped by account or by asset class. */
 export function PositionsTab({ accountId }: { accountId?: number }) {
   const { t } = useTranslation();
-  const portfolio = usePortfolio(accountId);
+  const display = useDisplayCurrency();
+  const portfolio = usePortfolio(accountId, display.requested);
   const accounts = useAccounts();
   const [grouping, setGrouping] = useState<Grouping>('account');
   if (portfolio.isLoading) return <Skeleton height={360} radius="md" />;
@@ -65,7 +68,8 @@ export function PositionsTab({ accountId }: { accountId?: number }) {
           />
         )}
       </SimpleGrid>
-      <Group justify="flex-end">
+      <Group justify="flex-end" gap="xs">
+        <CurrencySwitch label={t('invPositions.currency')} />
         <SegmentedControl
           size="xs"
           aria-label={t('invPositions.grouping')}
