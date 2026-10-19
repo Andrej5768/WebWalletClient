@@ -1376,6 +1376,135 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/taxes/fop/{year}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The income, taxes, social contribution and deadlines of the sole proprietor by quarter */
+        get: operations["fop"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/taxes/fop/{year}/quarters/{quarter}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Mark the taxes of a quarter as paid or not */
+        put: operations["markPaid"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/taxes/income-categories": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Replace the income categories whose income is income of the sole proprietor on any account
+         * @description Their subcategories count too; the income of FOP accounts counts whatever its category.
+         */
+        put: operations["incomeCategories"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/taxes/investments/dividends/{operationId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Mark whether the document of the tax withheld abroad from a dividend exists; null forgets */
+        put: operations["dividendDocument"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/taxes/investments/{year}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The taxes of the investment income of a year: dividends, sales, the carried loss
+         * @description In hryvnias at the NBU rates of the dates: the profit of a sale counts its lots (FIFO) at the rates of their purchases, so a change of the exchange rate is profit too.
+         */
+        get: operations["investments"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/taxes/settings/{year}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The tax rates of a year: the user's own values over the defaults, and where to check them
+         * @description The defaults are those known when the year was added and may be outdated: the user replaces any of them.
+         */
+        get: operations["settings"];
+        /** Replace the user's own tax values of a year; null takes the default */
+        put: operations["updateSettings"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/taxes/transactions/{transactionId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Add a transaction to the income of the sole proprietor, take it out, or forget the mark (null) */
+        put: operations["mark"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/transactions": {
         parameters: {
             query?: never;
@@ -1427,7 +1556,7 @@ export interface components {
             /** Format: int32 */
             sortOrder?: number;
             /** @enum {string} */
-            type: "CASH" | "CARD" | "CREDIT_CARD" | "LOAN" | "DEPOSIT" | "SAVINGS" | "DEBT" | "INVESTMENT";
+            type: "CASH" | "CARD" | "CREDIT_CARD" | "LOAN" | "DEPOSIT" | "SAVINGS" | "DEBT" | "INVESTMENT" | "FOP";
         };
         AccountResponse: {
             archived: boolean;
@@ -1445,7 +1574,7 @@ export interface components {
             /** Format: int32 */
             sortOrder: number;
             /** @enum {string} */
-            type: "CASH" | "CARD" | "CREDIT_CARD" | "LOAN" | "DEPOSIT" | "SAVINGS" | "DEBT" | "INVESTMENT";
+            type: "CASH" | "CARD" | "CREDIT_CARD" | "LOAN" | "DEPOSIT" | "SAVINGS" | "DEBT" | "INVESTMENT" | "FOP";
         };
         AccountSummaryResponse: {
             available: number;
@@ -1741,9 +1870,87 @@ export interface components {
             amount: number;
             name: string;
         };
+        DividendDocumentRequest: {
+            document?: boolean;
+        };
+        DividendTax: {
+            /** Format: int64 */
+            accountId: number;
+            amount: number;
+            amountUah: number;
+            credit: number;
+            currency: string;
+            /** Format: date */
+            date: string;
+            document: boolean;
+            documentSet: boolean;
+            military: number;
+            /** Format: int64 */
+            operationId: number;
+            pdfo: number;
+            rate: number | null;
+            symbol: string;
+            type: string;
+            withheld: number;
+            withheldUah: number;
+        };
         EmailRequest: {
             /** Format: email */
             email: string;
+        };
+        FopIncome: {
+            /** Format: int64 */
+            accountId: number;
+            accountName: string;
+            amount: number;
+            amountUah: number | null;
+            comment: string | null;
+            currency: string;
+            /** Format: date */
+            date: string;
+            included: boolean;
+            payee: string | null;
+            /** Format: int32 */
+            quarter: number;
+            rate: number | null;
+            /** @enum {string} */
+            reason: "ACCOUNT" | "CATEGORY" | "MANUAL";
+            /** Format: int64 */
+            transactionId: number;
+        };
+        FopQuarter: {
+            /** Format: date */
+            declarationDue: string | null;
+            esv: number;
+            /** Format: date */
+            esvDue: string;
+            income: number;
+            military: number;
+            paid: boolean;
+            /** Format: int32 */
+            quarter: number;
+            singleTax: number;
+            /** Format: date */
+            taxDue: string;
+            total: number;
+        };
+        FopReport: {
+            fopAccountIds: number[];
+            incomeLimit: number;
+            incomes: components["schemas"]["FopIncome"][];
+            quarters: components["schemas"]["FopQuarter"][];
+            rates: components["schemas"]["TaxRates"];
+            totals: components["schemas"]["FopTotals"];
+            unconvertedCurrencies: string[];
+            /** Format: int32 */
+            year: number;
+        };
+        FopTotals: {
+            esv: number;
+            income: number;
+            military: number;
+            singleTax: number;
+            total: number;
         };
         ForecastDay: {
             actual: boolean;
@@ -1900,6 +2107,9 @@ export interface components {
             transactionsSkipped: number;
             warnings: string[];
         };
+        IncomeCategoriesRequest: {
+            categoryIds: number[];
+        };
         IncomeExpenseResponse: {
             currency: string;
             expense: number;
@@ -1954,6 +2164,27 @@ export interface components {
             type: "STOCK" | "ETF" | "FUND" | "BOND" | "GOVERNMENT_BOND" | "CRYPTO" | "OTHER";
             /** @enum {string} */
             valuation: "MARKET" | "NOMINAL" | "MANUAL";
+        };
+        InvestmentTaxReport: {
+            carriedIn: number;
+            carriedOut: number;
+            creditUah: number;
+            /** Format: date */
+            declarationDue: string;
+            dividends: components["schemas"]["DividendTax"][];
+            dividendsUah: number;
+            military: number;
+            /** Format: date */
+            paymentDue: string;
+            pdfo: number;
+            profit: number;
+            rates: components["schemas"]["TaxRates"];
+            sales: components["schemas"]["SaleTax"][];
+            taxableProfit: number;
+            total: number;
+            unconvertedCurrencies: string[];
+            /** Format: int32 */
+            year: number;
         };
         LinkRequest: {
             /** Format: int64 */
@@ -2353,6 +2584,9 @@ export interface components {
             /** Format: date */
             date: string;
         };
+        QuarterPaymentRequest: {
+            paid?: boolean;
+        };
         RecurringRef: {
             /** Format: date */
             dueDate: string;
@@ -2485,6 +2719,23 @@ export interface components {
             quantity: number;
             realized: number;
         };
+        SaleTax: {
+            /** Format: int64 */
+            accountId: number;
+            cost: number;
+            costUah: number;
+            currency: string;
+            /** Format: date */
+            date: string;
+            incomeUah: number;
+            /** Format: int64 */
+            operationId: number;
+            proceeds: number;
+            quantity: number;
+            resultInCurrency: number;
+            resultUah: number;
+            symbol: string;
+        };
         SavingsResponse: {
             averageRate: number | null;
             bestMonth: string | null;
@@ -2568,6 +2819,46 @@ export interface components {
             id: number;
             name: string;
         };
+        TaxRates: {
+            esvEnabled: boolean;
+            esvRate: number;
+            /** Format: int32 */
+            fopGroup: number;
+            fopMilitaryMonthly: number;
+            fopMilitaryRate: number;
+            fopVat: boolean;
+            foreignDocumentDefault: boolean;
+            investmentMilitaryRate: number;
+            minWage: number;
+            pdfoRate: number;
+            singleTaxMonthly: number;
+            singleTaxRate: number;
+        };
+        TaxSettingsRequest: {
+            esvEnabled?: boolean;
+            esvRate?: number;
+            /** Format: int32 */
+            fopGroup?: number;
+            fopMilitaryMonthly?: number;
+            fopMilitaryRate?: number;
+            fopVat?: boolean;
+            foreignDocumentDefault?: boolean;
+            investmentMilitaryRate?: number;
+            minWage?: number;
+            pdfoRate?: number;
+            singleTaxMonthly?: number;
+            singleTaxRate?: number;
+        };
+        TaxSettingsResponse: {
+            defaults: components["schemas"]["TaxRates"];
+            incomeCategoryIds: number[];
+            sources: {
+                [key: string]: string;
+            };
+            values: components["schemas"]["TaxRates"];
+            /** Format: int32 */
+            year: number;
+        };
         TickerChoice: {
             /** Format: int64 */
             instrumentId?: number;
@@ -2591,6 +2882,9 @@ export interface components {
             /** Format: int64 */
             expiresIn: number;
             tokenType: string;
+        };
+        TransactionMarkRequest: {
+            included?: boolean;
         };
         TransactionRequest: {
             /** Format: int64 */
@@ -5003,6 +5297,195 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    fop: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                year: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["FopReport"];
+                };
+            };
+        };
+    };
+    markPaid: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                year: number;
+                quarter: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["QuarterPaymentRequest"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    incomeCategories: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["IncomeCategoriesRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": number[];
+                };
+            };
+        };
+    };
+    dividendDocument: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                operationId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DividendDocumentRequest"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    investments: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                year: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["InvestmentTaxReport"];
+                };
+            };
+        };
+    };
+    settings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                year: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TaxSettingsResponse"];
+                };
+            };
+        };
+    };
+    updateSettings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                year: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TaxSettingsRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TaxSettingsResponse"];
+                };
+            };
+        };
+    };
+    mark: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                transactionId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TransactionMarkRequest"];
+            };
+        };
         responses: {
             /** @description No Content */
             204: {

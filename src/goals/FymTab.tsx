@@ -16,7 +16,7 @@ type Account = Schemas['AccountResponse'];
 const STORAGE_KEY = 'ww-fym';
 const TARGETS = [6, 12, 24] as const;
 /** Money that can be spent at once; deposits, investments and debts are not. */
-const LIQUID_BY_DEFAULT: Account['type'][] = ['CASH', 'CARD', 'SAVINGS'];
+const LIQUID_BY_DEFAULT: Account['type'][] = ['CASH', 'CARD', 'FOP', 'SAVINGS'];
 
 interface Settings {
   /** Choices of the viewer by account id; other accounts follow their type. */
