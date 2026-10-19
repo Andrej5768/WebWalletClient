@@ -22,7 +22,7 @@ export function InstrumentPicker({
   /** Units held per instrument id, shown next to the results. */
   held: Map<number, number>;
   error?: string;
-  onPick(instrument: { id: number; currency: string }): void;
+  onPick(instrument: { id: number; currency: string; symbol?: string; name?: string }): void;
   onManual(): void;
 }) {
   const { t } = useTranslation();
@@ -36,11 +36,19 @@ export function InstrumentPicker({
           body: { symbol: result.symbol, micCode: result.micCode ?? undefined },
         }),
       ),
-    onSuccess: (instrument: Instrument) => onPick({ id: instrument.id, currency: instrument.currency }),
+    onSuccess: (instrument: Instrument) =>
+      onPick({
+        id: instrument.id,
+        currency: instrument.currency,
+        symbol: instrument.symbol,
+        name: instrument.name,
+      }),
   });
 
   const pick = (result: SearchResult) =>
-    result.id != null ? onPick({ id: result.id, currency: result.currency }) : add.mutate(result);
+    result.id != null
+      ? onPick({ id: result.id, currency: result.currency, symbol: result.symbol, name: result.name })
+      : add.mutate(result);
 
   return (
     <Stack gap={6}>

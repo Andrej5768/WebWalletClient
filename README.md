@@ -1,7 +1,8 @@
 # WebWallet Client
 
 Web client for the [WebWallet](https://github.com/Andrej5768/WebWallet) personal finance API: accounts,
-transactions, envelope budget, bank imports, reports and goals.
+transactions and recurring payments, envelope budget, bank and broker imports, reports and analytics, goals and
+investments.
 
 React + TypeScript on Vite, [Mantine](https://mantine.dev) components, TanStack Query, React Router,
 i18next (Ukrainian and English), an API client generated from the backend OpenAPI spec
@@ -71,6 +72,9 @@ expenses red and income green, [Fixel](https://github.com/MacPaw/Fixel) for text
 
 - [x] Monobank: connect, synchronization schedule, card and jar links, differences, history progress
 - [x] PrivatBank PDF statement and Zen Money (token or file) with a preview before import
+- [x] Freedom Finance reports (trades and cash flows XLSX) with a preview: the instrument for each ticker (found at
+      the provider, already held or created by hand), every row with its status, rows left out, money and
+      positions after the import
 
 ### 6. Envelopes
 
@@ -95,7 +99,21 @@ expenses red and income green, [Fixel](https://github.com/MacPaw/Fixel) for text
 - [x] Goals on an account (e.g. a Monobank jar) or kept by hand, with the pace to the deadline
 - [x] Recurring payments in the feed: planned payments above today, matching with bank operations, linking,
       saving as a transaction, the series editor; balance forecast with planned payments on the overview
-- [ ] FIRE, FYM and the compound interest calculator (investments phase)
+- [x] FIRE, FYM and the compound interest calculator on the goals page
+
+### Investments
+
+- [x] Overview: key figures, value over time against the same deposits in S&P 500 / MSCI World / Nasdaq 100,
+      allocation by asset class and currency, the next payments; one ₴ / $ switch for the whole section
+- [x] Positions by account or by asset class
+- [x] Dividend calendar and list: received, expected, declared and forecast payments, yield
+- [x] Instrument page with lots (FIFO) and sales; side panel for trades, dividends, coupons, fees and splits,
+      instruments entered by hand (e.g. government bonds)
+- [x] Freedom Finance import (see step 5)
+- [ ] The operations of an account: deposits, withdrawals, currency exchanges and fees without an instrument
+      (imported ones are counted in the portfolio but not listed yet), and entering them by hand
+- [ ] Interactive Brokers import
+- [ ] XIRR / TWR, allocation by sector and country, rebalancing
 
 ### Backend changes this client needs
 
