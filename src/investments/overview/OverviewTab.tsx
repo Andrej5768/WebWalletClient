@@ -40,7 +40,8 @@ const PART_COLORS = ['cobalt.6', 'teal.6', 'orange.5', 'violet.5', 'pink.5', 'li
 /** The overview of the portfolio: key figures, the value over time with a benchmark, the allocation. */
 export function OverviewTab({ accountId }: { accountId?: number }) {
   const { t } = useTranslation();
-  const portfolio = usePortfolio(accountId);
+  const display = useDisplayCurrency();
+  const portfolio = usePortfolio(accountId, display.requested);
   if (portfolio.isLoading) return <Skeleton height={420} radius="md" />;
   if (!portfolio.data) return <QueryError error={portfolio.error} onRetry={() => void portfolio.refetch()} />;
   const data = portfolio.data;
@@ -48,11 +49,13 @@ export function OverviewTab({ accountId }: { accountId?: number }) {
     <Stack gap="md">
       <UnconvertedAlert currencies={data.unconvertedCurrencies} />
       <Figures data={data} />
-      {data.pricesAsOf && (
+      <Group justify="space-between" wrap="wrap">
         <Text size="xs" c="dimmed">
-          {t('investments.pricesAsOf', { date: formatDayShort(data.pricesAsOf) })}
+          {data.pricesAsOf && t('investments.pricesAsOf', { date: formatDayShort(data.pricesAsOf) })}
         </Text>
-      )}
+        {/* The figures, the chart and the allocation follow it */}
+        <CurrencySwitch label={t('invOverview.currency')} />
+      </Group>
       <ValueChart accountId={accountId} />
       <SimpleGrid cols={{ base: 1, md: 3 }} spacing="md">
         <Allocation
@@ -187,7 +190,6 @@ function ValueChart({ accountId }: { accountId?: number }) {
               onChange={(value) => setRange(value as Range)}
               data={RANGES.map((value) => ({ value, label: t(`invOverview.chart.ranges.${value}`) }))}
             />
-            <CurrencySwitch label={t('invOverview.chart.currency')} />
           </Group>
         </Group>
         <Group gap="xs">
