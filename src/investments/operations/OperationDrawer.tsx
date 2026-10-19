@@ -25,6 +25,7 @@ import { confirmDelete } from '../../components/confirm';
 import { ProblemAlert } from '../../components/feedback';
 import { FormFooter } from '../../components/FormFooter';
 import { MoneyInput } from '../../components/MoneyInput';
+import { locale } from '../../i18n';
 import { currencyOptions } from '../../lib/currencies';
 import { formatDay } from '../../lib/format';
 import { formatMoney } from '../../lib/money';
@@ -474,7 +475,7 @@ function OperationForm({
                 {t('invOperations.rate', {
                   from: currency,
                   to: values.toCurrency,
-                  rate: new Intl.NumberFormat(undefined, { maximumFractionDigits: 6 }).format(
+                  rate: new Intl.NumberFormat(locale(), { maximumFractionDigits: 6 }).format(
                     toNumber(values.toAmount) / toNumber(values.amount),
                   ),
                 })}
