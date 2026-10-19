@@ -21,6 +21,7 @@ import {
   ArchiveRestore,
   ArrowLeftRight,
   Banknote,
+  BriefcaseBusiness,
   CircleCheck,
   CreditCard,
   EllipsisVertical,
@@ -56,6 +57,7 @@ const TYPE_ICONS: Record<AccountType, ReactNode> = {
   LOAN: <FileText size={16} />,
   DEBT: <Users size={16} />,
   INVESTMENT: <TrendingUp size={16} />,
+  FOP: <BriefcaseBusiness size={16} />,
 };
 
 type Link = Schemas['LinkResponse'];

@@ -148,7 +148,8 @@
       "savings": "Savings",
       "debts": "Loans and debts",
       "investments": "Investments",
-      "archived": "Archive"
+      "archived": "Archive",
+      "fop": "Sole proprietor"
     },
     "types": {
       "CARD": "Card",
@@ -158,7 +159,8 @@
       "DEPOSIT": "Deposit",
       "LOAN": "Loan",
       "DEBT": "Debts with people",
-      "INVESTMENT": "Investments"
+      "INVESTMENT": "Investments",
+      "FOP": "Sole proprietor (FOP)"
     },
     "empty": {
       "title": "No accounts yet",
