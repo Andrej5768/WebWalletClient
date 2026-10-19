@@ -23,6 +23,7 @@ import { invalidateLedger } from '../api/queries';
 import { FormFooter } from '../components/FormFooter';
 import { ProblemAlert } from '../components/feedback';
 import { investmentKeys } from '../investments/api';
+import { OPERATION_COLORS } from '../investments/operationColors';
 import { InstrumentPicker } from '../investments/operations/InstrumentPicker';
 import { formatDate } from '../lib/format';
 import { formatMoney, formatQuantity } from '../lib/money';
@@ -45,18 +46,6 @@ import {
   type Choice,
   type Filter,
 } from './broker';
-
-const TYPE_COLORS: Record<string, string> = {
-  BUY: 'blue',
-  SELL: 'violet',
-  DIVIDEND: 'green',
-  COUPON: 'green',
-  FEE: 'gray',
-  SPLIT: 'gray',
-  DEPOSIT: 'teal',
-  WITHDRAWAL: 'teal',
-  EXCHANGE: 'orange',
-};
 
 /** The reports of a broker before the import: what each ticker becomes and every row of the reports. */
 export function BrokerPreviewModal({ preview, onClose }: { preview: BrokerPreview; onClose(): void }) {
@@ -508,7 +497,7 @@ function OperationRow({
       </Table.Td>
       <Table.Td>
         {type ? (
-          <Badge variant="light" color={TYPE_COLORS[type] ?? 'gray'} style={{ textTransform: 'none' }}>
+          <Badge variant="light" color={OPERATION_COLORS[type]} style={{ textTransform: 'none' }}>
             {t(`investments.operationTypes.${type}`)}
           </Badge>
         ) : (

@@ -5,7 +5,6 @@ import {
   Group,
   Loader,
   NumberInput,
-  SegmentedControl,
   Select,
   SimpleGrid,
   Stack,
@@ -26,6 +25,7 @@ import { confirmDelete } from '../../components/confirm';
 import { ProblemAlert } from '../../components/feedback';
 import { FormFooter } from '../../components/FormFooter';
 import { MoneyInput } from '../../components/MoneyInput';
+import { currencyOptions } from '../../lib/currencies';
 import { formatDay } from '../../lib/format';
 import { formatMoney } from '../../lib/money';
 import {
@@ -44,6 +44,7 @@ import {
   formErrors,
   INCOMES,
   initialOperationValues,
+  MONEY,
   toNumber,
   toOperationBody,
   tradeAmount,
@@ -53,7 +54,12 @@ import {
 import { InstrumentPicker } from './InstrumentPicker';
 import classes from './operations.module.css';
 
-const TYPES: OperationType[] = ['BUY', 'SELL', 'DIVIDEND', 'COUPON', 'FEE', 'SPLIT'];
+/** The types by group, as the type select shows them. */
+const TYPE_GROUPS: { group: string; types: OperationType[] }[] = [
+  { group: 'trades', types: ['BUY', 'SELL', 'SPLIT'] },
+  { group: 'income', types: ['DIVIDEND', 'COUPON'] },
+  { group: 'money', types: ['DEPOSIT', 'WITHDRAWAL', 'EXCHANGE', 'FEE'] },
+];
 const FIELDS = [
   'type',
   'accountId',
@@ -65,6 +71,8 @@ const FIELDS = [
   'amount',
   'tax',
   'currency',
+  'toAmount',
+  'toCurrency',
   'splitFrom',
   'splitTo',
   'comment',
@@ -135,7 +143,18 @@ function OperationForm({
     initialValues: initialOperationValues(operation, defaults),
     validate: {
       accountId: (value) => (value ? null : t('validation.required')),
-      instrumentId: (value, values) => (value || values.type === 'FEE' ? null : t('validation.required')),
+      instrumentId: (value, values) =>
+        value || values.type === 'FEE' || MONEY.includes(values.type) ? null : t('validation.required'),
+      toAmount: (value, values) =>
+        values.type === 'EXCHANGE' && !(toNumber(value) > 0) ? t('invOperations.positive') : null,
+      toCurrency: (value, values) =>
+        values.type !== 'EXCHANGE'
+          ? null
+          : !value
+            ? t('validation.required')
+            : value === (values.currency ?? accountCurrencyOf(values.accountId))
+              ? t('invOperations.sameCurrency')
+              : null,
       date: (value) => (value ? null : t('validation.required')),
       quantity: (value, values) =>
         TRADES.includes(values.type) && !(toNumber(value) > 0) ? t('invOperations.positive') : null,
@@ -150,6 +169,9 @@ function OperationForm({
     },
   });
   const values = form.values;
+  function accountCurrencyOf(accountId: string | null) {
+    return accounts.data?.find((account) => String(account.id) === accountId)?.currency;
+  }
   const accountNumber = values.accountId ? Number(values.accountId) : undefined;
   const instrumentNumber = values.instrumentId ? Number(values.instrumentId) : undefined;
   const instrument = useInstrument(instrumentNumber);
@@ -177,9 +199,10 @@ function OperationForm({
   }, [portfolio.data, accountNumber]);
 
   const accountCurrency = brokerage.find((account) => String(account.id) === values.accountId)?.currency;
+  const money = MONEY.includes(values.type);
   const currency =
     values.currency ??
-    (values.type === 'FEE' ? accountCurrency : instrument.data?.currency) ??
+    (values.type === 'FEE' || money ? accountCurrency : instrument.data?.currency) ??
     accountCurrency ??
     'USD';
   const government = instrument.data?.type === 'GOVERNMENT_BOND';
@@ -238,15 +261,18 @@ function OperationForm({
     <>
       <form onSubmit={form.onSubmit((input) => save.mutate(input))} noValidate>
         <Stack gap="md">
-          <SegmentedControl
-            aria-label={t('invOperations.type')}
+          <Select
+            label={t('invOperations.type')}
+            allowDeselect={false}
             value={values.type}
             onChange={(value) => {
               form.setFieldValue('type', value as OperationType);
               form.clearErrors();
             }}
-            data={TYPES.map((value) => ({ value, label: t(`investments.operationTypes.${value}`) }))}
-            fullWidth
+            data={TYPE_GROUPS.map(({ group, types }) => ({
+              group: t(`invOperations.groups.${group}`),
+              items: types.map((value) => ({ value, label: t(`investments.operationTypes.${value}`) })),
+            }))}
           />
           <Select
             label={t('invOperations.account')}
@@ -258,6 +284,7 @@ function OperationForm({
             {...form.getInputProps('accountId')}
           />
           {values.type !== 'FEE' &&
+            !money &&
             (values.instrumentId ? (
               <div className={classes.chosen}>
                 <span className={classes.ticker}>{instrument.data?.symbol ?? '…'}</span>
@@ -372,6 +399,41 @@ function OperationForm({
                 {...form.getInputProps('amount')}
               />
             )}
+            {(values.type === 'DEPOSIT' || values.type === 'WITHDRAWAL' || values.type === 'EXCHANGE') && (
+              <MoneyInput
+                label={t(values.type === 'EXCHANGE' ? 'invOperations.sold' : 'invOperations.amount')}
+                currency={currency}
+                {...form.getInputProps('amount')}
+              />
+            )}
+            {money && (
+              <Select
+                label={t('invOperations.currency')}
+                searchable
+                allowDeselect={false}
+                data={currencyOptions(currency)}
+                value={currency}
+                onChange={(value) => form.setFieldValue('currency', value)}
+              />
+            )}
+            {values.type === 'EXCHANGE' && (
+              <MoneyInput
+                label={t('invOperations.received')}
+                currency={values.toCurrency ?? undefined}
+                {...form.getInputProps('toAmount')}
+              />
+            )}
+            {values.type === 'EXCHANGE' && (
+              <Select
+                label={t('invOperations.toCurrency')}
+                searchable
+                data={currencyOptions(values.toCurrency ?? undefined)}
+                {...form.getInputProps('toCurrency')}
+              />
+            )}
+            {values.type === 'EXCHANGE' && (
+              <MoneyInput label={t('invOperations.fee')} currency={currency} {...form.getInputProps('fee')} />
+            )}
             {values.type === 'SPLIT' && (
               <NumberInput
                 label={t('invOperations.splitFrom')}
@@ -399,6 +461,25 @@ function OperationForm({
               {t('invOperations.feeHint')}
             </Text>
           )}
+          {(values.type === 'DEPOSIT' || values.type === 'WITHDRAWAL') && (
+            <Text size="sm" c="dimmed">
+              {t('invOperations.depositHint')}
+            </Text>
+          )}
+          {values.type === 'EXCHANGE' &&
+            values.toCurrency &&
+            toNumber(values.amount) > 0 &&
+            toNumber(values.toAmount) > 0 && (
+              <Text size="sm" c="dimmed" data-testid="exchange-rate">
+                {t('invOperations.rate', {
+                  from: currency,
+                  to: values.toCurrency,
+                  rate: new Intl.NumberFormat(undefined, { maximumFractionDigits: 6 }).format(
+                    toNumber(values.toAmount) / toNumber(values.amount),
+                  ),
+                })}
+              </Text>
+            )}
 
           {preview && (
             <div className={classes.preview}>
@@ -458,12 +539,14 @@ function OperationForm({
               </Stack>
               <Stack gap={0} align="flex-end">
                 <Text className="num" fw={600} data-testid="operation-total">
-                  {formatMoney(
-                    trade
-                      ? tradeAmount(values)
-                      : toNumber(values.amount) - (income ? toNumber(values.tax) : 0),
-                    currency,
-                  )}
+                  {values.type === 'EXCHANGE'
+                    ? formatMoney(toNumber(values.toAmount), values.toCurrency ?? currency)
+                    : formatMoney(
+                        trade
+                          ? tradeAmount(values)
+                          : toNumber(values.amount) - (income ? toNumber(values.tax) : 0),
+                        currency,
+                      )}
                 </Text>
                 <Text
                   size="xs"

@@ -2,13 +2,14 @@
   "investments": {
     "title": "Investments",
     "allAccounts": "All accounts",
-    "addOperation": "Trade",
+    "addOperation": "Add operation",
     "noAccounts": "No investment accounts yet. Create an account of type “Investments” in Accounts to record trades.",
     "pricesAsOf": "Closing prices of {{date}} · updated daily",
     "tabs": {
       "overview": "Overview",
       "positions": "Positions",
-      "dividends": "Dividends"
+      "dividends": "Dividends",
+      "operations": "Operations"
     },
     "types": {
       "STOCK": "Stocks",

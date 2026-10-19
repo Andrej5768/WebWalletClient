@@ -954,7 +954,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Operations of the brokerage accounts, newest first */
+        /**
+         * Operations of the brokerage accounts, newest first
+         * @description Optionally of one account, one instrument and some types (all by default).
+         */
         get: operations["operations"];
         put?: never;
         /**
@@ -4221,6 +4224,7 @@ export interface operations {
             query?: {
                 accountId?: number;
                 instrumentId?: number;
+                types?: ("BUY" | "SELL" | "DIVIDEND" | "COUPON" | "FEE" | "SPLIT" | "DEPOSIT" | "WITHDRAWAL" | "EXCHANGE")[];
                 page?: number;
                 size?: number;
             };

@@ -1,6 +1,6 @@
 {
   "invOperations": {
-    "newTitle": "New trade",
+    "newTitle": "New operation",
     "editTitle": "Operation",
     "type": "Operation type",
     "account": "Brokerage account",
@@ -40,6 +40,40 @@
     "deleteTitle": "Delete the operation?",
     "position": "Position",
     "positionPlaceholder": "What you sell",
-    "noPositions": "No positions on the account"
+    "noPositions": "No positions on the account",
+    "groups": {
+      "trades": "Trades",
+      "income": "Income",
+      "money": "Money and fees"
+    },
+    "amount": "Amount",
+    "sold": "Sold",
+    "received": "Received",
+    "currency": "Currency",
+    "toCurrency": "Currency received",
+    "sameCurrency": "Choose another currency",
+    "rate": "Rate: 1 {{from}} = {{rate}} {{to}}",
+    "depositHint": "Money the broker credited or charged on its own, e.g. a card payment in the broker cabinet. A transfer from your own card is better recorded as a transfer among the transactions, so that it shows on both accounts.",
+    "list": {
+      "filter": "Which operations to show",
+      "filters": {
+        "all": "All",
+        "trades": "Trades",
+        "income": "Income",
+        "fees": "Fees",
+        "money": "Deposits and exchanges"
+      },
+      "columns": {
+        "date": "Date",
+        "type": "Type",
+        "what": "Instrument or description",
+        "account": "Account",
+        "quantity": "Quantity × price",
+        "cash": "Money"
+      },
+      "open": "Open: {{what}}, {{date}}",
+      "empty": "No operations yet. Add a trade or import the reports of a broker.",
+      "emptyFilter": "No such operations."
+    }
   }
 }

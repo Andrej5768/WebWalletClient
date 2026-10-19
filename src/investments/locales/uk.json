@@ -2,13 +2,14 @@
   "investments": {
     "title": "Інвестиції",
     "allAccounts": "Усі рахунки",
-    "addOperation": "Угода",
+    "addOperation": "Додати операцію",
     "noAccounts": "Інвестиційних рахунків ще немає. Створіть рахунок типу «Інвестиції» у «Рахунках», щоб записувати угоди.",
     "pricesAsOf": "Ціни на закриття {{date}} · оновлюються щодня",
     "tabs": {
       "overview": "Огляд",
       "positions": "Позиції",
-      "dividends": "Дивіденди"
+      "dividends": "Дивіденди",
+      "operations": "Операції"
     },
     "types": {
       "STOCK": "Акції",

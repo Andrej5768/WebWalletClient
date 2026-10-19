@@ -7584,6 +7584,7 @@
     },
     "/api/v1/investments/operations": {
       "get": {
+        "description": "Optionally of one account, one instrument and some types (all by default).",
         "operationId": "operations",
         "parameters": [
           {
@@ -7602,6 +7603,29 @@
             "schema": {
               "format": "int64",
               "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "types",
+            "required": false,
+            "schema": {
+              "items": {
+                "enum": [
+                  "BUY",
+                  "SELL",
+                  "DIVIDEND",
+                  "COUPON",
+                  "FEE",
+                  "SPLIT",
+                  "DEPOSIT",
+                  "WITHDRAWAL",
+                  "EXCHANGE"
+                ],
+                "type": "string"
+              },
+              "type": "array",
+              "uniqueItems": true
             }
           },
           {
