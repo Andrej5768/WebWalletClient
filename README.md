@@ -113,7 +113,9 @@ expenses red and income green, [Fixel](https://github.com/MacPaw/Fixel) for text
 - [x] Operations tab: every operation of the accounts with filters by kind; deposits, withdrawals and currency
       exchanges entered by hand in the operation panel
 - [ ] Interactive Brokers import
-- [ ] XIRR / TWR, allocation by sector and country, rebalancing
+- [x] Returns over the period of the chart: time-weighted (TWR) and money-weighted (XIRR), also of the benchmark;
+      allocation by sector
+- [ ] Allocation by country, rebalancing
 
 ### Backend changes this client needs
 

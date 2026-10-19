@@ -40,8 +40,19 @@
     "allocation": {
       "byType": "Asset classes",
       "byCurrency": "Currencies",
-      "empty": "No positions"
+      "empty": "No positions",
+      "bySector": "By sector",
+      "sectorsLoading": "The sectors of instruments load gradually, a few a day."
     },
-    "unrealizedNote": "{{share}} of the cost of {{cost}}"
+    "unrealizedNote": "{{share}} of the cost of {{cost}}",
+    "returns": {
+      "twr": "Investment return (TWR)",
+      "xirr": "Your return (XIRR), per year",
+      "benchmarkTwr": "{{name}}: TWR",
+      "benchmarkXirr": "{{name}}: XIRR",
+      "perYear": "{{value}} per year",
+      "what": "What TWR and XIRR mean",
+      "hint": "TWR shows how the investments themselves did: deposits and their timing do not affect it, which makes it fit for comparing with an index. XIRR is your annual return including when and how much you deposited, like the rate of a deposit that would give the same result. Example: the portfolio grew 10 %, but most money came in right before a fall — TWR is 10 %, XIRR is lower."
+    }
   }
 }
