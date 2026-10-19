@@ -1,5 +1,6 @@
 import { CompositeChart, DonutChart } from '@mantine/charts';
 import {
+  ActionIcon,
   Alert,
   Card,
   Chip,
@@ -11,6 +12,7 @@ import {
   Stack,
   Text,
   Title,
+  Tooltip,
 } from '@mantine/core';
 import { Info } from 'lucide-react';
 import { lazy, Suspense, useMemo, useState } from 'react';
@@ -21,7 +23,7 @@ import { formatDayShort, formatMonthShort, formatPercent } from '../../lib/forma
 import { formatMoney } from '../../lib/money';
 import { moneyAxis } from '../../components/chartAxis';
 import { kyivToday } from '../../lib/periods';
-import { useHistory, usePortfolio, type Benchmark, type Portfolio } from '../api';
+import { useHistory, usePortfolio, type Benchmark, type History, type Portfolio } from '../api';
 import { CurrencySwitch } from '../CurrencySwitch';
 import { useDisplayCurrency } from '../useDisplayCurrency';
 import { fromFirstMoney, RANGES, rangeFrom, result, type Range, type Result } from './model';
@@ -57,17 +59,28 @@ export function OverviewTab({ accountId }: { accountId?: number }) {
         <CurrencySwitch label={t('invOverview.currency')} />
       </Group>
       <ValueChart accountId={accountId} />
-      <SimpleGrid cols={{ base: 1, md: 3 }} spacing="md">
+      <SimpleGrid cols={{ base: 1, md: 2 }} spacing="md">
         <Allocation
           title={t('invOverview.allocation.byType')}
           parts={data.byType}
           currency={data.currency}
-          typed
+          label={(key) => t(`investments.types.${key}`, { defaultValue: key })}
         />
         <Allocation
           title={t('invOverview.allocation.byCurrency')}
           parts={data.byCurrency}
           currency={data.currency}
+        />
+        <Allocation
+          title={t('invOverview.allocation.bySector')}
+          parts={data.bySector}
+          currency={data.currency}
+          label={(key) => t(`investments.sectors.${key}`, { defaultValue: key })}
+          note={
+            data.bySector.some((part) => part.key === 'UNKNOWN')
+              ? t('invOverview.allocation.sectorsLoading')
+              : undefined
+          }
         />
         <Suspense fallback={<Skeleton height={240} radius="md" />}>
           <UpcomingPayments accountId={accountId} />
@@ -266,6 +279,7 @@ function ValueChart({ accountId }: { accountId?: number }) {
             benchmark={benchmarkResult}
             benchmarkName={benchmarkName}
             money={money}
+            returns={data!.returns}
           />
         )}
         {withBenchmark && (
@@ -330,11 +344,13 @@ function Summary({
   benchmark,
   benchmarkName,
   money,
+  returns,
 }: {
   portfolio: Result;
   benchmark: Result | null;
   benchmarkName: string;
   money(value: number, signed?: boolean): string;
+  returns: History['returns'];
 }) {
   const { t } = useTranslation();
   const item = (label: string, value: Result) => (
@@ -348,17 +364,47 @@ function Summary({
       </Text>
     </Stack>
   );
+  const rate = (label: string, value: number | null, annual?: number | null) =>
+    value == null ? null : (
+      <Stack gap={0}>
+        <Text size="xs" c="dimmed">
+          {label}
+        </Text>
+        <Text size="sm" fw={600} className={`num ${value < 0 ? 'expense' : 'income'}`}>
+          {formatSigned(value)}
+          {annual != null && ` · ${t('invOverview.returns.perYear', { value: formatSigned(annual) })}`}
+        </Text>
+      </Stack>
+    );
+  const hasReturns = returns.twr != null || returns.xirr != null;
   return (
-    <Group gap="xl" wrap="wrap" data-testid="history-summary">
-      {item(t('invOverview.chart.portfolio'), portfolio)}
-      {benchmark && item(t('invOverview.chart.sameDeposits', { name: benchmarkName }), benchmark)}
-      {benchmark &&
-        item(t('invOverview.chart.differenceLabel'), {
-          profit: portfolio.profit - benchmark.profit,
-          share:
-            portfolio.share != null && benchmark.share != null ? portfolio.share - benchmark.share : null,
-        })}
-    </Group>
+    <Stack gap="sm" data-testid="history-summary">
+      <Group gap="xl" wrap="wrap">
+        {item(t('invOverview.chart.portfolio'), portfolio)}
+        {benchmark && item(t('invOverview.chart.sameDeposits', { name: benchmarkName }), benchmark)}
+        {benchmark &&
+          item(t('invOverview.chart.differenceLabel'), {
+            profit: portfolio.profit - benchmark.profit,
+            share:
+              portfolio.share != null && benchmark.share != null ? portfolio.share - benchmark.share : null,
+          })}
+      </Group>
+      {hasReturns && (
+        <Group gap="xl" wrap="wrap" align="flex-end" data-testid="history-returns">
+          {rate(t('invOverview.returns.twr'), returns.twr, returns.twrAnnualized)}
+          {rate(t('invOverview.returns.xirr'), returns.xirr)}
+          {benchmark &&
+            rate(t('invOverview.returns.benchmarkTwr', { name: benchmarkName }), returns.benchmarkTwr)}
+          {benchmark &&
+            rate(t('invOverview.returns.benchmarkXirr', { name: benchmarkName }), returns.benchmarkXirr)}
+          <Tooltip label={t('invOverview.returns.hint')} multiline w={340} withArrow>
+            <ActionIcon variant="subtle" color="gray" size="sm" aria-label={t('invOverview.returns.what')}>
+              <Info size={14} />
+            </ActionIcon>
+          </Tooltip>
+        </Group>
+      )}
+    </Stack>
   );
 }
 
@@ -366,15 +412,17 @@ function Allocation({
   title,
   parts,
   currency,
-  typed,
+  label = (key) => key,
+  note,
 }: {
   title: string;
   parts: Portfolio['byType'];
   currency: string;
-  typed?: boolean;
+  /** The name of a part; the key itself by default (a currency code). */
+  label?: (key: string) => string;
+  note?: string;
 }) {
   const { t } = useTranslation();
-  const label = (key: string) => (typed ? t(`investments.types.${key}`, { defaultValue: key }) : key);
   const data = parts.map((part, index) => ({
     name: label(part.key),
     value: part.value,
@@ -416,6 +464,11 @@ function Allocation({
               </Group>
             ))}
           </Stack>
+          {note && (
+            <Text size="xs" c="dimmed">
+              {note}
+            </Text>
+          )}
         </Stack>
       )}
     </Card>

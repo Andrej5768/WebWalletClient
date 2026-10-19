@@ -31,6 +31,22 @@
       "DEPOSIT": "Поповнення",
       "WITHDRAWAL": "Виведення",
       "EXCHANGE": "Обмін валют"
+    },
+    "sectors": {
+      "ENERGY": "Енергетика",
+      "MATERIALS": "Матеріали",
+      "INDUSTRIALS": "Промисловість",
+      "CONSUMER_DISCRETIONARY": "Товари не першої необхідності",
+      "CONSUMER_STAPLES": "Товари першої необхідності",
+      "HEALTH_CARE": "Охорона здоров’я",
+      "FINANCIALS": "Фінанси",
+      "INFORMATION_TECHNOLOGY": "Інформаційні технології",
+      "COMMUNICATION_SERVICES": "Комунікації",
+      "UTILITIES": "Комунальні послуги",
+      "REAL_ESTATE": "Нерухомість",
+      "BONDS": "Облігації",
+      "OTHER": "Інше",
+      "UNKNOWN": "Ще невідомо"
     }
   }
 }

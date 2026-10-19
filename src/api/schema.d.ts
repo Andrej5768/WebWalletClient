@@ -1840,6 +1840,7 @@ export interface components {
             /** Format: date */
             from: string;
             points: components["schemas"]["HistoryPoint"][];
+            returns: components["schemas"]["Returns"];
             /** Format: date */
             to: string;
             unconvertedCurrencies: string[];
@@ -2291,6 +2292,7 @@ export interface components {
         };
         PortfolioResponse: {
             byCurrency: components["schemas"]["AllocationPart"][];
+            bySector: components["schemas"]["AllocationPart"][];
             byType: components["schemas"]["AllocationPart"][];
             cash: components["schemas"]["CashResponse"][];
             currency: string;
@@ -2434,6 +2436,13 @@ export interface components {
         ResetRequest: {
             confirm?: string;
             keepCategories?: boolean;
+        };
+        Returns: {
+            benchmarkTwr: number | null;
+            benchmarkXirr: number | null;
+            twr: number | null;
+            twrAnnualized: number | null;
+            xirr: number | null;
         };
         RuleRequest: {
             bankCategory?: string;

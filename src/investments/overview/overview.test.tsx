@@ -32,6 +32,10 @@ const portfolio = portfolioOf({
     { key: 'CASH', value: 90000, share: 0.3333 },
   ],
   byCurrency: [{ key: 'USD', value: 270000, share: 1 }],
+  bySector: [
+    { key: 'INFORMATION_TECHNOLOGY', value: 120000, share: 0.6667 },
+    { key: 'UNKNOWN', value: 60000, share: 0.3333 },
+  ],
 });
 
 const points = [
@@ -53,6 +57,13 @@ function api(extra = {}) {
           benchmark: benchmark
             ? { key: 'SP500', symbol: 'SPY', name: 'SPDR S&P 500', pricesFrom: '2025-01-02' }
             : null,
+          returns: {
+            twr: 0.2134,
+            twrAnnualized: null,
+            xirr: 0.1876,
+            benchmarkTwr: benchmark ? 0.15 : null,
+            benchmarkXirr: null,
+          },
         }),
       );
     },
@@ -87,6 +98,15 @@ it('shows the key figures, the allocation and the result of the period', async (
   const summary = await screen.findByTestId('history-summary');
   // 150 − 100 − 20 deposited since the start: 30 on 120 at stake
   expect(plain(summary.textContent)).toContain('+30,00 ₴ · +25%');
+  const returns = plain(screen.getByTestId('history-returns').textContent);
+  expect(returns).toContain('Дохідність інвестицій (TWR)+21,3%');
+  expect(returns).toContain('Ваша дохідність (XIRR), річних+18,8%');
+  expect(screen.getByLabelText('Що таке TWR і XIRR')).toBeInTheDocument();
+
+  expect(screen.getByText('За секторами')).toBeInTheDocument();
+  expect(screen.getByText('Інформаційні технології')).toBeInTheDocument();
+  expect(screen.getByText('Ще невідомо')).toBeInTheDocument();
+  expect(screen.getByText(/Сектори інструментів завантажуються/)).toBeInTheDocument();
 });
 
 it('changes the period, the currency and the benchmark of the chart', async () => {

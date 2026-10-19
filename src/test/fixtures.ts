@@ -294,6 +294,7 @@ export function portfolioOf(
     cash: [],
     byType: [],
     byCurrency: [],
+    bySector: [],
     unconvertedCurrencies: [],
     ...overrides,
   };
@@ -306,6 +307,7 @@ export function historyOf(overrides: Partial<Schemas['HistoryResponse']> = {}): 
     to: '2026-10-15',
     benchmark: null,
     points: [],
+    returns: { twr: null, twrAnnualized: null, xirr: null, benchmarkTwr: null, benchmarkXirr: null },
     unconvertedCurrencies: [],
     ...overrides,
   };

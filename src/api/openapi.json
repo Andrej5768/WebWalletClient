@@ -1666,6 +1666,9 @@
             },
             "type": "array"
           },
+          "returns": {
+            "$ref": "#/components/schemas/Returns"
+          },
           "to": {
             "format": "date",
             "type": "string"
@@ -1682,6 +1685,7 @@
           "currency",
           "from",
           "points",
+          "returns",
           "to",
           "unconvertedCurrencies"
         ],
@@ -3491,6 +3495,12 @@
             },
             "type": "array"
           },
+          "bySector": {
+            "items": {
+              "$ref": "#/components/schemas/AllocationPart"
+            },
+            "type": "array"
+          },
           "byType": {
             "items": {
               "$ref": "#/components/schemas/AllocationPart"
@@ -3555,6 +3565,7 @@
         },
         "required": [
           "byCurrency",
+          "bySector",
           "byType",
           "cash",
           "currency",
@@ -4073,6 +4084,48 @@
             "type": "boolean"
           }
         },
+        "type": "object"
+      },
+      "Returns": {
+        "properties": {
+          "benchmarkTwr": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "benchmarkXirr": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "twr": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "twrAnnualized": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "xirr": {
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "benchmarkTwr",
+          "benchmarkXirr",
+          "twr",
+          "twrAnnualized",
+          "xirr"
+        ],
         "type": "object"
       },
       "RuleRequest": {
