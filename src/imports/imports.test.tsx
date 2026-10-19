@@ -154,7 +154,8 @@ it('reviews a PrivatBank statement before importing it', async () => {
 
   const fileInput = container.querySelector('#privatbank input[type="file"]') as HTMLInputElement;
   await userEvent.upload(fileInput, new File(['%PDF'], 'statement.pdf', { type: 'application/pdf' }));
-  await userEvent.click(screen.getByRole('button', { name: 'Завантажити й переглянути' }));
+  const card = container.querySelector('#privatbank') as HTMLElement;
+  await userEvent.click(within(card).getByRole('button', { name: 'Завантажити й переглянути' }));
 
   const dialog = await screen.findByRole('dialog');
   expect(within(dialog).getByText('Дублікат — уже є в обліку')).toBeInTheDocument();
