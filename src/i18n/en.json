@@ -92,7 +92,8 @@
     "goals": "Goals",
     "investments": "Investments",
     "imports": "Import",
-    "settings": "Settings"
+    "settings": "Settings",
+    "taxes": "Taxes"
   },
   "shell": {
     "mainNav": "Main",

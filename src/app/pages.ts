@@ -24,6 +24,7 @@ export const GoalsPage = lazy(() => import('../goals/GoalsPage').then((m) => ({ 
 export const InvestmentsPage = lazy(() =>
   import('../investments/InvestmentsPage').then((m) => ({ default: m.InvestmentsPage })),
 );
+export const TaxesPage = lazy(() => import('../taxes/TaxesPage').then((m) => ({ default: m.TaxesPage })));
 export const InstrumentPage = lazy(() =>
   import('../investments/instrument/InstrumentPage').then((m) => ({ default: m.InstrumentPage })),
 );

@@ -1495,7 +1495,8 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /** Whether a transaction is income of the sole proprietor, and why */
+        get: operations["transaction"];
         /** Add a transaction to the income of the sole proprietor, take it out, or forget the mark (null) */
         put: operations["mark"];
         post?: never;
@@ -2934,6 +2935,14 @@ export interface components {
             toCurrency: string | null;
             /** @enum {string} */
             type: "EXPENSE" | "INCOME" | "TRANSFER";
+        };
+        TransactionTaxResponse: {
+            counted: boolean;
+            mark: boolean | null;
+            /** @enum {string|null} */
+            reason: "ACCOUNT" | "CATEGORY" | "MANUAL" | null;
+            /** @enum {string|null} */
+            ruleReason: "ACCOUNT" | "CATEGORY" | "MANUAL" | null;
         };
         TrendsResponse: {
             average: number;
@@ -5468,6 +5477,28 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["TaxSettingsResponse"];
+                };
+            };
+        };
+    };
+    transaction: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                transactionId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TransactionTaxResponse"];
                 };
             };
         };
