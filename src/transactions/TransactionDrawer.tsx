@@ -44,6 +44,7 @@ import {
   type TransactionValues,
 } from './form';
 import type { Transaction } from './model';
+import { FopIncomeSwitch } from '../taxes/FopIncomeSwitch';
 import { SplitEditor } from './SplitEditor';
 
 /** Fields the form renders; a backend error on any other field is shown in the alert. */
@@ -314,6 +315,7 @@ function TransactionForm({ transaction, defaultAccountId, defaults, onClose }: P
           {...form.getInputProps('comment')}
         />
         {values.type !== 'TRANSFER' && <ForeignAmount form={form} />}
+        {editing && transaction.type === 'INCOME' && <FopIncomeSwitch transactionId={transaction.id} />}
 
         {mismatch && (
           <Alert color="yellow" variant="light" p="xs" role="alert">

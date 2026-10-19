@@ -9,6 +9,7 @@ import {
   InvestmentsPage,
   ReportsPage,
   SettingsPage,
+  TaxesPage,
   TransactionsPage,
 } from './pages';
 import { AuthProvider } from '../auth/AuthProvider';
@@ -65,6 +66,7 @@ export const routes = [
           { path: 'imports', element: <ImportsPage /> },
           { path: 'investments', element: <InvestmentsPage /> },
           { path: 'investments/instruments/:id', element: <InstrumentPage /> },
+          { path: 'taxes', element: <TaxesPage /> },
           { path: '*', element: <Navigate to="/" replace /> },
         ],
       },

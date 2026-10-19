@@ -26,12 +26,14 @@ export const queryKeys = {
   forecast: ['forecast'] as const,
   recurring: ['recurring'] as const,
   investments: ['investments'] as const,
+  taxes: ['taxes'] as const,
 };
 
 /**
  * Refreshes everything a change of money can affect: transactions, balances, the budget, reports,
  * payees, tags, goals (their progress follows account balances), the forecast, recurring payments
- * (a new transaction may pay one) and investments (transfers bring cash to brokerage accounts).
+ * (a new transaction may pay one), investments (transfers bring cash to brokerage accounts) and taxes (an income
+ * may be income of the sole proprietor).
  * Used after adding, editing, importing or categorizing transactions and accounts.
  */
 export function invalidateLedger(queryClient: QueryClient): Promise<unknown> {
@@ -48,6 +50,7 @@ export function invalidateLedger(queryClient: QueryClient): Promise<unknown> {
       queryKeys.forecast,
       queryKeys.recurring,
       queryKeys.investments,
+      queryKeys.taxes,
     ].map((queryKey) => queryClient.invalidateQueries({ queryKey })),
   );
 }

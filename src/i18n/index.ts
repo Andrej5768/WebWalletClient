@@ -21,6 +21,8 @@ import recurringUk from '../recurring/locales/uk.json';
 import reportsEn from '../reports/locales/en.json';
 import reportsUk from '../reports/locales/uk.json';
 import settingsEn from '../settings/locales/en.json';
+import taxesEn from '../taxes/locales/en.json';
+import taxesUk from '../taxes/locales/uk.json';
 import settingsUk from '../settings/locales/uk.json';
 import en from './en.json';
 import uk from './uk.json';
@@ -56,6 +58,7 @@ void i18n.use(initReactI18next).init({
         ...invDividendsUk,
         ...invInstrumentUk,
         ...invOperationsUk,
+        ...taxesUk,
       },
     },
     en: {
@@ -72,6 +75,7 @@ void i18n.use(initReactI18next).init({
         ...invDividendsEn,
         ...invInstrumentEn,
         ...invOperationsEn,
+        ...taxesEn,
       },
     },
   },

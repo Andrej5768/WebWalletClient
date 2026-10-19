@@ -1,8 +1,8 @@
 # WebWallet Client
 
 Web client for the [WebWallet](https://github.com/Andrej5768/WebWallet) personal finance API: accounts,
-transactions and recurring payments, envelope budget, bank and broker imports, reports and analytics, goals and
-investments.
+transactions and recurring payments, envelope budget, bank and broker imports, reports and analytics, goals,
+investments and taxes.
 
 React + TypeScript on Vite, [Mantine](https://mantine.dev) components, TanStack Query, React Router,
 i18next (Ukrainian and English), an API client generated from the backend OpenAPI spec
@@ -116,6 +116,17 @@ expenses red and income green, [Fixel](https://github.com/MacPaw/Fixel) for text
 - [x] Returns over the period of the chart: time-weighted (TWR) and money-weighted (XIRR), also of the benchmark;
       allocation by sector
 - [ ] Allocation by country, rebalancing
+
+### Taxes
+
+- [x] «Податки» page by year: the sole proprietor (ФОП) by quarter — income, single tax, military levy, social
+      contribution, deadlines, paid marks, the income limit, every income with a switch to leave it out — and the
+      investment income — dividends with the foreign tax credit, sales in hryvnias, the carried loss, the declaration
+      summary; CSV export of both
+- [x] Rates of each year with the defaults, a way back to them and links to the sources; income categories of the
+      sole proprietor
+- [x] «ФОП» account type; a switch in the transaction panel adds an income on another account to the taxes
+- [ ] Declaration files for the tax service cabinet
 
 ### Backend changes this client needs
 

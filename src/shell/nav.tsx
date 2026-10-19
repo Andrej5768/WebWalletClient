@@ -2,6 +2,7 @@ import {
   ArrowLeftRight,
   ChartColumn,
   LayoutGrid,
+  ReceiptText,
   SlidersHorizontal,
   Target,
   TrendingUp,
@@ -26,6 +27,7 @@ export const mainNav: NavItem[] = [
   { path: '/reports', key: 'reports', icon: ChartColumn },
   { path: '/goals', key: 'goals', icon: Target },
   { path: '/investments', key: 'investments', icon: TrendingUp },
+  { path: '/taxes', key: 'taxes', icon: ReceiptText },
   { path: '/imports', key: 'imports', icon: Upload },
 ];
 
