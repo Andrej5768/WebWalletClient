@@ -3,6 +3,7 @@
     "value": "Value",
     "unrealized": "Unrealized profit",
     "day": "Today",
+    "currency": "Currency",
     "grouping": "Grouping",
     "byAccount": "By account",
     "byType": "By class",

@@ -953,8 +953,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * The portfolio of the brokerage accounts in the base currency
-         * @description All brokerage accounts that are not archived, or the given one.
+         * The portfolio of the brokerage accounts in a currency, by default the base one
+         * @description All brokerage accounts that are not archived, or the given one. Amounts named "InBase" are in the currency of the portfolio.
          */
         get: operations["portfolio"];
         put?: never;
@@ -4146,6 +4146,7 @@ export interface operations {
         parameters: {
             query?: {
                 accountId?: number;
+                currency?: string;
             };
             header?: never;
             path?: never;

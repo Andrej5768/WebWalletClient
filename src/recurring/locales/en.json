@@ -100,6 +100,12 @@
         "YEARLY_other": "years"
       },
       "startDate": "First payment",
+      "weekday": "Day of the week",
+      "yearDay": "Day",
+      "yearMonth": "Month",
+      "badDay": "No such day in the month",
+      "startFrom": "Starting from",
+      "firstPayment": "First payment: {{date}}",
       "shortMonths": "In shorter months — the last day",
       "end": "Ends",
       "endNever": "Never",

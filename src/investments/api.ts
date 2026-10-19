@@ -20,7 +20,8 @@ export type DividendEvent = Schemas['CalendarEvent'];
 /** Keys under the `investments` prefix, refreshed together after a change. */
 export const investmentKeys = {
   all: queryKeys.investments,
-  portfolio: (accountId?: number) => [...queryKeys.investments, 'portfolio', accountId ?? null] as const,
+  portfolio: (accountId?: number, currency?: string) =>
+    [...queryKeys.investments, 'portfolio', accountId ?? null, currency ?? null] as const,
   history: (params: HistoryParams) => [...queryKeys.investments, 'history', params] as const,
   dividends: (params: DividendParams) => [...queryKeys.investments, 'dividends', params] as const,
   position: (accountId: number, instrumentId: number) =>
@@ -34,10 +35,12 @@ export const investmentKeys = {
     [...queryKeys.investments, 'operations', accountId ?? null, instrumentId ?? null, page] as const,
 };
 
-export function usePortfolio(accountId?: number) {
+/** The portfolio in the currency, by default the base one. */
+export function usePortfolio(accountId?: number, currency?: string) {
   return useQuery({
-    queryKey: investmentKeys.portfolio(accountId),
-    queryFn: () => unwrap(api.GET('/api/v1/investments/portfolio', { params: { query: { accountId } } })),
+    queryKey: investmentKeys.portfolio(accountId, currency),
+    queryFn: () =>
+      unwrap(api.GET('/api/v1/investments/portfolio', { params: { query: { accountId, currency } } })),
     placeholderData: keepPreviousData,
   });
 }
