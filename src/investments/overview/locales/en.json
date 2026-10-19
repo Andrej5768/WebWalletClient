@@ -1,5 +1,6 @@
 {
   "invOverview": {
+    "currency": "Currency",
     "value": "Portfolio value",
     "dayChange": "{{amount}} today",
     "invested": "Invested",
@@ -18,7 +19,6 @@
         "1y": "1 yr",
         "all": "All"
       },
-      "currency": "Chart currency",
       "compareWith": "Compare with:",
       "benchmarks": {
         "none": "No comparison",

@@ -107,6 +107,9 @@ it('changes the period, the currency and the benchmark of the chart', async () =
   const last = historyParams(requests).at(-1)!;
   expect(last.get('from')).toBeNull();
   expect(last.get('currency')).toBe('USD');
+  // The key figures follow the currency too
+  const portfolios = requests.filter((request) => request.url.includes('/investments/portfolio'));
+  expect(new URL(portfolios.at(-1)!.url).searchParams.get('currency')).toBe('USD');
   const summary = await screen.findByTestId('history-summary');
   await waitFor(() => expect(plain(summary.textContent)).toContain('Ті самі внески в S&P 500'));
   // 30 against 10 in the index
