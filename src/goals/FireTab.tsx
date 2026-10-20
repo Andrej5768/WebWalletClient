@@ -1,6 +1,18 @@
 import { LineChart } from '@mantine/charts';
 import { moneyAxis } from '../components/chartAxis';
-import { Anchor, Card, Group, NumberInput, SimpleGrid, Skeleton, Stack, Text } from '@mantine/core';
+import {
+  ActionIcon,
+  Anchor,
+  Card,
+  Group,
+  NumberInput,
+  Popover,
+  SimpleGrid,
+  Skeleton,
+  Stack,
+  Text,
+} from '@mantine/core';
+import { Info } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { formatMoney } from '../lib/money';
@@ -177,9 +189,26 @@ export function FireTab() {
         <SimpleGrid cols={{ base: 2, md: 4 }} spacing="md">
           {levels.map((level) => (
             <Card key={level.key} withBorder radius="md" padding="md">
-              <Text size="xs" c="dimmed" fw={500}>
-                {t(`goals.fire.levels.${level.key}`)}
-              </Text>
+              <Group gap={4} wrap="nowrap">
+                <Text size="xs" c="dimmed" fw={500}>
+                  {t(`goals.fire.levels.${level.key}`)}
+                </Text>
+                <Popover width={280} withArrow shadow="md" position="top">
+                  <Popover.Target>
+                    <ActionIcon
+                      variant="subtle"
+                      color="gray"
+                      size="xs"
+                      aria-label={t('goals.fire.levels.info', { name: t(`goals.fire.levels.${level.key}`) })}
+                    >
+                      <Info size={12} />
+                    </ActionIcon>
+                  </Popover.Target>
+                  <Popover.Dropdown>
+                    <Text size="sm">{t(`goals.fire.levels.${level.key}Tip`)}</Text>
+                  </Popover.Dropdown>
+                </Popover>
+              </Group>
               <Text className="num" fw={600} mt={4}>
                 {Number.isFinite(level.value) ? money(level.value) : '—'}
               </Text>

@@ -151,3 +151,12 @@ it('averages over the complete months with data and warns when there are few', a
   // 26 000 a month over the two complete months, not 55 000 / 12
   expect(plain(screen.getByLabelText('Річні витрати').getAttribute('value'))).toBe('312 000');
 });
+
+it('explains each kind of FIRE', async () => {
+  api();
+  renderApp('/goals?tab=fire');
+
+  await userEvent.click(await screen.findByRole('button', { name: 'Що таке Coast FIRE' }));
+
+  expect(await screen.findByRole('dialog')).toHaveTextContent('навіть без нових внесків');
+});

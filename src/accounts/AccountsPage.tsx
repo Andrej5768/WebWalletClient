@@ -27,6 +27,7 @@ import {
   EllipsisVertical,
   FileText,
   Landmark,
+  Pencil,
   PiggyBank,
   Plus,
   TrendingUp,
@@ -100,11 +101,16 @@ export function AccountsPage() {
   const groups = groupAccounts(accounts.data ?? [], showArchived);
   const count = (accounts.data ?? []).filter((account) => !account.archived).length;
   const currency = summary.data?.currency ?? 'UAH';
-  const creditCards = (accounts.data ?? []).filter(
-    (account) => account.type === 'CREDIT_CARD' && !account.archived,
-  );
-  const creditDebt = creditCards.reduce((sum, account) => sum + Math.min(account.balanceInBase ?? 0, 0), 0);
-  const creditIncomplete = creditCards.some((account) => account.balanceInBase == null);
+  const active = (accounts.data ?? []).filter((account) => !account.archived);
+  const credits = active.filter((account) => account.type === 'CREDIT_CARD' || account.type === 'LOAN');
+  const people = active.filter((account) => account.type === 'DEBT');
+  // What the user owes: the negative balances; a positive debt account is money others owe the user
+  const owed = (list: Account[]) =>
+    list.reduce((sum, account) => sum + Math.min(account.balanceInBase ?? 0, 0), 0);
+  const creditDebt = owed(credits);
+  const peopleDebt = owed(people);
+  const owedToUser = people.reduce((sum, account) => sum + Math.max(account.balanceInBase ?? 0, 0), 0);
+  const incomplete = (list: Account[]) => list.some((account) => account.balanceInBase == null);
 
   return (
     <Stack gap="lg" maw={1200}>
@@ -145,7 +151,7 @@ export function AccountsPage() {
         </Alert>
       )}
 
-      <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="sm">
+      <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} spacing="sm">
         <Figure
           label={t('balance.netWorth.label')}
           value={summary.data ? formatMoney(summary.data.netWorth, currency) : '—'}
@@ -157,7 +163,18 @@ export function AccountsPage() {
         <Figure
           label={t('accounts.creditDebt')}
           value={formatMoney(-creditDebt, currency)}
-          note={creditIncomplete ? t('accounts.withoutRate') : undefined}
+          note={incomplete(credits) ? t('accounts.withoutRate') : undefined}
+        />
+        <Figure
+          label={t('accounts.peopleDebt')}
+          value={formatMoney(-peopleDebt, currency)}
+          note={
+            incomplete(people)
+              ? t('accounts.withoutRate')
+              : owedToUser > 0
+                ? t('accounts.owedToYou', { amount: formatMoney(owedToUser, currency) })
+                : undefined
+          }
         />
       </SimpleGrid>
 
@@ -321,12 +338,14 @@ function AccountRow({
           </ActionIcon>
         </Menu.Target>
         <Menu.Dropdown>
+          <Menu.Item leftSection={<Pencil size={14} />} onClick={onEdit}>
+            {t('accounts.menu.edit')}
+          </Menu.Item>
           {onPositions && (
             <Menu.Item leftSection={<TrendingUp size={14} />} onClick={onPositions}>
               {t('accounts.menu.positions')}
             </Menu.Item>
           )}
-          <Menu.Item onClick={onEdit}>{t('accounts.menu.edit')}</Menu.Item>
           <Menu.Item leftSection={<ArrowLeftRight size={14} />} onClick={onTransactions}>
             {t('accounts.menu.transactions')}
           </Menu.Item>
