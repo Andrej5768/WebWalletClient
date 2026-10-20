@@ -38,7 +38,17 @@ import {
   type Preview,
   type PreviewOperation,
 } from './api';
-import { buildEdits, initialEdit, isUncategorized, needsTransferAccount, type RowEdit } from './edits';
+import {
+  buildEdits,
+  canPair,
+  exactPairs,
+  initialEdit,
+  isUncategorized,
+  needsTransferAccount,
+  samePair,
+  type Pair,
+  type RowEdit,
+} from './edits';
 import { PreviewRow } from './PreviewRow';
 
 type Filter = 'all' | 'uncategorized' | 'duplicates';
@@ -85,12 +95,55 @@ export function ImportPreviewModal({ preview, onClose }: { preview: Preview; onC
     () => new Map((tags.data ?? []).map((tag) => [tag.id, tag.name])),
     [tags.data],
   );
-  const editOf = (operation: PreviewOperation) =>
-    edits.get(operation.key) ?? initialEdit(operation, tagNamesById);
-  const change = (operation: PreviewOperation, patch: Partial<RowEdit>) =>
-    setEdits((current) =>
-      new Map(current).set(operation.key, { ...editOf(operation), ...patch, touched: true }),
-    );
+  // Exact matches are merged unless the user says otherwise.
+  const autoPairs = useMemo(() => exactPairs(known.values()), [known]);
+  const initial = (operation: PreviewOperation) =>
+    initialEdit(operation, tagNamesById, autoPairs.get(operation.key) ?? null);
+  const editOf = (operation: PreviewOperation) => edits.get(operation.key) ?? initial(operation);
+
+  /**
+   * Applies a change and keeps the pairs consistent: an operation of the file paired with this one
+   * points back at it, and a half chosen here is let go by any other row.
+   */
+  const update = (operation: PreviewOperation, patch: Partial<RowEdit>) =>
+    setEdits((current) => {
+      const next = new Map(current);
+      const get = (key: string) => {
+        const other = known.get(key);
+        return next.get(key) ?? (other ? initial(other) : undefined);
+      };
+      const set = (key: string, values: Partial<RowEdit>) => {
+        const edit = get(key);
+        if (edit) next.set(key, { ...edit, ...values, touched: true });
+      };
+      const release = (key: string) => {
+        const partner = get(key)?.pair?.operationKey;
+        if (partner != null && get(partner)?.pair?.operationKey === key) set(partner, { pair: null });
+      };
+      const merged = { ...get(operation.key)!, ...patch };
+      const pair = merged.include && canPair(operation, merged) ? merged.pair : null;
+      const before = get(operation.key)!.pair;
+      if (!samePair(before, pair)) {
+        release(operation.key);
+        if (pair) {
+          known.forEach((_, key) => {
+            if (key !== operation.key && samePair(get(key)?.pair ?? null, pair)) set(key, { pair: null });
+          });
+          if (pair.operationKey != null) {
+            release(pair.operationKey);
+            known.forEach((_, key) => {
+              if (get(key)?.pair?.operationKey === operation.key && key !== pair.operationKey)
+                set(key, { pair: null });
+            });
+            set(pair.operationKey, { pair: { operationKey: operation.key, transactionId: null } });
+          }
+        }
+      }
+      next.set(operation.key, { ...merged, pair, touched: true });
+      return next;
+    });
+  const change = (operation: PreviewOperation, patch: Partial<RowEdit>) => update(operation, patch);
+  const choosePair = (operation: PreviewOperation, pair: Pair | null) => update(operation, { pair });
 
   const visible = items.filter((operation) => {
     if (filter === 'duplicates') return operation.duplicate;
@@ -114,10 +167,23 @@ export function ImportPreviewModal({ preview, onClose }: { preview: Preview; onC
   const withoutTransferAccount = [...known.values()].filter((operation) =>
     needsTransferAccount(operation, editOf(operation)),
   );
+  // A pair within the file counts once.
+  const pairable = [...known.values()].filter((operation) => canPair(operation, editOf(operation)));
+  const chosenPairs = pairable.filter((operation) => {
+    const edit = editOf(operation);
+    return edit.include && edit.pair && (edit.pair.operationKey == null || operation.type === 'EXPENSE');
+  }).length;
+  const possiblePairs = pairable.filter(
+    (operation) =>
+      operation.type === 'EXPENSE' ||
+      !(operation.transferSuggestions ?? []).some((suggestion) => suggestion.operationKey != null),
+  ).length;
 
   const confirm = useMutation({
     mutationFn: async () => {
-      const changed = [...edits.values()].filter((edit) => edit.touched && edit.include);
+      const changed = [...known.values()]
+        .map(editOf)
+        .filter((edit) => (edit.touched || edit.pair) && edit.include);
       const names = [
         ...new Map(
           changed.flatMap((edit) => edit.tags).map((name) => [name.trim().toLowerCase(), name]),
@@ -125,7 +191,7 @@ export function ImportPreviewModal({ preview, onClose }: { preview: Preview; onC
       ];
       const ids = await ensureTagIds(names, tags.data ?? [], queryClient);
       const tagIds = new Map(names.map((name, index) => [name.trim().toLowerCase(), ids[index]!]));
-      return confirmPreview(id, buildEdits(known, edits, tagIds));
+      return confirmPreview(id, buildEdits(known, editOf, tagIds));
     },
     onSuccess: async (imported) => {
       setResult(imported);
@@ -154,7 +220,7 @@ export function ImportPreviewModal({ preview, onClose }: { preview: Preview; onC
       selected.forEach((key) => {
         const operation = known.get(key);
         if (!operation) return;
-        const edit = next.get(key) ?? initialEdit(operation, tagNamesById);
+        const edit = next.get(key) ?? initial(operation);
         const categorize = !!bulkCategory && edit.type !== 'TRANSFER';
         const tag = bulkTag.trim();
         next.set(key, {
@@ -207,6 +273,11 @@ export function ImportPreviewModal({ preview, onClose }: { preview: Preview; onC
               ? ` · ${t('imports.preview.categoriesCreated', { count: summary.categoriesCreated })}`
               : ''}
           </Text>
+          {possiblePairs > 0 && (
+            <Alert color="blue" variant="light" p="xs">
+              {t('imports.preview.pairs', { count: possiblePairs, chosen: chosenPairs })}
+            </Alert>
+          )}
           <Warnings warnings={summary.warnings} />
           <Group justify="space-between" wrap="wrap" gap="sm">
             <SegmentedControl
@@ -295,6 +366,7 @@ export function ImportPreviewModal({ preview, onClose }: { preview: Preview; onC
                       })
                     }
                     onChange={(patch) => change(operation, patch)}
+                    onPair={(pair) => choosePair(operation, pair)}
                   />
                 ))}
               </Table.Tbody>

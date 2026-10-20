@@ -36,8 +36,18 @@ export function TransactionRow({
   const title = transfer
     ? `${accountName ?? ''} → ${toAccountName ?? ''}`
     : (transaction.payee?.name ?? transaction.comment ?? t('transactions.noPayee'));
+  // Within one currency, what did not arrive is the fee
+  const fee =
+    transfer &&
+    transaction.toAmount != null &&
+    (transaction.toCurrency ?? transaction.currency) === transaction.currency &&
+    transaction.toAmount < transaction.amount
+      ? transaction.amount - transaction.toAmount
+      : 0;
   const subtitle = transfer
-    ? t('transactions.types.TRANSFER')
+    ? fee > 0
+      ? t('transactions.transferFee', { fee: formatMoney(fee, transaction.currency) })
+      : t('transactions.types.TRANSFER')
     : isSplit(transaction)
       ? t('transactions.split', {
           names: transaction.splits

@@ -1867,6 +1867,63 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/transactions/transfer-pairs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Expenses and incomes that may be one transfer
+         * @description The same day, different own accounts in the same currency, amounts within 10 %, both without a category or marked as transfers by the bank; dismissed pairs are left out
+         */
+        get: operations["suggestions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/transactions/transfer-pairs/dismiss": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Say an expense and an income are not one transfer, so that the pair is not suggested again */
+        post: operations["dismiss"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/transactions/transfer-pairs/merge": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Merge an expense and an income into one transfer
+         * @description The expense becomes a transfer to the account of the income with both amounts; the income is deleted
+         */
+        post: operations["merge"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/transactions/{id}": {
         parameters: {
             query?: never;
@@ -1878,6 +1935,26 @@ export interface paths {
         put: operations["update"];
         post?: never;
         delete: operations["delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/transactions/{id}/split-transfer": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Split a transfer into an expense and an income
+         * @description Undoes a merge: the income is created again on the target account, and the pair is not suggested again. Returns the expense.
+         */
+        post: operations["split"];
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -2436,6 +2513,8 @@ export interface components {
             tagIds: number[];
             toAccount: components["schemas"]["ImportAccount"] | null;
             toAmount: number | null;
+            transferLike: boolean;
+            transferSuggestions: components["schemas"]["TransferSuggestion"][] | null;
             /** @enum {string} */
             type: "EXPENSE" | "INCOME" | "TRANSFER";
         };
@@ -2707,6 +2786,9 @@ export interface components {
             include?: boolean;
             keepSuggestedCategory?: boolean;
             key: string;
+            pairKey?: string | null;
+            /** Format: int64 */
+            pairTransactionId?: number | null;
             rememberRule?: boolean;
             tagIds?: number[] | null;
             /** Format: int64 */
@@ -3341,6 +3423,35 @@ export interface components {
             reason: "ACCOUNT" | "CATEGORY" | "MANUAL" | null;
             /** @enum {string|null} */
             ruleReason: "ACCOUNT" | "CATEGORY" | "MANUAL" | null;
+        };
+        TransferPairRequest: {
+            /** Format: int64 */
+            expenseId: number;
+            /** Format: int64 */
+            incomeId: number;
+        };
+        TransferPairResponse: {
+            /** Format: date */
+            date: string;
+            difference: number;
+            exact: boolean;
+            /** Format: int64 */
+            expenseId: number;
+            /** Format: int64 */
+            incomeId: number;
+        };
+        TransferSuggestion: {
+            accountName: string;
+            amount: number;
+            currency: string;
+            /** Format: date */
+            date: string;
+            description: string | null;
+            difference: number;
+            exact: boolean;
+            operationKey: string | null;
+            /** Format: int64 */
+            transactionId: number | null;
         };
         TrendsResponse: {
             average: number;
@@ -6399,6 +6510,75 @@ export interface operations {
             };
         };
     };
+    suggestions: {
+        parameters: {
+            query: {
+                from: string;
+                to: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TransferPairResponse"][];
+                };
+            };
+        };
+    };
+    dismiss: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TransferPairRequest"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    merge: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TransferPairRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TransactionResponse"];
+                };
+            };
+        };
+    };
     get: {
         parameters: {
             query?: never;
@@ -6464,6 +6644,28 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    split: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TransactionResponse"];
+                };
             };
         };
     };

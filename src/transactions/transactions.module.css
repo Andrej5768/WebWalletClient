@@ -46,3 +46,15 @@
 .row .num {
   white-space: nowrap;
 }
+
+/* A hint under a day: two of its operations may be one transfer. */
+.pair {
+  display: grid;
+  grid-template-columns: 16px 1fr auto;
+  align-items: center;
+  column-gap: 12px;
+  padding: 10px 20px;
+  border-top: 1px solid var(--ww-border);
+  background: var(--mantine-color-blue-light);
+  color: var(--mantine-color-text);
+}

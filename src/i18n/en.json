@@ -331,7 +331,18 @@
       "splitComment": "Comment on this part"
     },
     "chooseCategoryFor": "Choose a category for “{{name}}”",
-    "notFound": "Transaction not found: it may have been deleted."
+    "notFound": "Transaction not found: it may have been deleted.",
+    "transferFee": "Transfer · fee {{fee}}",
+    "pair": {
+      "text": "Looks like one transfer {{from}} → {{to}}:",
+      "exact": "the same amount.",
+      "less": "{{percent}} less arrived — perhaps a fee.",
+      "more": "{{percent}} more arrived.",
+      "merge": "Merge into a transfer",
+      "dismiss": "Not a transfer"
+    },
+    "splitTransfer": "Split",
+    "splitTransferHint": "The transfer becomes an expense and an income again, and this pair is not suggested any more."
   },
   "budget": {
     "previousMonth": "Previous month",
