@@ -1,3 +1,4 @@
+import { categoryOf } from '../test/fixtures';
 import { flattenCategories } from './categories';
 import { autoColor } from './palette';
 
@@ -9,8 +10,8 @@ it('gives a category without a color a stable one that is not gray', () => {
 
 it('keeps chosen colors and lets subcategories take the color of the group', () => {
   const [food, cafe, fun] = flattenCategories([
-    { id: 1, name: 'Їжа', kind: 'EXPENSE', children: [{ id: 2, name: 'Кафе', kind: 'EXPENSE' }] },
-    { id: 3, name: 'Розваги', kind: 'EXPENSE', color: 'pink' },
+    categoryOf({ id: 1, name: 'Їжа', children: [categoryOf({ id: 2, name: 'Кафе', parentId: 1 })] }),
+    categoryOf({ id: 3, name: 'Розваги', color: 'pink' }),
   ]);
 
   expect(food!.color).toBe(autoColor(1));
