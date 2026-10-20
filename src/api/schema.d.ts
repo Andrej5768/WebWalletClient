@@ -182,6 +182,66 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/auth/google/callback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Google redirects here after the user chose an account
+         * @description Redirects to the web client: /auth/google#ticket=... to exchange at /google/complete, or #error=...; for linking, to the security settings with #google=linked or #error=...
+         */
+        get: operations["callback"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/google/complete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Finish signing in with Google
+         * @description Exchanges the ticket of the callback for a session, like /login: the access token, or twoFactorChallenge when two-factor authentication is on. The ticket works once and briefly.
+         */
+        post: operations["complete"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/google/start": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Start signing in with Google
+         * @description A link for the browser: redirects to Google and sets a cookie that binds the sign-in to this browser. Not found when sign-in with Google is not configured.
+         */
+        get: operations["start"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/auth/login": {
         parameters: {
             query?: never;
@@ -236,6 +296,23 @@ export interface paths {
          * @description Succeeds without the cookie or with an unknown token as well
          */
         post: operations["logout"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/options": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Which ways of signing in this server offers besides the password */
+        get: operations["options"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -1063,6 +1140,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/me/google/link": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Start linking a Google account
+         * @description Returns the Google page to send the browser to and sets the cookie that binds the link to this browser; Google then redirects to the security settings
+         */
+        post: operations["link_2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/google/unlink": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Unlink the Google account
+         * @description CONFLICT for an account without a password, which could not sign in otherwise
+         */
+        post: operations["unlink"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/me/password": {
         parameters: {
             query?: never;
@@ -1764,6 +1881,9 @@ export interface components {
         AssignRequest: {
             assigned: number;
         };
+        AuthOptionsResponse: {
+            googleSignIn: boolean;
+        };
         BenchmarkInfo: {
             /** @enum {string} */
             key: "SP500" | "MSCI_WORLD" | "NASDAQ100";
@@ -2199,6 +2319,9 @@ export interface components {
             saved: number;
             target: number;
             unconvertedCurrencies: string[];
+        };
+        GoogleTicketRequest: {
+            ticket: string;
         };
         HistoryPoint: {
             benchmark: number | null;
@@ -2832,6 +2955,9 @@ export interface components {
             type: "EXPENSE" | "INCOME" | "TRANSFER";
             variableAmount: boolean;
         };
+        RedirectResponse: {
+            url: string;
+        };
         RegisterRequest: {
             /** Format: email */
             email: string;
@@ -3175,6 +3301,8 @@ export interface components {
             email: string;
             emailVerified: boolean;
             firstName: string;
+            googleEmail: string | null;
+            hasPassword: boolean;
             /** Format: int64 */
             id: number;
             lastName: string | null;
@@ -3474,6 +3602,76 @@ export interface operations {
             };
         };
     };
+    callback: {
+        parameters: {
+            query?: {
+                state?: string;
+                code?: string;
+                error?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: {
+                /** @description Set by /google/start or /api/v1/me/google/link */
+                oauth_state?: string;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    complete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                /** @description Set when the browser was trusted at an earlier two-factor sign-in */
+                trusted_device?: string;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GoogleTicketRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["LoginResponse"];
+                };
+            };
+        };
+    };
+    start: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     login: {
         parameters: {
             query?: never;
@@ -3543,6 +3741,26 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    options: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AuthOptionsResponse"];
+                };
             };
         };
     };
@@ -4975,6 +5193,44 @@ export interface operations {
                 content: {
                     "*/*": components["schemas"]["UserResponse"];
                 };
+            };
+        };
+    };
+    link_2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["RedirectResponse"];
+                };
+            };
+        };
+    };
+    unlink: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

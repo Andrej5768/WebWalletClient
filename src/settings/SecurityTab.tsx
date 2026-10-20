@@ -22,6 +22,8 @@ import { fieldErrors, problemMessage, toProblem } from '../api/errors';
 import { check } from '../api/http';
 import { shareAccessToken } from '../api/session';
 import { ProblemAlert } from '../components/feedback';
+import { useAuth } from '../auth/context';
+import { GoogleCard, SetPasswordCard } from './GoogleCard';
 import { TwoFactorCard } from './TwoFactorCard';
 import { newPassword, required } from '../lib/validation';
 import i18n from '../i18n';
@@ -30,6 +32,7 @@ const CONFIRM_WORD = 'DELETE';
 
 export function SecurityTab() {
   const { t } = useTranslation();
+  const { user } = useAuth();
   const [resetOpen, setResetOpen] = useState(false);
   const form = useForm({
     initialValues: { current: '', password: '', repeat: '' },
@@ -70,47 +73,53 @@ export function SecurityTab() {
 
   return (
     <Stack gap="lg" maw={640}>
-      <Card withBorder radius="md" padding="lg">
-        <form onSubmit={form.onSubmit((values) => change.mutate(values))} noValidate>
-          <Stack gap="md">
-            <Title order={2} size="h4">
-              {t('settings.security.title')}
-            </Title>
-            <PasswordInput
-              label={t('settings.security.current')}
-              autoComplete="current-password"
-              {...form.getInputProps('current')}
-            />
-            <PasswordInput
-              label={t('auth.newPassword')}
-              description={t('auth.passwordHint')}
-              inputWrapperOrder={['label', 'input', 'description', 'error']}
-              autoComplete="new-password"
-              {...form.getInputProps('password')}
-            />
-            <PasswordInput
-              label={t('auth.repeatPassword')}
-              autoComplete="new-password"
-              {...form.getInputProps('repeat')}
-            />
-            <Text size="sm" c="dimmed">
-              {t('settings.security.othersSignedOut')}
-            </Text>
-            {change.error && toProblem(change.error).code === 'TOO_MANY_ATTEMPTS' && (
-              <Alert color="yellow" variant="light" p="xs" role="alert">
-                {problemMessage(toProblem(change.error))}
-              </Alert>
-            )}
-            <Group justify="flex-end">
-              <Button type="submit" loading={change.isPending}>
-                {t('settings.security.submit')}
-              </Button>
-            </Group>
-          </Stack>
-        </form>
-      </Card>
+      {user?.hasPassword === false ? (
+        <SetPasswordCard />
+      ) : (
+        <Card withBorder radius="md" padding="lg">
+          <form onSubmit={form.onSubmit((values) => change.mutate(values))} noValidate>
+            <Stack gap="md">
+              <Title order={2} size="h4">
+                {t('settings.security.title')}
+              </Title>
+              <PasswordInput
+                label={t('settings.security.current')}
+                autoComplete="current-password"
+                {...form.getInputProps('current')}
+              />
+              <PasswordInput
+                label={t('auth.newPassword')}
+                description={t('auth.passwordHint')}
+                inputWrapperOrder={['label', 'input', 'description', 'error']}
+                autoComplete="new-password"
+                {...form.getInputProps('password')}
+              />
+              <PasswordInput
+                label={t('auth.repeatPassword')}
+                autoComplete="new-password"
+                {...form.getInputProps('repeat')}
+              />
+              <Text size="sm" c="dimmed">
+                {t('settings.security.othersSignedOut')}
+              </Text>
+              {change.error && toProblem(change.error).code === 'TOO_MANY_ATTEMPTS' && (
+                <Alert color="yellow" variant="light" p="xs" role="alert">
+                  {problemMessage(toProblem(change.error))}
+                </Alert>
+              )}
+              <Group justify="flex-end">
+                <Button type="submit" loading={change.isPending}>
+                  {t('settings.security.submit')}
+                </Button>
+              </Group>
+            </Stack>
+          </form>
+        </Card>
+      )}
 
       <TwoFactorCard />
+
+      <GoogleCard />
 
       <Card withBorder radius="md" padding="lg" style={{ borderColor: 'var(--mantine-color-red-outline)' }}>
         <Stack gap="md">

@@ -14,6 +14,7 @@ import {
 } from './pages';
 import { AuthProvider } from '../auth/AuthProvider';
 import { ForgotPasswordPage } from '../auth/pages/ForgotPasswordPage';
+import { GoogleSignInPage } from '../auth/pages/GoogleSignInPage';
 import { LoginPage } from '../auth/pages/LoginPage';
 import { RegisterPage } from '../auth/pages/RegisterPage';
 import { ResetPasswordPage } from '../auth/pages/ResetPasswordPage';
@@ -47,6 +48,8 @@ export const routes = [
         ),
       },
       { path: '/forgot-password', element: <ForgotPasswordPage /> },
+      // Google sign-in comes back here with a one-time ticket in the fragment
+      { path: '/auth/google', element: <GoogleSignInPage /> },
       // Links from emails; they work whether or not someone is signed in.
       { path: '/reset-password', element: <ResetPasswordPage /> },
       { path: '/verify-email', element: <VerifyEmailPage /> },

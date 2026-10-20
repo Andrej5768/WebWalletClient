@@ -46,6 +46,19 @@
       "noAccount": "No account yet?",
       "register": "Create one"
     },
+    "google": {
+      "signIn": "Sign in with Google",
+      "or": "or",
+      "working": "Signing in with Google",
+      "failedTitle": "Could not sign in with Google",
+      "errors": {
+        "cancelled": "Sign-in with Google was cancelled.",
+        "failed": "Google did not confirm the sign-in. Please try again.",
+        "unverified": "Google has not verified this email address. Use another Google account or your password.",
+        "email_taken": "An account with this email exists, but its email is not confirmed. Sign in with the password and connect Google in the settings.",
+        "disabled": "The account is blocked."
+      }
+    },
     "twoFactor": {
       "title": "Confirm sign-in",
       "appText": "Enter the 6-digit code from your authenticator app.",

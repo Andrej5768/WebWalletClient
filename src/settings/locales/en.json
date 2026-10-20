@@ -40,6 +40,26 @@
       "othersSignedOut": "Other devices will be signed out.",
       "changed": "Password changed"
     },
+    "google": {
+      "title": "Sign in with Google",
+      "text": "Sign in with one click, without a password. The 2FA code is still asked when it is on.",
+      "linkedTo": "Connected:",
+      "link": "Connect",
+      "unlink": "Disconnect",
+      "setPasswordFirst": "Set a password before disconnecting Google, or there will be no way to sign in.",
+      "linked": "Google is connected",
+      "unlinked": "Google is disconnected",
+      "errors": {
+        "taken": "This Google account is already connected to another WebWallet account.",
+        "failed": "Could not connect Google. Please try again."
+      }
+    },
+    "password": {
+      "title": "Password",
+      "none": "No password yet: you sign in with Google. We will email you a link to set one.",
+      "send": "Set a password",
+      "sent": "We have sent you the link"
+    },
     "twoFactor": {
       "title": "Two-factor authentication",
       "text": "Signing in needs a code from an authenticator app besides the password: Google Authenticator, 1Password, Bitwarden and the like.",

@@ -16,6 +16,7 @@ import { Link } from 'react-router';
 import { api } from '../../api/client';
 import { fieldErrors, problemMessage, toProblem, type ApiProblem } from '../../api/errors';
 import { AuthLayout } from '../AuthLayout';
+import { GoogleSignIn } from '../GoogleButton';
 import { newPassword, required, requiredEmail } from '../../lib/validation';
 import { CheckMail } from './CheckMail';
 
@@ -73,6 +74,7 @@ export function RegisterPage() {
             </Title>
             <Text c="dimmed">{t('auth.register.subtitle')}</Text>
           </Stack>
+          <GoogleSignIn />
           <SimpleGrid cols={2} spacing="sm">
             <TextInput
               label={t('auth.firstName')}

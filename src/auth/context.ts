@@ -12,6 +12,8 @@ export interface AuthState {
   status: 'loading' | 'signedIn' | 'signedOut';
   user: Schemas['UserResponse'] | null;
   signIn(email: string, password: string): Promise<SignInResult>;
+  /** Exchanges the ticket the Google sign-in redirected with for a session. */
+  completeGoogle(ticket: string): Promise<SignInResult>;
   /** Exchanges the challenge of {@link signIn} and a code for a session; returns the problem to show, or null. */
   completeTwoFactor(challenge: string, code: string, trustDevice: boolean): Promise<ApiProblem | null>;
   signOut(): Promise<void>;
