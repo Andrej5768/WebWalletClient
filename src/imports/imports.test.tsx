@@ -2,7 +2,7 @@ import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { setAccessToken } from '../api/session';
 import { accountOf, categoryOf } from '../test/fixtures';
-import { bodyOf, json, mockApi, renderWithProviders } from '../test/render';
+import { bodyOf, json, mockApi, plain, renderWithProviders } from '../test/render';
 import { ImportsPage } from './ImportsPage';
 
 const accounts = [
@@ -196,4 +196,98 @@ it('previews a Zen Money import by token', async () => {
 
   expect(await screen.findByText('Перегляд перед імпортом')).toBeInTheDocument();
   expect(await bodyOf(requests, 'POST', '/api/v1/imports/zenmoney/preview')).toEqual({ token: 'zen-token' });
+});
+
+it('merges expenses and incomes into transfers: exact matches chosen, the rest on request', async () => {
+  const account = (id: number, name: string) => ({ id, name, currency: 'UAH', created: false });
+  const operation = (key: string, type: string, amount: number, onAccount: ReturnType<typeof account>) => ({
+    key,
+    date: '2026-10-20',
+    comment: key,
+    amount,
+    currency: 'UAH',
+    type,
+    account: onAccount,
+    tagIds: [],
+    duplicate: false,
+    transferLike: true,
+  });
+  const suggestion = (
+    target: { operationKey?: string; transactionId?: number },
+    amount: number,
+    difference: number,
+  ) => ({
+    ...target,
+    date: '2026-10-20',
+    accountName: 'Monobank',
+    amount,
+    currency: 'UAH',
+    exact: difference === 0,
+    difference,
+  });
+  const universal = account(2, 'Картка «Універсальна»');
+  const black = account(1, 'Чорна картка');
+  const withPairs = {
+    ...preview,
+    summary: { ...preview.summary, transactionsImported: 3 },
+    operations: {
+      ...preview.operations,
+      totalItems: 3,
+      items: [
+        {
+          ...operation('На Монобанк', 'EXPENSE', 5000, universal),
+          transferSuggestions: [suggestion({ transactionId: 99 }, 5000, 0)],
+        },
+        {
+          ...operation('Зі своєї картки', 'INCOME', 9650, universal),
+          transferSuggestions: [
+            suggestion({ operationKey: 'На ФОП' }, 10000, -0.035),
+            suggestion({ transactionId: 77 }, 9800, -0.0153),
+          ],
+        },
+        {
+          ...operation('На ФОП', 'EXPENSE', 10000, black),
+          transferSuggestions: [suggestion({ operationKey: 'Зі своєї картки' }, 9650, -0.035)],
+        },
+      ],
+    },
+  };
+  const requests = mockApi({
+    ...base,
+    'GET /api/v1/banks/monobank': () => json({ code: 'NOT_FOUND' }, 404),
+    'POST /api/v1/imports/zenmoney/preview': () => json({ ...withPairs, source: 'ZENMONEY' }),
+    [`POST /api/v1/imports/previews/${preview.id}/confirm`]: () =>
+      json({ transactionsImported: 2, transactionsMatched: 0, warnings: [] }),
+  });
+  renderPage();
+  await userEvent.type(await screen.findByLabelText('API-токен Дзен-мані'), 'zen-token');
+  await userEvent.click(screen.getByRole('button', { name: 'Імпортувати з Дзен-мані' }));
+  const dialog = await screen.findByRole('dialog');
+
+  // The exact match is chosen, the one within 10 % waits for the user
+  expect(within(dialog).getByText(/Знайдено 2 можливі перекази .* об’єднати: 1\./)).toBeInTheDocument();
+  expect(within(dialog).getByLabelText('Об’єднати в переказ: На Монобанк')).toBeChecked();
+  expect(within(dialog).getByLabelText('Об’єднати в переказ: Зі своєї картки')).not.toBeChecked();
+
+  await userEvent.click(within(dialog).getByLabelText('Об’єднати в переказ: Зі своєї картки'));
+  // The other half in the file is merged with it too, and the best match is offered first
+  expect(within(dialog).getByLabelText('Об’єднати в переказ: На ФОП')).toBeChecked();
+  expect(within(dialog).getByText(/об’єднати: 2\./)).toBeInTheDocument();
+  const choices = within(dialog).getAllByLabelText('З операцією') as HTMLInputElement[];
+  expect(choices.map((input) => plain(input.value))).toContainEqual(
+    expect.stringMatching(/^Monobank · [-−]10 000,00 ₴ · 20 жовт\. · з цього файлу · менше на 3,5 ?%$/),
+  );
+
+  await userEvent.click(within(dialog).getByRole('button', { name: 'Імпортувати 3 операції' }));
+  expect(await within(dialog).findByText('Імпортовано операцій')).toBeInTheDocument();
+  const confirm = (await bodyOf(requests, 'POST', `/api/v1/imports/previews/${preview.id}/confirm`)) as {
+    operations: unknown[];
+  };
+  expect(confirm.operations).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({ key: 'На Монобанк', pairTransactionId: 99 }),
+      expect.objectContaining({ key: 'Зі своєї картки', pairKey: 'На ФОП' }),
+      expect.objectContaining({ key: 'На ФОП', pairKey: 'Зі своєї картки' }),
+    ]),
+  );
 });

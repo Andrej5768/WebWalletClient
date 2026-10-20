@@ -26,10 +26,12 @@ import { LinkModal } from '../recurring/LinkModal';
 import { PlannedGroup } from '../recurring/PlannedGroup';
 import { RecurringDrawer, type RecurringView } from '../recurring/RecurringDrawer';
 import { displayCategory, groupByDay, toRequest, type Transaction } from './model';
+import { PairHint } from './PairHint';
 import { TransactionDrawer } from './TransactionDrawer';
 import { TransactionFiltersBar } from './TransactionFiltersBar';
 import { TransactionRow } from './TransactionRow';
 import classes from './transactions.module.css';
+import { useTransferPairs } from './transferPairs';
 import { PAGE_SIZE, useTransactionFilters } from './useTransactionFilters';
 
 export function TransactionsPage() {
@@ -70,6 +72,19 @@ export function TransactionsPage() {
 
   const total = transactions.data?.totalItems ?? 0;
   const days = groupByDay(transactions.data?.items ?? []);
+
+  // Possible transfers among the operations of this page: both halves are shown, the hint follows their day.
+  const shown = useMemo(
+    () => new Map((transactions.data?.items ?? []).map((item) => [item.id, item])),
+    [transactions.data],
+  );
+  const dates = days.map((day) => day.date).sort();
+  const pairs = useTransferPairs(dates[0] ?? null, dates.at(-1) ?? null);
+  const pairsOf = (date: string) =>
+    (pairs.data ?? []).filter(
+      (pair) => pair.date === date && shown.has(pair.expenseId) && shown.has(pair.incomeId),
+    );
+  const accountOf = (id: number) => accountsById.get(shown.get(id)!.accountId)?.name ?? '';
   const today = kyivToday();
   const todayIso = today.format('YYYY-MM-DD');
 
@@ -186,6 +201,13 @@ export function TransactionsPage() {
                   tags={transaction.tagIds.map((id) => tagsById.get(id)).filter((tag) => tag !== undefined)}
                   onOpen={() => update({ edit: String(transaction.id), new: null, page: params.get('page') })}
                   onCategorize={(categoryId) => recategorize.mutate({ transaction, categoryId })}
+                />
+              ))}
+              {pairsOf(day.date).map((pair) => (
+                <PairHint
+                  key={`${pair.expenseId}-${pair.incomeId}`}
+                  pair={pair}
+                  names={[accountOf(pair.expenseId), accountOf(pair.incomeId)]}
                 />
               ))}
             </div>
