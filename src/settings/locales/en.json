@@ -3,6 +3,7 @@
     "tabs": {
       "profile": "Profile",
       "security": "Security",
+      "data": "Data",
       "categories": "Categories",
       "rules": "Rules",
       "payees": "Payees",
@@ -40,18 +41,87 @@
       "othersSignedOut": "Other devices will be signed out.",
       "changed": "Password changed"
     },
+    "google": {
+      "title": "Sign in with Google",
+      "text": "Sign in with one click, without a password. The 2FA code is still asked when it is on.",
+      "linkedTo": "Connected:",
+      "link": "Connect",
+      "unlink": "Disconnect",
+      "setPasswordFirst": "Set a password before disconnecting Google, or there will be no way to sign in.",
+      "linked": "Google is connected",
+      "unlinked": "Google is disconnected",
+      "errors": {
+        "taken": "This Google account is already connected to another WebWallet account.",
+        "failed": "Could not connect Google. Please try again."
+      }
+    },
+    "password": {
+      "title": "Password",
+      "none": "No password yet: you sign in with Google. We will email you a link to set one.",
+      "send": "Set a password",
+      "sent": "We have sent you the link"
+    },
+    "twoFactor": {
+      "title": "Two-factor authentication",
+      "text": "Signing in needs a code from an authenticator app besides the password: Google Authenticator, 1Password, Bitwarden and the like.",
+      "on": "On",
+      "enable": "Turn on",
+      "disable": "Turn off",
+      "newCodes": "New recovery codes",
+      "codesLeft_one": "{{count}} recovery code left",
+      "codesLeft_other": "{{count}} recovery codes left",
+      "setupTitle": "Turn on two-factor authentication",
+      "scan": "Scan the QR code with an authenticator app and enter the code it shows.",
+      "qrAlt": "QR code for the authenticator app",
+      "manual": "Cannot scan? Enter the key by hand:",
+      "copyKey": "Copy the key",
+      "copy": "Copy",
+      "copied": "Copied",
+      "appCode": "Code from the app",
+      "confirm": "Confirm",
+      "codesWarning": "Keep these codes somewhere safe. If you lose your phone, only they will let you sign in. Each code works once, and we show them only now.",
+      "download": "Download .txt",
+      "saved": "I have saved the recovery codes",
+      "done": "Done",
+      "disableTitle": "Turn off two-factor authentication?",
+      "disableText": "Signing in will need only the password again. Recovery codes and trusted devices will be deleted.",
+      "codeOrRecovery": "Code from the app or a recovery code",
+      "disabled": "Two-factor authentication is off",
+      "newCodesTitle": "New recovery codes",
+      "newCodesText": "The old recovery codes will stop working. Confirm with a code from the app.",
+      "newCodesSubmit": "Create new codes"
+    },
+    "data": {
+      "exportTitle": "Export data",
+      "exportText": "A ZIP archive with all your data: accounts, transactions, categories, budget, goals, investments, taxes.",
+      "exportButton": "Download archive",
+      "exportJson": "everything, machine-readable",
+      "exportCsv": "transactions for Excel or Google Sheets",
+      "exportSecrets": "Bank tokens and the password are not exported."
+    },
+    "delete": {
+      "title": "Delete the account?",
+      "blocked": "The account is blocked at once and you are signed out on all devices.",
+      "erased": "On {{date}} accounts, transactions, the budget, investments and all other data will be erased for good.",
+      "cancel": "Until then you can cancel: with the link in the email or by signing in again.",
+      "exportFirst": "Save a copy of your data first.",
+      "confirmEmail": "Type the email of this account",
+      "doneTitle": "Deletion scheduled",
+      "doneText": "The account will be deleted on {{date}}. We sent a link to cancel to {{email}}. You will be signed out now.",
+      "ok": "Got it"
+    },
     "danger": {
       "title": "Danger zone",
       "resetTitle": "Start over",
       "resetText": "Deletes all accounts, transactions, envelopes, payees, tags and bank connections. Your profile and password stay.",
       "resetButton": "Start over",
-      "resetWarning": "This cannot be undone. Consider an export first (coming later).",
+      "resetWarning": "This cannot be undone. Consider an export first.",
       "keepCategories": "Keep categories and rules",
       "confirmLabel": "Type {{word}} to confirm",
       "resetSubmit": "Delete everything",
       "done": "Your data is deleted. You can start over.",
       "deleteTitle": "Delete account",
-      "deleteText": "Coming later.",
+      "deleteText": "The account is blocked and deleted with all its data after 14 days. Until then you can cancel.",
       "deleteButton": "Delete account"
     },
     "categories": {

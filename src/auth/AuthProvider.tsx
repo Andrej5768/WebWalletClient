@@ -5,9 +5,10 @@ import { api, refreshAccessToken, type Schemas } from '../api/client';
 import { toProblem, type ApiProblem } from '../api/errors';
 import { onAccessTokenChange, setAccessToken, shareAccessToken } from '../api/session';
 import i18n from '../i18n';
-import { AuthContext, type AuthState } from './context';
+import { AuthContext, type AuthState, type SignInResult } from './context';
 
 type User = Schemas['UserResponse'];
+type LoginResponse = Schemas['LoginResponse'];
 
 async function loadUser(): Promise<User | null> {
   try {
@@ -29,6 +30,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
   const [status, setStatus] = useState<AuthState['status']>('loading');
   const [user, setUser] = useState<User | null>(null);
+  const [sessionEnded, setSessionEnded] = useState(false);
   const statusRef = useRef(status);
   useEffect(() => {
     statusRef.current = status;
@@ -44,6 +46,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     applyUserLanguage(loaded);
     setUser(loaded);
+    setSessionEnded(false);
     setStatus('signedIn');
     return true;
   }, []);
@@ -76,10 +79,55 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [queryClient, finishSignIn],
   );
 
-  const signIn = useCallback(
-    async (email: string, password: string): Promise<ApiProblem | null> => {
+  /** A session, the second step of two-factor authentication, or the problem of a login response. */
+  const loginResult = useCallback(
+    async (call: Promise<{ data?: LoginResponse; error?: unknown }>): Promise<SignInResult> => {
       try {
-        const { data, error } = await api.POST('/api/v1/auth/login', { body: { email, password } });
+        const { data, error } = await call;
+        if (data?.twoFactorChallenge) return { status: 'twoFactor', challenge: data.twoFactorChallenge };
+        if (error || !data?.accessToken) return { status: 'problem', problem: toProblem(error) };
+        shareAccessToken(data.accessToken);
+        return (await finishSignIn())
+          ? { status: 'signedIn' }
+          : { status: 'problem', problem: toProblem(undefined) };
+      } catch (thrown) {
+        return { status: 'problem', problem: toProblem(thrown) };
+      }
+    },
+    [finishSignIn],
+  );
+
+  const signIn = useCallback(
+    (email: string, password: string) =>
+      loginResult(api.POST('/api/v1/auth/login', { body: { email, password } })),
+    [loginResult],
+  );
+
+  const completeGoogle = useCallback(
+    (ticket: string) => loginResult(api.POST('/api/v1/auth/google/complete', { body: { ticket } })),
+    [loginResult],
+  );
+
+  const completeTwoFactor = useCallback(
+    async (challenge: string, code: string, trustDevice: boolean): Promise<ApiProblem | null> => {
+      try {
+        const { data, error } = await api.POST('/api/v1/auth/login/two-factor', {
+          body: { challenge, code, trustDevice },
+        });
+        if (error || !data?.accessToken) return toProblem(error);
+        shareAccessToken(data.accessToken);
+        return (await finishSignIn()) ? null : toProblem(undefined);
+      } catch (thrown) {
+        return toProblem(thrown);
+      }
+    },
+    [finishSignIn],
+  );
+
+  const restoreAccount = useCallback(
+    async (token: string): Promise<ApiProblem | null> => {
+      try {
+        const { data, error } = await api.POST('/api/v1/auth/restore', { body: { token } });
         if (error || !data?.accessToken) return toProblem(error);
         shareAccessToken(data.accessToken);
         return (await finishSignIn()) ? null : toProblem(undefined);
@@ -102,9 +150,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const endSession = useCallback(() => {
+    setSessionEnded(true);
+    shareAccessToken(null);
+  }, []);
+
   const value = useMemo<AuthState>(
-    () => ({ status, user, signIn, signOut, setUser }),
-    [status, user, signIn, signOut],
+    () => ({
+      status,
+      user,
+      signIn,
+      completeGoogle,
+      completeTwoFactor,
+      restoreAccount,
+      signOut,
+      endSession,
+      sessionEnded,
+      setUser,
+    }),
+    [
+      status,
+      user,
+      signIn,
+      completeGoogle,
+      completeTwoFactor,
+      restoreAccount,
+      signOut,
+      endSession,
+      sessionEnded,
+    ],
   );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

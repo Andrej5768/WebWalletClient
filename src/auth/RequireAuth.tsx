@@ -5,7 +5,7 @@ import { useAuth } from './context';
 
 /** Shows the children to a signed-in user. Everyone else gets `home` at the root and the sign-in page elsewhere. */
 export function RequireAuth({ children, home }: { children: ReactNode; home?: ReactNode }) {
-  const { status } = useAuth();
+  const { status, sessionEnded } = useAuth();
   const location = useLocation();
 
   if (status === 'loading') {
@@ -17,6 +17,7 @@ export function RequireAuth({ children, home }: { children: ReactNode; home?: Re
   }
   if (status === 'signedOut') {
     if (home && location.pathname === '/') return home;
+    if (sessionEnded) return <Navigate to="/" replace />;
     return <Navigate to="/login" replace state={{ from: location.pathname + location.search }} />;
   }
   return children;
