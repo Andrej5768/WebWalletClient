@@ -31,7 +31,9 @@ backend, so a page reload starts with `POST /api/v1/auth/refresh`.
 | `npm run build`                                       | Production build into `dist/`                                                                                                                                                         |
 
 CI runs all of the above on every push; the `api-drift` job reports when the backend spec moved ahead of the
-committed copy.
+committed copy. On `master`, once the checks pass, the `image` job publishes the build as
+the private image `ghcr.io/andrej5768/webwalletclient`, which the production server picks up within a few minutes (see "Production
+server" in the backend README).
 
 ## Design
 
