@@ -1,11 +1,20 @@
 import react from '@vitejs/plugin-react';
 import { defineConfig, type Plugin } from 'vite';
+import { staticHome } from './src/landing/staticHome.ts';
 import { legalPage } from './src/legal/staticPage.ts';
 
-/** privacy.html and terms.html next to index.html: the legal pages readable without JavaScript. */
+/**
+ * Pages readable without JavaScript: the home page inside index.html, privacy.html and terms.html next to it.
+ */
 const legalPages = (): Plugin => ({
   name: 'legal-pages',
   apply: 'build',
+  transformIndexHtml(html) {
+    const home = staticHome();
+    return html
+      .replace('</head>', `${home.style}\n</head>`)
+      .replace('<div id="root"></div>', `<div id="root">${home.body}</div>`);
+  },
   generateBundle() {
     for (const page of ['privacy', 'terms'] as const) {
       this.emitFile({ type: 'asset', fileName: `${page}.html`, source: legalPage(page) });

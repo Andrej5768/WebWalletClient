@@ -38,9 +38,11 @@ function initialLanguage(): Language {
     const saved = localStorage.getItem(storageKey);
     if (saved === 'uk' || saved === 'en') return saved;
   } catch {
-    // Storage can be unavailable (private mode); fall back to Ukrainian.
+    // Storage can be unavailable (private mode); then the language of the browser decides.
   }
-  return 'uk';
+  // Ukrainian for Ukrainian browsers, English for the rest of the world
+  const browser = typeof navigator === 'undefined' ? [] : (navigator.languages ?? [navigator.language]);
+  return browser.some((language) => language?.toLowerCase().startsWith('uk')) ? 'uk' : 'en';
 }
 
 void i18n.use(initReactI18next).init({

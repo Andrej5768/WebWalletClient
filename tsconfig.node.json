@@ -10,7 +10,8 @@
     "verbatimModuleSyntax": true,
     "skipLibCheck": true,
     "noEmit": true,
-    "allowImportingTsExtensions": true
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true
   },
   "include": [
     "vite.config.ts",
@@ -18,6 +19,7 @@
     "playwright.config.ts",
     "e2e",
     "src/legal/content.ts",
-    "src/legal/staticPage.ts"
+    "src/legal/staticPage.ts",
+    "src/landing/staticHome.ts"
   ]
 }
