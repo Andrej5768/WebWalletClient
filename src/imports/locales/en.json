@@ -68,8 +68,8 @@
       "file": "File",
       "tokenLabel": "Zen Money API token",
       "tokenHint": "The token is used once and not stored.",
-      "fileLabel": "Saved sync response (JSON)",
-      "fileHint": "The response of POST /v8/diff/ with serverTimestamp 0.",
+      "fileLabel": "Zen Money export file (CSV)",
+      "fileHint": "The CSV export of transactions from Zen Money (\"dump of transactions\"), best for all time. A saved JSON of the sync API works too.",
       "submit": "Import from Zen Money"
     },
     "preview": {
