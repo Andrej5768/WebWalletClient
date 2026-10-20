@@ -325,6 +325,15 @@ export function LandingPage() {
           </div>
         </section>
 
+        <section className={`${classes.section} ${classes.surface}`}>
+          <div className={classes.container}>
+            <div className={classes.sectionHead} style={{ marginBottom: 0 }}>
+              <Title order={2}>{t('landing.google.title')}</Title>
+              <Text c="dimmed">{t('landing.google.text')}</Text>
+            </div>
+          </div>
+        </section>
+
         <section id="source" className={classes.section}>
           <div className={`${classes.container} ${classes.split}`}>
             <Stack gap={12}>

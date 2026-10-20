@@ -71,7 +71,7 @@
       },
       "privacy": {
         "title": "Privacy",
-        "text": "Bank tokens are encrypted in the database. No ads, analytics or third-party scripts on the pages."
+        "text": "Bank tokens are encrypted in the database. No ads, analytics or third-party scripts on the pages. Sign-in with Google is used only to identify you."
       }
     },
     "independence": {
@@ -106,6 +106,10 @@
         "compoundBasis": "₴5,000 / month · 10% · 20 years",
         "caption": "Example. The calculations are a guide for planning, not financial advice."
       }
+    },
+    "google": {
+      "title": "Sign-in with Google",
+      "text": "WebWallet uses Google only to sign you in: with the openid, email and profile permissions it receives your name and email address and nothing else. Google user data is never used for advertising, never sold, and never used to train or run AI models or to generate any content."
     },
     "source": {
       "title": "Source code",

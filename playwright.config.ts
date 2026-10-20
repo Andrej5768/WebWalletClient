@@ -9,8 +9,10 @@ export default defineConfig({
   use: {
     baseURL: 'http://localhost:4173',
     trace: 'retain-on-failure',
+    // The app picks the language of the browser; the tests read the Ukrainian interface
+    locale: 'uk-UA',
   },
-  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
+  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'], locale: 'uk-UA' } }],
   webServer: {
     command: 'npm run build && npm run preview -- --port 4173 --strictPort',
     url: 'http://localhost:4173',

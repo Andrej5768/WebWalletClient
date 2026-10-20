@@ -34,6 +34,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const statusRef = useRef(status);
   useEffect(() => {
     statusRef.current = status;
+    // /boot.js hides the static home page of index.html for a browser that has signed in
+    try {
+      if (status === 'signedIn') localStorage.setItem('ww-returning', '1');
+    } catch {
+      // Storage can be unavailable (private mode)
+    }
   }, [status]);
 
   /** Loads the profile with the current access token; signs out when that is not possible. */
