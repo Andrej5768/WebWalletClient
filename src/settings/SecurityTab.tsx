@@ -22,6 +22,7 @@ import { fieldErrors, problemMessage, toProblem } from '../api/errors';
 import { check } from '../api/http';
 import { shareAccessToken } from '../api/session';
 import { ProblemAlert } from '../components/feedback';
+import { TwoFactorCard } from './TwoFactorCard';
 import { newPassword, required } from '../lib/validation';
 import i18n from '../i18n';
 
@@ -108,6 +109,8 @@ export function SecurityTab() {
           </Stack>
         </form>
       </Card>
+
+      <TwoFactorCard />
 
       <Card withBorder radius="md" padding="lg" style={{ borderColor: 'var(--mantine-color-red-outline)' }}>
         <Stack gap="md">
