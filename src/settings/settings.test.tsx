@@ -38,7 +38,7 @@ it('starts over only after typing the confirmation word', async () => {
     ...signedInApi,
     'POST /api/v1/me/reset': () => new Response(null, { status: 204 }),
   });
-  renderApp('/settings?tab=security');
+  renderApp('/settings?tab=data');
 
   await userEvent.click(await screen.findByRole('button', { name: 'Почати спочатку' }));
   const dialog = await screen.findByRole('dialog');

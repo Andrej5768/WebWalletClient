@@ -9,6 +9,7 @@ import { AuthLayout } from '../AuthLayout';
 import { GoogleSignIn } from '../GoogleButton';
 import { useAuth } from '../context';
 import { required, requiredEmail } from '../../lib/validation';
+import { PendingDeletion } from '../PendingDeletion';
 import { TwoFactorStep } from './TwoFactorStep';
 
 export function LoginPage() {
@@ -41,6 +42,14 @@ export function LoginPage() {
   });
 
   const invalid = problem?.code === 'INVALID_CREDENTIALS';
+
+  if (problem?.code === 'ACCOUNT_DELETION_SCHEDULED') {
+    return (
+      <AuthLayout>
+        <PendingDeletion problem={problem} onRestored={signedIn} onBack={() => setProblem(null)} />
+      </AuthLayout>
+    );
+  }
 
   if (challenge) {
     return (

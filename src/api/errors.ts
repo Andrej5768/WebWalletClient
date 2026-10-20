@@ -8,6 +8,9 @@ export interface ApiProblem {
   /** Already translated by the backend into the request language. */
   detail?: string;
   errors?: { field: string; message: string }[];
+  /** ACCOUNT_DELETION_SCHEDULED: cancels the deletion and signs in at /api/v1/auth/restore. */
+  restoreToken?: string;
+  deletionScheduledAt?: string;
 }
 
 /** Turns whatever an API call or fetch threw into a problem with a message to show. */

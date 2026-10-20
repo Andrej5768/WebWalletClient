@@ -27,7 +27,7 @@ export function TwoFactorStep({
 }: {
   challenge: string;
   onSignedIn(): void;
-  /** The time for the code is over; the password form shows the problem. */
+  /** Signing in cannot go on with a code: the time for it is over, or the account is to be deleted. */
   onExpired(problem: ApiProblem): void;
   onBack(): void;
 }) {
@@ -45,7 +45,7 @@ export function TwoFactorStep({
     setSubmitting(false);
     if (!result) {
       onSignedIn();
-    } else if (result.code === 'TWO_FACTOR_EXPIRED') {
+    } else if (result.code === 'TWO_FACTOR_EXPIRED' || result.code === 'ACCOUNT_DELETION_SCHEDULED') {
       onExpired(result);
     } else {
       setProblem(result);

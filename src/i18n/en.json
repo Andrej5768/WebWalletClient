@@ -46,6 +46,16 @@
       "noAccount": "No account yet?",
       "register": "Create one"
     },
+    "deletion": {
+      "title": "The account will be deleted on {{date}}",
+      "text": "You asked to delete the account. Until {{date}} you can keep it — all data stays. After that date it is erased for good.",
+      "restore": "Cancel the deletion",
+      "leave": "Leave",
+      "restoredTitle": "Deletion cancelled",
+      "restoredText": "The account and all data stay. Sign in to go on.",
+      "failedTitle": "Could not cancel the deletion",
+      "badLink": "The link is incomplete. Open it from the email again."
+    },
     "google": {
       "signIn": "Sign in with Google",
       "or": "or",

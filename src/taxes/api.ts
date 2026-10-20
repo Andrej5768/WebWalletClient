@@ -1,4 +1,5 @@
 import { useQuery, type QueryClient } from '@tanstack/react-query';
+import { saveDownload } from '../lib/download';
 import { api, type Schemas } from '../api/client';
 import { check, unwrap, unwrapOrNull } from '../api/http';
 import { queryKeys } from '../api/queries';
@@ -104,20 +105,7 @@ export function useTaxProfile() {
 export const saveTaxProfile = (body: TaxProfile) => unwrap(api.PUT('/api/v1/taxes/profile', { body }));
 
 /** Saves a downloaded declaration (one XML or a ZIP of several) under the name the server gave it. */
-async function saveDeclaration(call: Promise<{ data?: Blob; error?: unknown; response: Response }>) {
-  const { data, error, response } = await call;
-  if (error !== undefined || data === undefined || !response.ok) {
-    throw error ?? { status: response.status, code: 'EMPTY_RESPONSE' };
-  }
-  const name =
-    /filename="?([^";]+)"?/.exec(response.headers.get('Content-Disposition') ?? '')?.[1] ?? 'declaration.xml';
-  const url = URL.createObjectURL(data);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = name;
-  link.click();
-  URL.revokeObjectURL(url);
-}
+const saveDeclaration = (call: Parameters<typeof saveDownload>[0]) => saveDownload(call, 'declaration.xml');
 
 export const downloadFopDeclaration = (year: number, quarter: number) =>
   saveDeclaration(

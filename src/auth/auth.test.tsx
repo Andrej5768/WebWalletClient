@@ -1,6 +1,6 @@
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { json, mockApi, renderApp, signedInApi, user } from '../test/render';
+import { bodyOf, json, mockApi, renderApp, signedInApi, user } from '../test/render';
 
 const signedOut = { 'POST /api/v1/auth/refresh': () => json({ code: 'INVALID_REFRESH_TOKEN' }, 401) };
 
@@ -126,6 +126,44 @@ describe('sign in', () => {
 
     expect(await screen.findByRole('heading', { name: 'Вхід' })).toBeInTheDocument();
     expect(screen.getByRole('alert')).toHaveTextContent('Час на введення коду минув');
+  });
+
+  it('offers to cancel the deletion of the account', async () => {
+    const requests = mockApi({
+      ...signedInApi,
+      ...signedOut,
+      'POST /api/v1/auth/login': () =>
+        json(
+          {
+            code: 'ACCOUNT_DELETION_SCHEDULED',
+            detail: 'Акаунт заплановано до видалення',
+            restoreToken: 'restore-1',
+            deletionScheduledAt: '2026-11-03T10:00:00Z',
+          },
+          403,
+        ),
+      'POST /api/v1/auth/restore': () => json({ accessToken: 'token', tokenType: 'Bearer', expiresIn: 900 }),
+    });
+    renderApp('/login');
+
+    await userEvent.type(await screen.findByLabelText('Електронна пошта'), 'olena@example.com');
+    await userEvent.type(screen.getByLabelText('Пароль'), 'secret-password');
+    await userEvent.click(screen.getByRole('button', { name: 'Увійти' }));
+
+    expect(
+      await screen.findByRole('heading', { name: 'Акаунт буде видалено 03.11.2026' }),
+    ).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'Скасувати видалення' }));
+
+    expect(await screen.findByRole('heading', { name: 'Огляд' })).toBeInTheDocument();
+    expect(await bodyOf(requests, 'POST', '/api/v1/auth/restore')).toEqual({ token: 'restore-1' });
+  });
+
+  it('cancels the deletion with the link of the email', async () => {
+    mockApi({ ...signedOut, 'POST /api/v1/auth/restore': () => json({}) });
+    renderApp('/restore-account#token=emailed-1');
+
+    expect(await screen.findByRole('heading', { name: 'Видалення скасовано' })).toBeInTheDocument();
   });
 });
 

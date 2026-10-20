@@ -3,13 +3,24 @@ import { CircleAlert } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useNavigate } from 'react-router';
-import { problemMessage } from '../../api/errors';
+import { problemMessage, type ApiProblem } from '../../api/errors';
 import { AuthLayout } from '../AuthLayout';
 import { useAuth } from '../context';
+import { PendingDeletion } from '../PendingDeletion';
 import { TwoFactorStep } from './TwoFactorStep';
 
 type State =
-  { status: 'working' } | { status: 'twoFactor'; challenge: string } | { status: 'failed'; message: string };
+  | { status: 'working' }
+  | { status: 'twoFactor'; challenge: string }
+  | { status: 'pendingDeletion'; problem: ApiProblem }
+  | { status: 'failed'; message: string };
+
+/** The account is to be deleted: offer to cancel; any other problem is shown as text. */
+function afterProblem(problem: ApiProblem): State {
+  return problem.code === 'ACCOUNT_DELETION_SCHEDULED'
+    ? { status: 'pendingDeletion', problem }
+    : { status: 'failed', message: problemMessage(problem) };
+}
 
 /**
  * The page Google sign-in comes back to: the fragment holds a one-time ticket, or the error of the sign-in.
@@ -48,7 +59,7 @@ export function GoogleSignInPage() {
     void completeGoogle(fragment.ticket).then((result) => {
       if (result.status === 'signedIn') void navigate('/', { replace: true });
       else if (result.status === 'twoFactor') setState({ status: 'twoFactor', challenge: result.challenge });
-      else setState({ status: 'failed', message: problemMessage(result.problem) });
+      else setState(afterProblem(result.problem));
     });
   }, [completeGoogle, fragment.ticket, navigate]);
 
@@ -66,7 +77,13 @@ export function GoogleSignInPage() {
         <TwoFactorStep
           challenge={state.challenge}
           onSignedIn={() => void navigate('/', { replace: true })}
-          onExpired={(problem) => setState({ status: 'failed', message: problemMessage(problem) })}
+          onExpired={(problem) => setState(afterProblem(problem))}
+          onBack={() => void navigate('/login', { replace: true })}
+        />
+      ) : state.status === 'pendingDeletion' ? (
+        <PendingDeletion
+          problem={state.problem}
+          onRestored={() => void navigate('/', { replace: true })}
           onBack={() => void navigate('/login', { replace: true })}
         />
       ) : (

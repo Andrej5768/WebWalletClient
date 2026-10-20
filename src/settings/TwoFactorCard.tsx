@@ -28,6 +28,7 @@ import { api } from '../api/client';
 import { check, unwrap } from '../api/http';
 import { useAuth } from '../auth/context';
 import { ProblemAlert } from '../components/feedback';
+import { saveBlob } from '../lib/download';
 import { useReloadUser } from './useReloadUser';
 
 const codeInputStyles = {
@@ -206,14 +207,8 @@ function RecoveryCodes({ codes, onDone }: { codes: string[]; onDone(): void }) {
   const [saved, setSaved] = useState(false);
   const text = codes.join('\n');
 
-  const download = () => {
-    const url = URL.createObjectURL(new Blob([text + '\n'], { type: 'text/plain' }));
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'webwallet-recovery-codes.txt';
-    link.click();
-    URL.revokeObjectURL(url);
-  };
+  const download = () =>
+    saveBlob(new Blob([text + '\n'], { type: 'text/plain' }), 'webwallet-recovery-codes.txt');
 
   return (
     <Stack gap="md">

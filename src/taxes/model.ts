@@ -1,4 +1,5 @@
 import type { FopQuarter, IncomeReason, TaxRates } from './api';
+import { saveBlob } from '../lib/download';
 
 export const TAB_KEYS = ['fop', 'investments'] as const;
 export type TaxTab = (typeof TAB_KEYS)[number];
@@ -60,10 +61,5 @@ export function toCsv(rows: (string | number | null | undefined)[][]): string {
 }
 
 export function downloadCsv(name: string, rows: (string | number | null | undefined)[][]) {
-  const url = URL.createObjectURL(new Blob([toCsv(rows)], { type: 'text/csv;charset=utf-8' }));
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = name;
-  link.click();
-  URL.revokeObjectURL(url);
+  saveBlob(new Blob([toCsv(rows)], { type: 'text/csv;charset=utf-8' }), name);
 }

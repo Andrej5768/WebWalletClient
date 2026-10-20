@@ -2,13 +2,14 @@ import { Stack, Tabs, Title } from '@mantine/core';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router';
 import { CategoriesTab } from './CategoriesTab';
+import { DataTab } from './DataTab';
 import { PayeesTab } from './PayeesTab';
 import { ProfileTab } from './ProfileTab';
 import { RulesTab } from './RulesTab';
 import { SecurityTab } from './SecurityTab';
 import { TagsTab } from './TagsTab';
 
-const tabs = ['profile', 'security', 'categories', 'rules', 'payees', 'tags'] as const;
+const tabs = ['profile', 'security', 'data', 'categories', 'rules', 'payees', 'tags'] as const;
 type Tab = (typeof tabs)[number];
 
 export function SettingsPage() {
@@ -40,6 +41,9 @@ export function SettingsPage() {
         </Tabs.Panel>
         <Tabs.Panel value="security">
           <SecurityTab />
+        </Tabs.Panel>
+        <Tabs.Panel value="data">
+          <DataTab />
         </Tabs.Panel>
         <Tabs.Panel value="categories">
           <CategoriesTab />

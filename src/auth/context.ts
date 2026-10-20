@@ -16,7 +16,13 @@ export interface AuthState {
   completeGoogle(ticket: string): Promise<SignInResult>;
   /** Exchanges the challenge of {@link signIn} and a code for a session; returns the problem to show, or null. */
   completeTwoFactor(challenge: string, code: string, trustDevice: boolean): Promise<ApiProblem | null>;
+  /** Cancels the deletion of the account with the token of the sign-in and signs in; returns the problem, or null. */
+  restoreAccount(token: string): Promise<ApiProblem | null>;
   signOut(): Promise<void>;
+  /** Ends the session the server has already ended (the account is to be deleted) and goes to the home page. */
+  endSession(): void;
+  /** True after {@link endSession} until the next sign-in: the signed-out app shows the home page. */
+  sessionEnded: boolean;
   setUser(user: Schemas['UserResponse']): void;
 }
 
