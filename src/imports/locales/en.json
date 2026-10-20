@@ -54,7 +54,7 @@
       "title": "PrivatBank — PDF statement",
       "subtitle": "A card statement from Privat24",
       "file": "Statement file",
-      "choose": "Choose a file",
+      "choose": "Choose or drop a file",
       "account": "Account",
       "accountHint": "By default the account with the card number of the statement; it is created if there is none.",
       "auto": "Detect automatically",
