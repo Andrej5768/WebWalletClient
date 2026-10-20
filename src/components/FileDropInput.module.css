@@ -1,0 +1,28 @@
+.zone {
+  position: relative;
+}
+
+.input {
+  border-style: dashed;
+}
+
+.zone[data-dragging] .input {
+  border-color: var(--mantine-primary-color-filled);
+  background: var(--mantine-color-cobalt-light);
+}
+
+/* Covers the field while a file is dragged over it */
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px dashed var(--mantine-primary-color-filled);
+  border-radius: var(--mantine-radius-sm);
+  background: var(--mantine-color-cobalt-light);
+  color: var(--ww-accent-text);
+  font-size: var(--mantine-font-size-sm);
+  font-weight: 500;
+  pointer-events: none;
+}

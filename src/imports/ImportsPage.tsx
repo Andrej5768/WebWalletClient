@@ -1,7 +1,6 @@
 import {
   Button,
   Card,
-  FileInput,
   Group,
   Menu,
   PasswordInput,
@@ -18,6 +17,7 @@ import { ChevronDown, FileText, Landmark, TrendingUp, Upload } from 'lucide-reac
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAccounts } from '../api/queries';
+import { FileDropInput } from '../components/FileDropInput';
 import { ProblemAlert } from '../components/feedback';
 import {
   previewFreedom,
@@ -148,7 +148,7 @@ export function ImportsPage() {
                 </Text>
               </Stack>
             </Group>
-            <FileInput
+            <FileDropInput
               label={t('imports.privat.file')}
               placeholder={t('imports.privat.choose')}
               accept="application/pdf,.pdf"
@@ -209,7 +209,7 @@ export function ImportsPage() {
                 onChange={(event) => setZenToken(event.currentTarget.value)}
               />
             ) : (
-              <FileInput
+              <FileDropInput
                 label={t('imports.zen.fileLabel')}
                 placeholder={t('imports.privat.choose')}
                 accept="application/json,.json"
@@ -246,7 +246,7 @@ export function ImportsPage() {
                 </Text>
               </Stack>
             </Group>
-            <FileInput
+            <FileDropInput
               label={t('imports.freedom.trades')}
               placeholder={t('imports.privat.choose')}
               accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -254,7 +254,7 @@ export function ImportsPage() {
               value={freedomTrades}
               onChange={setFreedomTrades}
             />
-            <FileInput
+            <FileDropInput
               label={t('imports.freedom.cashFlows')}
               placeholder={t('imports.privat.choose')}
               accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"

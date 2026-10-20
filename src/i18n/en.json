@@ -7,6 +7,10 @@
     "retry": "Try again",
     "deleteWarning": "This cannot be undone."
   },
+  "files": {
+    "drop": "Drop the file here",
+    "wrongType": "“{{name}}” does not fit: a file of another type is needed"
+  },
   "legal": {
     "privacy": "Privacy",
     "terms": "Terms of service",
