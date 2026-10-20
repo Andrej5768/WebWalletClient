@@ -8,6 +8,7 @@ import { problemMessage, type ApiProblem } from '../../api/errors';
 import { AuthLayout } from '../AuthLayout';
 import { useAuth } from '../context';
 import { required, requiredEmail } from '../../lib/validation';
+import { TwoFactorStep } from './TwoFactorStep';
 
 export function LoginPage() {
   const { t } = useTranslation();
@@ -16,26 +17,45 @@ export function LoginPage() {
   const location = useLocation();
   const [problem, setProblem] = useState<ApiProblem | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [challenge, setChallenge] = useState<string | null>(null);
 
   const form = useForm({
     initialValues: { email: '', password: '' },
     validate: { email: requiredEmail, password: required },
   });
 
+  const signedIn = () => {
+    const from = (location.state as { from?: string } | null)?.from ?? '/';
+    void navigate(from, { replace: true });
+  };
+
   const submit = form.onSubmit(async ({ email, password }) => {
     setSubmitting(true);
     setProblem(null);
     const result = await signIn(email.trim(), password);
     setSubmitting(false);
-    if (result) {
-      setProblem(result);
-      return;
-    }
-    const from = (location.state as { from?: string } | null)?.from ?? '/';
-    void navigate(from, { replace: true });
+    if (result.status === 'problem') setProblem(result.problem);
+    else if (result.status === 'twoFactor') setChallenge(result.challenge);
+    else signedIn();
   });
 
   const invalid = problem?.code === 'INVALID_CREDENTIALS';
+
+  if (challenge) {
+    return (
+      <AuthLayout>
+        <TwoFactorStep
+          challenge={challenge}
+          onSignedIn={signedIn}
+          onExpired={(expired) => {
+            setChallenge(null);
+            setProblem(expired);
+          }}
+          onBack={() => setChallenge(null)}
+        />
+      </AuthLayout>
+    );
+  }
 
   return (
     <AuthLayout>

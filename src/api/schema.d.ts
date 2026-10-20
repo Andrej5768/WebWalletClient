@@ -193,9 +193,29 @@ export interface paths {
         put?: never;
         /**
          * Sign in with email and password
-         * @description Returns the access token; the refresh token is set in an HttpOnly cookie that is sent only to /api/v1/auth
+         * @description Returns the access token; the refresh token is set in an HttpOnly cookie that is sent only to /api/v1/auth. With two-factor authentication on, unless the browser is trusted, returns twoFactorChallenge instead, to exchange with a code at /api/v1/auth/login/two-factor.
          */
         post: operations["login"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/login/two-factor": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Finish signing in with a two-factor code
+         * @description Exchanges the challenge of the login response and a code of the authenticator app or a recovery code for a session. A wrong code keeps the challenge until it expires; an expired one fails with TWO_FACTOR_EXPIRED. With trustDevice the browser gets a cookie that skips the code for a while.
+         */
+        post: operations["loginTwoFactor"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1083,6 +1103,86 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/me/two-factor/disable": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Turn off two-factor authentication
+         * @description Needs the password (unless the account has none) and a code of the app or a recovery code. Recovery codes and trusted browsers are deleted.
+         */
+        post: operations["disable"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/two-factor/enable": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Turn on two-factor authentication with a code of the new secret
+         * @description Returns the recovery codes; they are not shown again. Trusted browsers are forgotten.
+         */
+        post: operations["enable"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/two-factor/recovery-codes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Replace the recovery codes
+         * @description Needs a code of the authenticator app; the old recovery codes stop working
+         */
+        post: operations["regenerateRecoveryCodes"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/two-factor/setup": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Start turning on two-factor authentication
+         * @description Returns a new secret for the authenticator app; it becomes active once /enable gets a code of it. Fails with CONFLICT when two-factor authentication is already on.
+         */
+        post: operations["setup"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/payees": {
         parameters: {
             query?: never;
@@ -1932,6 +2032,10 @@ export interface components {
             amount: number;
             name: string;
         };
+        DisableTwoFactorRequest: {
+            code: string;
+            password?: string | null;
+        };
         DividendDocumentRequest: {
             document?: boolean;
         };
@@ -2269,6 +2373,13 @@ export interface components {
         LoginRequest: {
             email: string;
             password: string;
+        };
+        LoginResponse: {
+            accessToken: string | null;
+            /** Format: int64 */
+            expiresIn: number | null;
+            tokenType: string | null;
+            twoFactorChallenge: string | null;
         };
         LotResponse: {
             /** Format: date */
@@ -2648,6 +2759,9 @@ export interface components {
         };
         QuarterPaymentRequest: {
             paid?: boolean;
+        };
+        RecoveryCodesResponse: {
+            recoveryCodes: string[];
         };
         RecurringRef: {
             /** Format: date */
@@ -3036,6 +3150,18 @@ export interface components {
             to: string;
             unconvertedCurrencies: string[];
         };
+        TwoFactorCodeRequest: {
+            code: string;
+        };
+        TwoFactorLoginRequest: {
+            challenge: string;
+            code: string;
+            trustDevice?: boolean;
+        };
+        TwoFactorSetupResponse: {
+            otpauthUri: string;
+            secret: string;
+        };
         UpdateProfileRequest: {
             baseCurrency: string;
             firstName: string;
@@ -3053,8 +3179,11 @@ export interface components {
             id: number;
             lastName: string | null;
             locale: string;
+            /** Format: int64 */
+            recoveryCodesLeft: number;
             /** @enum {string} */
             role: "USER" | "ADMIN";
+            twoFactorEnabled: boolean;
         };
         VerifyEmailRequest: {
             token: string;
@@ -3350,11 +3479,38 @@ export interface operations {
             query?: never;
             header?: never;
             path?: never;
-            cookie?: never;
+            cookie?: {
+                /** @description Set when the browser was trusted at an earlier two-factor sign-in */
+                trusted_device?: string;
+            };
         };
         requestBody: {
             content: {
                 "application/json": components["schemas"]["LoginRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["LoginResponse"];
+                };
+            };
+        };
+    };
+    loginTwoFactor: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TwoFactorLoginRequest"];
             };
         };
         responses: {
@@ -4865,6 +5021,96 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    disable: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DisableTwoFactorRequest"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    enable: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TwoFactorCodeRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["RecoveryCodesResponse"];
+                };
+            };
+        };
+    };
+    regenerateRecoveryCodes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TwoFactorCodeRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["RecoveryCodesResponse"];
+                };
+            };
+        };
+    };
+    setup: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TwoFactorSetupResponse"];
+                };
             };
         };
     };

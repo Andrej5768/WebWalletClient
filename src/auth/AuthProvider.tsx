@@ -5,7 +5,7 @@ import { api, refreshAccessToken, type Schemas } from '../api/client';
 import { toProblem, type ApiProblem } from '../api/errors';
 import { onAccessTokenChange, setAccessToken, shareAccessToken } from '../api/session';
 import i18n from '../i18n';
-import { AuthContext, type AuthState } from './context';
+import { AuthContext, type AuthState, type SignInResult } from './context';
 
 type User = Schemas['UserResponse'];
 
@@ -77,9 +77,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   const signIn = useCallback(
-    async (email: string, password: string): Promise<ApiProblem | null> => {
+    async (email: string, password: string): Promise<SignInResult> => {
       try {
         const { data, error } = await api.POST('/api/v1/auth/login', { body: { email, password } });
+        if (data?.twoFactorChallenge) return { status: 'twoFactor', challenge: data.twoFactorChallenge };
+        if (error || !data?.accessToken) return { status: 'problem', problem: toProblem(error) };
+        shareAccessToken(data.accessToken);
+        return (await finishSignIn())
+          ? { status: 'signedIn' }
+          : { status: 'problem', problem: toProblem(undefined) };
+      } catch (thrown) {
+        return { status: 'problem', problem: toProblem(thrown) };
+      }
+    },
+    [finishSignIn],
+  );
+
+  const completeTwoFactor = useCallback(
+    async (challenge: string, code: string, trustDevice: boolean): Promise<ApiProblem | null> => {
+      try {
+        const { data, error } = await api.POST('/api/v1/auth/login/two-factor', {
+          body: { challenge, code, trustDevice },
+        });
         if (error || !data?.accessToken) return toProblem(error);
         shareAccessToken(data.accessToken);
         return (await finishSignIn()) ? null : toProblem(undefined);
@@ -103,8 +122,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo<AuthState>(
-    () => ({ status, user, signIn, signOut, setUser }),
-    [status, user, signIn, signOut],
+    () => ({ status, user, signIn, completeTwoFactor, signOut, setUser }),
+    [status, user, signIn, completeTwoFactor, signOut],
   );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

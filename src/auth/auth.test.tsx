@@ -66,6 +66,67 @@ describe('sign in', () => {
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Неправильна пошта або пароль.');
   });
+
+  it('asks for the two-factor code after the password', async () => {
+    const requests = mockApi({
+      ...signedOut,
+      'POST /api/v1/auth/login': () => json({ twoFactorChallenge: 'challenge-1' }),
+      'POST /api/v1/auth/login/two-factor': async (request) => {
+        const body = (await request.clone().json()) as { code: string };
+        return body.code === '482913'
+          ? json({ accessToken: 'token', tokenType: 'Bearer', expiresIn: 900 })
+          : json({ code: 'INVALID_TWO_FACTOR_CODE', detail: 'Код неправильний або вже використаний' }, 400);
+      },
+      'GET /api/v1/me': () => json(user),
+      'GET /api/v1/accounts': () => json([]),
+      'GET /api/v1/accounts/summary': signedInApi['GET /api/v1/accounts/summary']!,
+      'GET /api/v1/categories': () => json([]),
+      'GET /api/v1/reports/spending': signedInApi['GET /api/v1/reports/spending']!,
+      'GET /api/v1/goals': signedInApi['GET /api/v1/goals']!,
+    });
+    renderApp('/reports');
+
+    await userEvent.type(await screen.findByLabelText('Електронна пошта'), 'olena@example.com');
+    await userEvent.type(screen.getByLabelText('Пароль'), 'secret-password');
+    await userEvent.click(screen.getByRole('button', { name: 'Увійти' }));
+
+    expect(await screen.findByRole('heading', { name: 'Підтвердження входу' })).toBeInTheDocument();
+    await userEvent.type(screen.getByLabelText('Код'), '000000');
+    await userEvent.click(screen.getByRole('button', { name: 'Підтвердити' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent('Код неправильний або вже використаний');
+
+    await userEvent.type(screen.getByLabelText('Код'), '482913');
+    await userEvent.click(screen.getByLabelText('Довіряти цьому пристрою'));
+    await userEvent.click(screen.getByRole('button', { name: 'Підтвердити' }));
+
+    expect(await screen.findByRole('heading', { name: 'Звіти' })).toBeInTheDocument();
+    const attempts = requests.filter((request) => request.url.endsWith('/api/v1/auth/login/two-factor'));
+    expect(await attempts[1]!.clone().json()).toEqual({
+      challenge: 'challenge-1',
+      code: '482913',
+      trustDevice: true,
+    });
+  });
+
+  it('starts over when the time for the code is over', async () => {
+    mockApi({
+      ...signedOut,
+      'POST /api/v1/auth/login': () => json({ twoFactorChallenge: 'challenge-1' }),
+      'POST /api/v1/auth/login/two-factor': () =>
+        json({ code: 'TWO_FACTOR_EXPIRED', detail: 'Час на введення коду минув. Увійдіть знову' }, 401),
+    });
+    renderApp('/login');
+
+    await userEvent.type(await screen.findByLabelText('Електронна пошта'), 'olena@example.com');
+    await userEvent.type(screen.getByLabelText('Пароль'), 'secret-password');
+    await userEvent.click(screen.getByRole('button', { name: 'Увійти' }));
+    await userEvent.click(await screen.findByRole('button', { name: 'Використати резервний код' }));
+    await userEvent.type(screen.getByLabelText('Резервний код'), '7KQ4-MZ2P');
+    await userEvent.click(screen.getByRole('button', { name: 'Підтвердити' }));
+
+    expect(await screen.findByRole('heading', { name: 'Вхід' })).toBeInTheDocument();
+    expect(screen.getByRole('alert')).toHaveTextContent('Час на введення коду минув');
+  });
 });
 
 describe('registration', () => {

@@ -46,6 +46,18 @@
       "noAccount": "No account yet?",
       "register": "Create one"
     },
+    "twoFactor": {
+      "title": "Confirm sign-in",
+      "appText": "Enter the 6-digit code from your authenticator app.",
+      "recoveryText": "Enter one of your recovery codes. Each code works only once.",
+      "code": "Code",
+      "recoveryCode": "Recovery code",
+      "trust": "Trust this device",
+      "submit": "Confirm",
+      "useRecovery": "Use a recovery code",
+      "useApp": "Code from the app",
+      "back": "Back"
+    },
     "register": {
       "title": "Create account",
       "subtitle": "It takes a minute",
