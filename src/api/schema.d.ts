@@ -393,6 +393,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/auth/restore": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Cancel the deletion of the account
+         * @description With restoreToken of an ACCOUNT_DELETION_SCHEDULED problem also signs in, like /login; with the token of the emailed link only cancels, and the response has no tokens
+         */
+        post: operations["restore"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/auth/verify-email": {
         parameters: {
             query?: never;
@@ -1133,6 +1153,46 @@ export interface paths {
         get: operations["me"];
         /** Update the profile of the current user */
         put: operations["updateProfile"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/delete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Delete the account
+         * @description The account is blocked at once and deleted with all its data after 14 days; all sessions end and an email with a link that cancels is sent. Needs the password (an account without one: confirmEmail) and, when two-factor authentication is on, a code.
+         */
+        post: operations["delete_9"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Download all data of the user
+         * @description A ZIP archive: webwallet.json with the rows of every table the user owns, and transactions.csv for spreadsheets. Passwords, bank tokens and other secrets are left out.
+         */
+        get: operations["export"];
+        put?: never;
         post?: never;
         delete?: never;
         options?: never;
@@ -2146,6 +2206,15 @@ export interface components {
         ContributionRequest: {
             amount: number;
         };
+        DeleteAccountRequest: {
+            code?: string | null;
+            confirmEmail?: string | null;
+            password?: string | null;
+        };
+        DeletionResponse: {
+            /** Format: date-time */
+            deletionScheduledAt: string;
+        };
         Destination: {
             /** Format: int64 */
             accountId: number;
@@ -2972,6 +3041,9 @@ export interface components {
         ResetRequest: {
             confirm?: string;
             keepCategories?: boolean;
+        };
+        RestoreAccountRequest: {
+            token: string;
         };
         Returns: {
             benchmarkTwr: number | null;
@@ -3850,6 +3922,30 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    restore: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RestoreAccountRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["LoginResponse"];
+                };
             };
         };
     };
@@ -5192,6 +5288,50 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["UserResponse"];
+                };
+            };
+        };
+    };
+    delete_9: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DeleteAccountRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DeletionResponse"];
+                };
+            };
+        };
+    };
+    export: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/zip": string;
                 };
             };
         };

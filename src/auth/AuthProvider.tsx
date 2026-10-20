@@ -30,6 +30,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
   const [status, setStatus] = useState<AuthState['status']>('loading');
   const [user, setUser] = useState<User | null>(null);
+  const [sessionEnded, setSessionEnded] = useState(false);
   const statusRef = useRef(status);
   useEffect(() => {
     statusRef.current = status;
@@ -45,6 +46,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     applyUserLanguage(loaded);
     setUser(loaded);
+    setSessionEnded(false);
     setStatus('signedIn');
     return true;
   }, []);
@@ -122,6 +124,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [finishSignIn],
   );
 
+  const restoreAccount = useCallback(
+    async (token: string): Promise<ApiProblem | null> => {
+      try {
+        const { data, error } = await api.POST('/api/v1/auth/restore', { body: { token } });
+        if (error || !data?.accessToken) return toProblem(error);
+        shareAccessToken(data.accessToken);
+        return (await finishSignIn()) ? null : toProblem(undefined);
+      } catch (thrown) {
+        return toProblem(thrown);
+      }
+    },
+    [finishSignIn],
+  );
+
   const signOut = useCallback(async () => {
     // The local session ends in any case; a failure means the server session may still be alive.
     try {
@@ -134,9 +150,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const endSession = useCallback(() => {
+    setSessionEnded(true);
+    shareAccessToken(null);
+  }, []);
+
   const value = useMemo<AuthState>(
-    () => ({ status, user, signIn, completeGoogle, completeTwoFactor, signOut, setUser }),
-    [status, user, signIn, completeGoogle, completeTwoFactor, signOut],
+    () => ({
+      status,
+      user,
+      signIn,
+      completeGoogle,
+      completeTwoFactor,
+      restoreAccount,
+      signOut,
+      endSession,
+      sessionEnded,
+      setUser,
+    }),
+    [
+      status,
+      user,
+      signIn,
+      completeGoogle,
+      completeTwoFactor,
+      restoreAccount,
+      signOut,
+      endSession,
+      sessionEnded,
+    ],
   );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

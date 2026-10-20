@@ -18,6 +18,7 @@ import { GoogleSignInPage } from '../auth/pages/GoogleSignInPage';
 import { LoginPage } from '../auth/pages/LoginPage';
 import { RegisterPage } from '../auth/pages/RegisterPage';
 import { ResetPasswordPage } from '../auth/pages/ResetPasswordPage';
+import { RestoreAccountPage } from '../auth/pages/RestoreAccountPage';
 import { VerifyEmailPage } from '../auth/pages/VerifyEmailPage';
 import { GuestOnly, RequireAuth } from '../auth/RequireAuth';
 import { LandingPage } from '../landing/LandingPage';
@@ -53,6 +54,7 @@ export const routes = [
       // Links from emails; they work whether or not someone is signed in.
       { path: '/reset-password', element: <ResetPasswordPage /> },
       { path: '/verify-email', element: <VerifyEmailPage /> },
+      { path: '/restore-account', element: <RestoreAccountPage /> },
       {
         element: (
           <RequireAuth home={<LandingPage />}>

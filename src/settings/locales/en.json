@@ -3,6 +3,7 @@
     "tabs": {
       "profile": "Profile",
       "security": "Security",
+      "data": "Data",
       "categories": "Categories",
       "rules": "Rules",
       "payees": "Payees",
@@ -90,18 +91,37 @@
       "newCodesText": "The old recovery codes will stop working. Confirm with a code from the app.",
       "newCodesSubmit": "Create new codes"
     },
+    "data": {
+      "exportTitle": "Export data",
+      "exportText": "A ZIP archive with all your data: accounts, transactions, categories, budget, goals, investments, taxes.",
+      "exportButton": "Download archive",
+      "exportJson": "everything, machine-readable",
+      "exportCsv": "transactions for Excel or Google Sheets",
+      "exportSecrets": "Bank tokens and the password are not exported."
+    },
+    "delete": {
+      "title": "Delete the account?",
+      "blocked": "The account is blocked at once and you are signed out on all devices.",
+      "erased": "On {{date}} accounts, transactions, the budget, investments and all other data will be erased for good.",
+      "cancel": "Until then you can cancel: with the link in the email or by signing in again.",
+      "exportFirst": "Save a copy of your data first.",
+      "confirmEmail": "Type the email of this account",
+      "doneTitle": "Deletion scheduled",
+      "doneText": "The account will be deleted on {{date}}. We sent a link to cancel to {{email}}. You will be signed out now.",
+      "ok": "Got it"
+    },
     "danger": {
       "title": "Danger zone",
       "resetTitle": "Start over",
       "resetText": "Deletes all accounts, transactions, envelopes, payees, tags and bank connections. Your profile and password stay.",
       "resetButton": "Start over",
-      "resetWarning": "This cannot be undone. Consider an export first (coming later).",
+      "resetWarning": "This cannot be undone. Consider an export first.",
       "keepCategories": "Keep categories and rules",
       "confirmLabel": "Type {{word}} to confirm",
       "resetSubmit": "Delete everything",
       "done": "Your data is deleted. You can start over.",
       "deleteTitle": "Delete account",
-      "deleteText": "Coming later.",
+      "deleteText": "The account is blocked and deleted with all its data after 14 days. Until then you can cancel.",
       "deleteButton": "Delete account"
     },
     "categories": {

@@ -1,39 +1,20 @@
-import {
-  Alert,
-  Button,
-  Card,
-  Checkbox,
-  Group,
-  Modal,
-  PasswordInput,
-  Stack,
-  Text,
-  TextInput,
-  Title,
-} from '@mantine/core';
+import { Alert, Button, Card, Group, PasswordInput, Stack, Text, Title } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { TriangleAlert } from 'lucide-react';
-import { useState } from 'react';
+import { useMutation } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
 import { fieldErrors, problemMessage, toProblem } from '../api/errors';
-import { check } from '../api/http';
 import { shareAccessToken } from '../api/session';
-import { ProblemAlert } from '../components/feedback';
 import { useAuth } from '../auth/context';
 import { GoogleCard, SetPasswordCard } from './GoogleCard';
 import { TwoFactorCard } from './TwoFactorCard';
 import { newPassword, required } from '../lib/validation';
 import i18n from '../i18n';
 
-const CONFIRM_WORD = 'DELETE';
-
 export function SecurityTab() {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const [resetOpen, setResetOpen] = useState(false);
   const form = useForm({
     initialValues: { current: '', password: '', repeat: '' },
     validate: {
@@ -120,89 +101,6 @@ export function SecurityTab() {
       <TwoFactorCard />
 
       <GoogleCard />
-
-      <Card withBorder radius="md" padding="lg" style={{ borderColor: 'var(--mantine-color-red-outline)' }}>
-        <Stack gap="md">
-          <Title order={2} size="h4">
-            {t('settings.danger.title')}
-          </Title>
-          <Group justify="space-between" wrap="nowrap" gap="lg">
-            <Stack gap={2}>
-              <Text fw={500}>{t('settings.danger.resetTitle')}</Text>
-              <Text size="sm" c="dimmed">
-                {t('settings.danger.resetText')}
-              </Text>
-            </Stack>
-            <Button color="red" variant="outline" onClick={() => setResetOpen(true)}>
-              {t('settings.danger.resetButton')}
-            </Button>
-          </Group>
-          <Group justify="space-between" wrap="nowrap" gap="lg">
-            <Stack gap={2}>
-              <Text fw={500}>{t('settings.danger.deleteTitle')}</Text>
-              <Text size="sm" c="dimmed">
-                {t('settings.danger.deleteText')}
-              </Text>
-            </Stack>
-            <Button color="red" variant="outline" disabled>
-              {t('settings.danger.deleteButton')}
-            </Button>
-          </Group>
-        </Stack>
-      </Card>
-      {resetOpen && <ResetModal onClose={() => setResetOpen(false)} />}
     </Stack>
-  );
-}
-
-function ResetModal({ onClose }: { onClose(): void }) {
-  const { t } = useTranslation();
-  const queryClient = useQueryClient();
-  const [keepCategories, setKeepCategories] = useState(true);
-  const [confirm, setConfirm] = useState('');
-
-  const reset = useMutation({
-    mutationFn: () => check(api.POST('/api/v1/me/reset', { body: { keepCategories, confirm } })),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries();
-      notifications.show({ message: t('settings.danger.done'), color: 'green' });
-      onClose();
-    },
-    meta: { errorShown: true },
-  });
-
-  return (
-    <Modal opened onClose={onClose} title={<Text fw={600}>{t('settings.danger.resetTitle')}</Text>}>
-      <Stack gap="md">
-        <Alert color="red" variant="light" icon={<TriangleAlert size={18} />}>
-          {t('settings.danger.resetWarning')}
-        </Alert>
-        <Checkbox
-          label={t('settings.danger.keepCategories')}
-          checked={keepCategories}
-          onChange={(event) => setKeepCategories(event.currentTarget.checked)}
-        />
-        <TextInput
-          label={t('settings.danger.confirmLabel', { word: CONFIRM_WORD })}
-          value={confirm}
-          onChange={(event) => setConfirm(event.currentTarget.value)}
-          autoComplete="off"
-        />
-        <ProblemAlert error={reset.error} />
-        <Group justify="flex-end" gap="xs">
-          <Button variant="default" onClick={onClose}>
-            {t('common.cancel')}
-          </Button>
-          <Button
-            color="red"
-            disabled={confirm !== CONFIRM_WORD}
-            loading={reset.isPending}
-            onClick={() => reset.mutate()}
-          >
-            {t('settings.danger.resetSubmit')}
-          </Button>
-        </Group>
-      </Stack>
-    </Modal>
   );
 }
