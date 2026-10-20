@@ -2,7 +2,7 @@ import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { isoDate, kyivToday } from '../lib/periods';
 import { accountOf, categoryOf, splitOf, transactionOf } from '../test/fixtures';
-import { bodyOf, json, mockApi, renderApp, signedInApi } from '../test/render';
+import { bodyOf, json, mockApi, plain, renderApp, signedInApi } from '../test/render';
 
 const today = isoDate(kyivToday());
 
@@ -196,5 +196,100 @@ it('goes back to the first page when the search changes', async () => {
     const last = new URL(requests.filter((request) => request.url.includes('/transactions')).at(-1)!.url);
     expect(last.searchParams.get('q')).toBe('сільпо');
     expect(last.searchParams.get('page')).toBe('0');
+  });
+});
+
+describe('transfers between own accounts', () => {
+  const uah = [accounts[0]!, accountOf({ id: 3, name: 'ПриватБанк ФОП', balance: 9650 })];
+  const halves = [
+    transactionOf({
+      id: 200,
+      type: 'EXPENSE',
+      date: today,
+      accountId: 1,
+      amount: 10000,
+      currency: 'UAH',
+      comment: 'Переказ на картку ПриватБанку',
+      splits: [splitOf({ id: 3, amount: 10000 })],
+      tagIds: [],
+    }),
+    transactionOf({
+      id: 201,
+      type: 'INCOME',
+      date: today,
+      accountId: 3,
+      amount: 9650,
+      currency: 'UAH',
+      comment: 'Зарахування зі своєї картки',
+      splits: [splitOf({ id: 4, amount: 9650 })],
+      tagIds: [],
+    }),
+  ];
+  const merged = transactionOf({
+    ...halves[0]!,
+    type: 'TRANSFER',
+    toAccountId: 3,
+    toAmount: 9650,
+    toCurrency: 'UAH',
+    splits: [],
+  });
+
+  it('suggests merging an expense and an income of the day, or leaving them apart', async () => {
+    const requests = api({
+      'GET /api/v1/accounts': () => json(uah),
+      'GET /api/v1/transactions': () =>
+        json({ items: halves, page: 0, size: 50, totalItems: 2, totalPages: 1 }),
+      'GET /api/v1/transactions/transfer-pairs': () =>
+        json([{ expenseId: 200, incomeId: 201, date: today, exact: false, difference: -0.035 }]),
+      'POST /api/v1/transactions/transfer-pairs/merge': () => json(merged),
+      'POST /api/v1/transactions/transfer-pairs/dismiss': () => new Response(null, { status: 204 }),
+    });
+    renderApp('/transactions');
+
+    const hint = await screen.findByTestId('pair-200-201');
+    expect(hint).toHaveTextContent('Схоже, це один переказ Чорна картка → ПриватБанк ФОП:');
+    expect(hint).toHaveTextContent(/дійшло на 3,5\s?% менше — можливо, комісія\./);
+    const pairs = requests.find((request) => request.url.includes('/transfer-pairs'))!;
+    expect(new URL(pairs.url).searchParams.get('from')).toBe(today);
+    expect(new URL(pairs.url).searchParams.get('to')).toBe(today);
+
+    await userEvent.click(within(hint).getByRole('button', { name: 'Об’єднати в переказ' }));
+    expect(await bodyOf(requests, 'POST', '/api/v1/transactions/transfer-pairs/merge')).toEqual({
+      expenseId: 200,
+      incomeId: 201,
+    });
+    await userEvent.click(within(hint).getByRole('button', { name: 'Не переказ' }));
+    expect(await bodyOf(requests, 'POST', '/api/v1/transactions/transfer-pairs/dismiss')).toEqual({
+      expenseId: 200,
+      incomeId: 201,
+    });
+  });
+
+  it('shows the fee of a transfer and splits it back', async () => {
+    const requests = api({
+      'GET /api/v1/accounts': () => json(uah),
+      'GET /api/v1/transactions': () =>
+        json({ items: [merged], page: 0, size: 50, totalItems: 1, totalPages: 1 }),
+      'POST /api/v1/transactions/200/split-transfer': () => json(halves[0]),
+    });
+    renderApp('/transactions');
+
+    const row = await screen.findByTestId('transaction-200');
+    expect(plain(within(row).getByText(/^Переказ · комісія/).textContent)).toBe('Переказ · комісія 350,00 ₴');
+
+    await userEvent.click(within(row).getByText('Чорна картка → ПриватБанк ФОП'));
+    const drawer = await screen.findByRole('dialog');
+    await userEvent.click(within(drawer).getByRole('button', { name: 'Роз’єднати' }));
+    await waitFor(() =>
+      expect(requests.some((request) => request.url.endsWith('/transactions/200/split-transfer'))).toBe(true),
+    );
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+  });
+
+  it('shows no fee for a transfer between currencies', async () => {
+    api();
+    renderApp('/transactions');
+    const row = await screen.findByTestId('transaction-102');
+    expect(within(row).getByText('Перекази')).toBeInTheDocument();
   });
 });

@@ -111,7 +111,17 @@
       "submit_other": "Import {{count}} transactions",
       "transferRequired": "Choose an account",
       "transfersIncomplete_one": "{{count}} transfer has no other account chosen.",
-      "transfersIncomplete_other": "{{count}} transfers have no other account chosen."
+      "transfersIncomplete_other": "{{count}} transfers have no other account chosen.",
+      "pairs_one": "{{count}} possible transfer between your accounts found · to merge: {{chosen}}. Exact matches are chosen, check the rest.",
+      "pairs_other": "{{count}} possible transfers between your accounts found · to merge: {{chosen}}. Exact matches are chosen, check the rest.",
+      "pairWith": "Looks like a transfer — merge",
+      "pairWithOf": "Merge into a transfer: {{name}}",
+      "pairOperation": "With the operation",
+      "pairInLedger": "already in the ledger",
+      "pairInFile": "from this file",
+      "pairExact": "same amount",
+      "pairLess": "{{percent}} less",
+      "pairMore": "{{percent}} more"
     },
     "result": {
       "title": "Import finished",

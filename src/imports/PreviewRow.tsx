@@ -1,11 +1,23 @@
 import { Badge, Checkbox, Select, Stack, Switch, Table, TagsInput, Text } from '@mantine/core';
+import type { TFunction } from 'i18next';
 import { useTranslation } from 'react-i18next';
 import type { Schemas } from '../api/client';
 import { Amount } from '../components/Amount';
 import { categorySelectData, type CategoryInfo } from '../lib/categories';
-import { formatDate } from '../lib/format';
+import { formatDate, formatDayShort, formatPercent } from '../lib/format';
+import { formatMoney } from '../lib/money';
 import type { PreviewOperation } from './api';
-import { allowedTypes, isUncategorized, needsTransferAccount, type RowEdit } from './edits';
+import {
+  allowedTypes,
+  canPair,
+  isUncategorized,
+  needsTransferAccount,
+  pairOf,
+  samePair,
+  type Pair,
+  type RowEdit,
+  type Suggestion,
+} from './edits';
 
 const warn = { input: { borderColor: 'var(--ww-warn-border)', background: 'var(--ww-warn-bg)' } };
 
@@ -20,6 +32,7 @@ export function PreviewRow({
   showErrors,
   onSelect,
   onChange,
+  onPair,
 }: {
   operation: PreviewOperation;
   edit: RowEdit;
@@ -31,6 +44,8 @@ export function PreviewRow({
   showErrors: boolean;
   onSelect(selected: boolean): void;
   onChange(patch: Partial<RowEdit>): void;
+  /** Chooses the other half of a transfer, or none. */
+  onPair(pair: Pair | null): void;
 }) {
   const { t } = useTranslation();
   const name = operation.payee ?? operation.comment ?? operation.key;
@@ -40,6 +55,11 @@ export function PreviewRow({
     (account) => account.currency === operation.currency && account.id !== operation.account.id,
   );
   const missingTransfer = needsTransferAccount(operation, edit);
+  const suggestions = operation.transferSuggestions ?? [];
+  const pairing = canPair(operation, edit);
+  const pairIndex = edit.pair
+    ? suggestions.findIndex((suggestion) => samePair(pairOf(suggestion), edit.pair))
+    : -1;
 
   return (
     <Table.Tr
@@ -123,28 +143,35 @@ export function PreviewRow({
           </Text>
         ) : (
           <Stack gap={4}>
-            <Select
-              size="xs"
-              searchable
-              clearable
-              disabled={duplicate}
-              aria-label={t('imports.preview.categoryOf', { name })}
-              placeholder={
-                !edit.categoryChanged && operation.categoryName && operation.categoryId == null
-                  ? t('imports.preview.newCategory', { name: operation.categoryName })
-                  : t('transactions.uncategorized')
-              }
-              data={categorySelectData(categories, edit.type === 'INCOME' ? 'INCOME' : 'EXPENSE')}
-              value={edit.categoryId}
-              onChange={(value) => onChange({ categoryId: value, categoryChanged: true })}
-              styles={!duplicate && isUncategorized(operation, edit) ? warn : undefined}
-            />
-            {edit.categoryChanged && edit.categoryId && operation.payee && (
+            {pairing && (
               <Checkbox
                 size="xs"
-                label={t('imports.preview.rememberRule')}
-                checked={edit.rememberRule}
-                onChange={(event) => onChange({ rememberRule: event.currentTarget.checked })}
+                label={t('imports.preview.pairWith')}
+                aria-label={t('imports.preview.pairWithOf', { name })}
+                checked={!!edit.pair}
+                onChange={(event) => onPair(event.currentTarget.checked ? pairOf(suggestions[0]!) : null)}
+              />
+            )}
+            {pairing && edit.pair ? (
+              <Select
+                size="xs"
+                allowDeselect={false}
+                aria-label={t('imports.preview.pairOperation')}
+                data={suggestions.map((suggestion, index) => ({
+                  value: String(index),
+                  label: suggestionLabel(suggestion, operation.type === 'EXPENSE', t),
+                }))}
+                value={pairIndex >= 0 ? String(pairIndex) : null}
+                onChange={(value) => value != null && onPair(pairOf(suggestions[Number(value)]!))}
+              />
+            ) : (
+              <CategoryPicker
+                operation={operation}
+                edit={edit}
+                duplicate={duplicate}
+                name={name}
+                categories={categories}
+                onChange={onChange}
               />
             )}
           </Stack>
@@ -162,5 +189,67 @@ export function PreviewRow({
         />
       </Table.Td>
     </Table.Tr>
+  );
+}
+
+/** "Monobank · +5 000,00 ₴ · 20 жовт. · уже в обліку · та сама сума". */
+function suggestionLabel(suggestion: Suggestion, outgoing: boolean, t: TFunction): string {
+  const amount = formatMoney(outgoing ? suggestion.amount : -suggestion.amount, suggestion.currency, {
+    signed: true,
+  });
+  const source = t(
+    suggestion.transactionId != null ? 'imports.preview.pairInLedger' : 'imports.preview.pairInFile',
+  );
+  const difference = suggestion.exact
+    ? t('imports.preview.pairExact')
+    : t(suggestion.difference < 0 ? 'imports.preview.pairLess' : 'imports.preview.pairMore', {
+        percent: formatPercent(Math.abs(suggestion.difference)),
+      });
+  return [suggestion.accountName, amount, formatDayShort(suggestion.date), source, difference].join(' · ');
+}
+
+function CategoryPicker({
+  operation,
+  edit,
+  duplicate,
+  name,
+  categories,
+  onChange,
+}: {
+  operation: PreviewOperation;
+  edit: RowEdit;
+  duplicate: boolean;
+  name: string;
+  categories: CategoryInfo[];
+  onChange(patch: Partial<RowEdit>): void;
+}) {
+  const { t } = useTranslation();
+  return (
+    <>
+      <Select
+        size="xs"
+        searchable
+        clearable
+        disabled={duplicate}
+        aria-label={t('imports.preview.categoryOf', { name })}
+        placeholder={
+          !edit.categoryChanged && operation.categoryName && operation.categoryId == null
+            ? t('imports.preview.newCategory', { name: operation.categoryName })
+            : t('transactions.uncategorized')
+        }
+        data={categorySelectData(categories, edit.type === 'INCOME' ? 'INCOME' : 'EXPENSE')}
+        value={edit.categoryId}
+        onChange={(value) => onChange({ categoryId: value, categoryChanged: true })}
+        styles={!duplicate && isUncategorized(operation, edit) ? warn : undefined}
+      />
+      {edit.categoryChanged && edit.categoryId && operation.payee && (
+        <Checkbox
+          size="xs"
+          label={t('imports.preview.rememberRule')}
+          checked={edit.rememberRule}
+          onChange={(event) => onChange({ rememberRule: event.currentTarget.checked })}
+        />
+      )}
+    </>
   );
 }

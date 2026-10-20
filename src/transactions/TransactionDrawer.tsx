@@ -2,6 +2,7 @@ import {
   Alert,
   Anchor,
   Autocomplete,
+  Button,
   Center,
   Collapse,
   Drawer,
@@ -19,7 +20,7 @@ import {
 import { DateInput } from '@mantine/dates';
 import { useForm, type UseFormReturnType } from '@mantine/form';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Info } from 'lucide-react';
+import { Info, Unlink } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
@@ -46,6 +47,7 @@ import {
 import type { Transaction } from './model';
 import { FopIncomeSwitch } from '../taxes/FopIncomeSwitch';
 import { SplitEditor } from './SplitEditor';
+import { useSplitTransfer } from './transferPairs';
 
 /** Fields the form renders; a backend error on any other field is shown in the alert. */
 const FORM_FIELDS = [
@@ -178,6 +180,8 @@ function TransactionForm({ transaction, defaultAccountId, defaults, onClose }: P
     onSuccess: done,
     onError: (error) => form.setErrors(formErrors(toProblem(error))),
   });
+
+  const split = useSplitTransfer();
 
   const remove = useMutation({
     mutationFn: () =>
@@ -322,7 +326,23 @@ function TransactionForm({ transaction, defaultAccountId, defaults, onClose }: P
             {t('transactions.form.splitMismatch')}
           </Alert>
         )}
-        <ProblemAlert error={save.error ?? remove.error} fieldsShown={FORM_FIELDS} />
+        {editing && transaction.type === 'TRANSFER' && (
+          <Group gap="sm" wrap="nowrap" align="center">
+            <Button
+              variant="default"
+              size="xs"
+              leftSection={<Unlink size={14} />}
+              loading={split.isPending}
+              onClick={() => split.mutate(transaction.id, { onSuccess: onClose })}
+            >
+              {t('transactions.splitTransfer')}
+            </Button>
+            <Text size="xs" c="dimmed">
+              {t('transactions.splitTransferHint')}
+            </Text>
+          </Group>
+        )}
+        <ProblemAlert error={save.error ?? remove.error ?? split.error} fieldsShown={FORM_FIELDS} />
         <FormFooter
           onCancel={onClose}
           saving={save.isPending}
