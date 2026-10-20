@@ -212,7 +212,7 @@ export function ImportsPage() {
               <FileDropInput
                 label={t('imports.zen.fileLabel')}
                 placeholder={t('imports.privat.choose')}
-                accept="application/json,.json"
+                accept=".csv,text/csv,application/json,.json"
                 clearable
                 value={zenFile}
                 onChange={setZenFile}

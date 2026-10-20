@@ -8296,6 +8296,7 @@
     },
     "/api/v1/imports/zenmoney/file": {
       "post": {
+        "description": "The CSV export of the app (dump of transactions) or a saved response of the sync API (POST /v8/diff/ with serverTimestamp 0)",
         "operationId": "importFile",
         "requestBody": {
           "content": {
@@ -8332,7 +8333,7 @@
             "bearer": []
           }
         ],
-        "summary": "Import a saved response of the Zen Money sync API (POST /v8/diff/ with serverTimestamp 0)",
+        "summary": "Import a file of Zen Money",
         "tags": [
           "Imports"
         ]
@@ -8377,7 +8378,7 @@
             "bearer": []
           }
         ],
-        "summary": "Preview a saved response of the Zen Money sync API without saving anything",
+        "summary": "Preview a file of Zen Money without saving anything",
         "tags": [
           "Imports"
         ]
