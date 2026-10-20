@@ -56,7 +56,7 @@ export function DataTab() {
                 </Text>
               </Stack>
             </Group>
-            <Button loading={download.isPending} onClick={() => download.mutate()}>
+            <Button loading={download.isPending} onClick={() => download.mutate()} style={{ flexShrink: 0 }}>
               {t('settings.data.exportButton')}
             </Button>
           </Group>
@@ -79,24 +79,29 @@ export function DataTab() {
             {t('settings.danger.title')}
           </Title>
           <Group justify="space-between" wrap="nowrap" gap="lg">
-            <Stack gap={2}>
+            <Stack gap={2} style={{ minWidth: 0 }}>
               <Text fw={500}>{t('settings.danger.resetTitle')}</Text>
               <Text size="sm" c="dimmed">
                 {t('settings.danger.resetText')}
               </Text>
             </Stack>
-            <Button color="red" variant="outline" onClick={() => setDialog('reset')}>
+            <Button
+              color="red"
+              variant="outline"
+              onClick={() => setDialog('reset')}
+              style={{ flexShrink: 0 }}
+            >
               {t('settings.danger.resetButton')}
             </Button>
           </Group>
           <Group justify="space-between" wrap="nowrap" gap="lg">
-            <Stack gap={2}>
+            <Stack gap={2} style={{ minWidth: 0 }}>
               <Text fw={500}>{t('settings.danger.deleteTitle')}</Text>
               <Text size="sm" c="dimmed">
                 {t('settings.danger.deleteText')}
               </Text>
             </Stack>
-            <Button color="red" onClick={() => setDialog('delete')}>
+            <Button color="red" onClick={() => setDialog('delete')} style={{ flexShrink: 0 }}>
               {t('settings.danger.deleteButton')}
             </Button>
           </Group>
