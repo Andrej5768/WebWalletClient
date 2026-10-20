@@ -44,7 +44,10 @@ describe('session', () => {
 
     await userEvent.click(await screen.findByRole('button', { name: 'Вийти' }));
 
-    expect(await screen.findByRole('heading', { name: 'Вхід' })).toBeInTheDocument();
+    // The root shows the home page to a signed-out visitor
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Гроші, інвестиції та податки — в одному місці' }),
+    ).toBeInTheDocument();
   });
 });
 

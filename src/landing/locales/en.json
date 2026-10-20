@@ -1,0 +1,122 @@
+{
+  "landing": {
+    "sections": "Sections",
+    "nav": {
+      "features": "Features",
+      "audience": "Who it is for",
+      "independence": "Financial independence",
+      "source": "Source code"
+    },
+    "signIn": "Sign in",
+    "register": "Create account",
+    "hero": {
+      "badge": "A personal finance project",
+      "title": "Money, investments and taxes in one place",
+      "text": "Personal finance tracking and investment portfolio analytics. Monobank sync, envelope budgeting, brokerage accounts and Ukrainian taxes.",
+      "note": "Ukrainian and English · light and dark themes · no ads"
+    },
+    "preview": {
+      "title": "Overview",
+      "netWorth": "Net worth",
+      "change": "+12,340 this month",
+      "privat": "PrivatBank sole proprietor",
+      "credit": "Credit card"
+    },
+    "audience": {
+      "title": "Who it is for",
+      "text": "For people who want to see all their money in one place without keeping spreadsheets by hand.",
+      "banks": {
+        "title": "Several banks and currencies",
+        "text": "Monobank and PrivatBank cards, cash, deposits, credit cards and debts, with the balance in hryvnias at the NBU rate."
+      },
+      "investors": {
+        "title": "Private investors",
+        "text": "Brokerage accounts at Interactive Brokers and Freedom Finance, Ukrainian government bonds and other assets, with returns and allocation."
+      },
+      "fop": {
+        "title": "Sole proprietors, group 3",
+        "text": "Business income from your accounts, the single tax, military levy and social contribution by quarter, and the declaration in the tax service format."
+      }
+    },
+    "features": {
+      "title": "Features",
+      "text": "From everyday spending to the yearly declaration.",
+      "sync": {
+        "title": "Sync and import",
+        "text": "Monobank through its API, PrivatBank PDF statements, import of past transactions. Review and edit before importing."
+      },
+      "categories": {
+        "title": "Categories without the chores",
+        "text": "Two-level categories, tags and payees. Payee and MCC rules learn from your corrections, duplicates are found automatically."
+      },
+      "envelopes": {
+        "title": "Envelope budgeting",
+        "text": "Every hryvnia gets a job, leftovers roll over to the next month. Needs, wants and savings by the 50/30/20 rule."
+      },
+      "planning": {
+        "title": "Planning",
+        "text": "Recurring payments in the feed, a balance forecast months ahead and savings goals linked to Monobank jars."
+      },
+      "reports": {
+        "title": "Reports and analytics",
+        "text": "Spending by category, income and expenses, net worth over time, plan versus actual, period comparison and trends."
+      },
+      "investments": {
+        "title": "Investments",
+        "text": "Lots by FIFO and average cost, IBKR and Freedom trade import, daily prices, TWR and MWR returns, allocation by sector."
+      },
+      "taxes": {
+        "title": "Taxes",
+        "text": "Tax on investment income with credit for foreign tax, sole proprietor taxes by quarter, rates per year and declarations as XML for the tax service."
+      },
+      "privacy": {
+        "title": "Privacy",
+        "text": "Bank tokens are encrypted in the database. No ads, analytics or third-party scripts on the pages."
+      }
+    },
+    "independence": {
+      "title": "The road to financial independence",
+      "text1": "Financial independence is not about a big fortune but about habits: knowing where the money goes, keeping a safety cushion and investing regularly. The hard part is that it usually takes spreadsheets, formulas and the discipline to keep them up for years.",
+      "text2": "WebWallet does the math: goals are calculated from your real spending and savings, so you see progress every month, not once a year.",
+      "steps": {
+        "tracking": {
+          "title": "Tracking",
+          "text": "How much you really spend and save each month — the basis of every calculation."
+        },
+        "fym": {
+          "title": "Safety cushion — FYM",
+          "text": "Freedom money: how many months your spare money lasts at your usual spending. The target is 6, 12 or 24 months."
+        },
+        "compound": {
+          "title": "Compound interest",
+          "text": "The calculator shows how regular contributions grow over the years and what is left of them after inflation."
+        },
+        "fire": {
+          "title": "FIRE",
+          "text": "The capital whose returns cover your spending forever, and when you reach it at your current pace."
+        }
+      },
+      "example": {
+        "fireBasis": "spending ₴20,000 / month · 4% rule",
+        "fireCapital": "Capital needed",
+        "fireSaved": "Saved {{amount}} · 23%",
+        "fireYear": "At the current pace — {{year}}",
+        "fymValue": "months of 12",
+        "compound": "Compound interest",
+        "compoundBasis": "₴5,000 / month · 10% · 20 years",
+        "caption": "Example. The calculations are a guide for planning, not financial advice."
+      }
+    },
+    "source": {
+      "title": "Source code",
+      "text": "The project is developed in the open: a Spring Boot server and a React web client. You can read the code, study it and check how your data is stored.",
+      "license": "PolyForm Noncommercial 1.0.0 license: the code is open for study and noncommercial use; commercial use is not allowed.",
+      "server": "Server",
+      "client": "Web client"
+    },
+    "cta": {
+      "title": "Try WebWallet",
+      "text": "All it takes is a name, an email and a password."
+    }
+  }
+}
