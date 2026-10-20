@@ -1,5 +1,5 @@
 import type { Schemas } from '../api/client';
-import type { PaletteColor } from './palette';
+import { autoColor, type PaletteColor } from './palette';
 
 export type Category = Schemas['CategoryResponse'];
 
@@ -34,7 +34,8 @@ export function flattenCategories(tree: Category[]): CategoryInfo[] {
       path: parent ? `${parent.name} › ${category.name}` : (category.name ?? ''),
       kind: category.kind ?? 'EXPENSE',
       icon: category.icon ?? parent?.icon ?? null,
-      color: category.color ?? parent?.color ?? null,
+      // A group without a color gets one of the palette by its id; subcategories take the color of the group
+      color: category.color ?? parent?.color ?? autoColor(category.id!),
       parentId: parent?.id ?? null,
       archived: !!category.archived || !!parent?.archived,
       necessity: category.necessity ?? parent?.necessity ?? null,
