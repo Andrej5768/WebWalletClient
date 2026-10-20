@@ -366,6 +366,12 @@ export function LandingPage() {
         <div className={`${classes.container} ${classes.footerRow}`}>
           <span>© 2026 WebWallet · {t('landing.footer')}</span>
           <Group gap={16}>
+            <Anchor component={Link} to="/privacy" c="dimmed" size="sm">
+              {t('legal.privacy')}
+            </Anchor>
+            <Anchor component={Link} to="/terms" c="dimmed" size="sm">
+              {t('legal.terms')}
+            </Anchor>
             <Anchor href={SERVER_REPO} c="dimmed" size="sm" target="_blank" rel="noreferrer">
               GitHub
             </Anchor>
