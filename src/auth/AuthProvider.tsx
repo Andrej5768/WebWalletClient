@@ -8,6 +8,7 @@ import i18n from '../i18n';
 import { AuthContext, type AuthState, type SignInResult } from './context';
 
 type User = Schemas['UserResponse'];
+type LoginResponse = Schemas['LoginResponse'];
 
 async function loadUser(): Promise<User | null> {
   try {
@@ -76,10 +77,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [queryClient, finishSignIn],
   );
 
-  const signIn = useCallback(
-    async (email: string, password: string): Promise<SignInResult> => {
+  /** A session, the second step of two-factor authentication, or the problem of a login response. */
+  const loginResult = useCallback(
+    async (call: Promise<{ data?: LoginResponse; error?: unknown }>): Promise<SignInResult> => {
       try {
-        const { data, error } = await api.POST('/api/v1/auth/login', { body: { email, password } });
+        const { data, error } = await call;
         if (data?.twoFactorChallenge) return { status: 'twoFactor', challenge: data.twoFactorChallenge };
         if (error || !data?.accessToken) return { status: 'problem', problem: toProblem(error) };
         shareAccessToken(data.accessToken);
@@ -91,6 +93,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     },
     [finishSignIn],
+  );
+
+  const signIn = useCallback(
+    (email: string, password: string) =>
+      loginResult(api.POST('/api/v1/auth/login', { body: { email, password } })),
+    [loginResult],
+  );
+
+  const completeGoogle = useCallback(
+    (ticket: string) => loginResult(api.POST('/api/v1/auth/google/complete', { body: { ticket } })),
+    [loginResult],
   );
 
   const completeTwoFactor = useCallback(
@@ -122,8 +135,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo<AuthState>(
-    () => ({ status, user, signIn, completeTwoFactor, signOut, setUser }),
-    [status, user, signIn, completeTwoFactor, signOut],
+    () => ({ status, user, signIn, completeGoogle, completeTwoFactor, signOut, setUser }),
+    [status, user, signIn, completeGoogle, completeTwoFactor, signOut],
   );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

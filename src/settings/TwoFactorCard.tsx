@@ -28,6 +28,7 @@ import { api } from '../api/client';
 import { check, unwrap } from '../api/http';
 import { useAuth } from '../auth/context';
 import { ProblemAlert } from '../components/feedback';
+import { useReloadUser } from './useReloadUser';
 
 const codeInputStyles = {
   input: { fontFamily: 'var(--mantine-font-family-monospace)', letterSpacing: '0.25em' },
@@ -87,15 +88,6 @@ export function TwoFactorCard() {
       {dialog === 'codes' && <NewCodesModal onClose={() => setDialog(null)} />}
     </Card>
   );
-}
-
-/** Reloads the profile, so that the card shows the new state. */
-function useReloadUser() {
-  const { setUser } = useAuth();
-  return async () => {
-    const { data } = await api.GET('/api/v1/me');
-    if (data) setUser(data);
-  };
 }
 
 function SetupModal({ onClose }: { onClose(): void }) {
@@ -271,6 +263,8 @@ function RecoveryCodes({ codes, onDone }: { codes: string[]; onDone(): void }) {
 function DisableModal({ onClose }: { onClose(): void }) {
   const { t } = useTranslation();
   const reloadUser = useReloadUser();
+  const { user } = useAuth();
+  const needsPassword = user?.hasPassword !== false;
   const [password, setPassword] = useState('');
   const [code, setCode] = useState('');
 
@@ -297,12 +291,14 @@ function DisableModal({ onClose }: { onClose(): void }) {
           <Text size="sm" c="dimmed">
             {t('settings.twoFactor.disableText')}
           </Text>
-          <PasswordInput
-            label={t('auth.password')}
-            autoComplete="current-password"
-            value={password}
-            onChange={(event) => setPassword(event.currentTarget.value)}
-          />
+          {needsPassword && (
+            <PasswordInput
+              label={t('auth.password')}
+              autoComplete="current-password"
+              value={password}
+              onChange={(event) => setPassword(event.currentTarget.value)}
+            />
+          )}
           <TextInput
             label={t('settings.twoFactor.codeOrRecovery')}
             autoComplete="one-time-code"
@@ -317,7 +313,7 @@ function DisableModal({ onClose }: { onClose(): void }) {
             <Button
               type="submit"
               color="red"
-              disabled={!password || !code.trim()}
+              disabled={(needsPassword && !password) || !code.trim()}
               loading={disable.isPending}
             >
               {t('settings.twoFactor.disable')}

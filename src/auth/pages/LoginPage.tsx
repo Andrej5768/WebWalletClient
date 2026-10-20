@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useNavigate } from 'react-router';
 import { problemMessage, type ApiProblem } from '../../api/errors';
 import { AuthLayout } from '../AuthLayout';
+import { GoogleSignIn } from '../GoogleButton';
 import { useAuth } from '../context';
 import { required, requiredEmail } from '../../lib/validation';
 import { TwoFactorStep } from './TwoFactorStep';
@@ -67,6 +68,7 @@ export function LoginPage() {
             </Title>
             <Text c="dimmed">{t('auth.login.subtitle')}</Text>
           </Stack>
+          <GoogleSignIn />
           <TextInput
             label={t('auth.email')}
             type="email"

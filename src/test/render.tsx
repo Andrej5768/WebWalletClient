@@ -25,6 +25,8 @@ export const unexpectedRequests: string[] = [];
 
 /** Stubs fetch with handlers keyed by "METHOD /path" and returns the requests that were made. */
 export function mockApi(handlers: Record<string, Handler>): Request[] {
+  // The sign-in pages ask which ways of signing in the server offers
+  handlers = { 'GET /api/v1/auth/options': () => json({ googleSignIn: false }), ...handlers };
   const requests: Request[] = [];
   vi.stubGlobal('fetch', async (input: RequestInfo | URL, init?: RequestInit) => {
     const request =
