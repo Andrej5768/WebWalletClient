@@ -3,8 +3,8 @@ import type { ReactNode } from 'react';
 import { Navigate, useLocation } from 'react-router';
 import { useAuth } from './context';
 
-/** Shows the children to a signed-in user and sends everyone else to the sign-in page. */
-export function RequireAuth({ children }: { children: ReactNode }) {
+/** Shows the children to a signed-in user. Everyone else gets `home` at the root and the sign-in page elsewhere. */
+export function RequireAuth({ children, home }: { children: ReactNode; home?: ReactNode }) {
   const { status } = useAuth();
   const location = useLocation();
 
@@ -16,6 +16,7 @@ export function RequireAuth({ children }: { children: ReactNode }) {
     );
   }
   if (status === 'signedOut') {
+    if (home && location.pathname === '/') return home;
     return <Navigate to="/login" replace state={{ from: location.pathname + location.search }} />;
   }
   return children;
