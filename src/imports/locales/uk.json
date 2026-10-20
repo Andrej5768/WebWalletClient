@@ -68,8 +68,8 @@
       "file": "Файл",
       "tokenLabel": "API-токен Дзен-мані",
       "tokenHint": "Токен використовується один раз і не зберігається.",
-      "fileLabel": "Збережена відповідь синхронізації (JSON)",
-      "fileHint": "Відповідь POST /v8/diff/ із serverTimestamp 0.",
+      "fileLabel": "Файл експорту Zen Money (CSV)",
+      "fileHint": "CSV-експорт операцій із Zen Money («dump of transactions») — краще за весь час. Підходить і збережений JSON з API синхронізації.",
       "submit": "Імпортувати з Дзен-мані"
     },
     "preview": {

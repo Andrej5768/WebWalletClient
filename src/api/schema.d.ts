@@ -883,7 +883,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Import a saved response of the Zen Money sync API (POST /v8/diff/ with serverTimestamp 0) */
+        /**
+         * Import a file of Zen Money
+         * @description The CSV export of the app (dump of transactions) or a saved response of the sync API (POST /v8/diff/ with serverTimestamp 0)
+         */
         post: operations["importFile"];
         delete?: never;
         options?: never;
@@ -901,7 +904,7 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Preview a saved response of the Zen Money sync API without saving anything
+         * Preview a file of Zen Money without saving anything
          * @description Like POST /api/v1/imports/zenmoney/preview; only the parsed records are kept, not the file.
          */
         post: operations["previewFile"];
