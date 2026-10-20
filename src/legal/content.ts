@@ -46,6 +46,15 @@ export const privacy: Record<'uk' | 'en', LegalDocument> = {
         ],
       },
       {
+        title: 'Дані, які ми отримуємо від Google',
+        paragraphs: [
+          'Якщо ви входите через Google або підключаєте Google у налаштуваннях, ми запитуємо лише базові дозволи openid, email і profile. Від Google ми отримуємо ідентифікатор вашого акаунта Google, адресу пошти, позначку про її підтвердження, ім’я та прізвище.',
+          'Ці дані використовуються лише для того, щоб створити ваш акаунт WebWallet або увійти в нього, знайти акаунт із тією самою підтвердженою поштою і показати підключену пошту в налаштуваннях. Ми не отримуємо доступу до Gmail, Google Диска, контактів чи інших даних вашого акаунта Google.',
+          'Ми не продаємо дані від Google, не використовуємо їх для реклами чи навчання моделей штучного інтелекту і не передаємо їх третім особам, окрім випадків, коли цього вимагає закон. Вони зберігаються в нашій базі даних (Google Cloud, Польща) і видаляються, коли ви відключаєте Google у налаштуваннях або видаляєте акаунт.',
+          'Використання й передача WebWallet інформації, отриманої від API Google, відповідають Правилам використання даних користувачів сервісів Google API (Google API Services User Data Policy), зокрема вимогам щодо обмеженого використання (Limited Use).',
+        ],
+      },
+      {
         title: 'Сторонні сервіси',
         items: [
           'Monobank — за вашим токеном, щоб отримувати операції ваших рахунків.',
@@ -119,6 +128,15 @@ export const privacy: Record<'uk' | 'en', LegalDocument> = {
         title: 'Where the data is stored',
         paragraphs: [
           'The server and the database run in Google Cloud in the europe-central2 region (Warsaw, Poland). Service emails are sent with Amazon Simple Email Service in a European Union region.',
+        ],
+      },
+      {
+        title: 'Data we receive from Google',
+        paragraphs: [
+          'If you sign in with Google or connect Google in the settings, we ask only for the basic openid, email and profile permissions. From Google we receive the id of your Google account, your email address, whether it is verified, and your first and last name.',
+          'This data is used only to create your WebWallet account or sign you in to it, to find an account with the same verified email, and to show the connected email in the settings. We get no access to Gmail, Google Drive, contacts or any other data of your Google account.',
+          'We do not sell data received from Google, do not use it for advertising or to train artificial intelligence models, and do not give it to third parties except where the law requires. It is stored in our database (Google Cloud, Poland) and deleted when you disconnect Google in the settings or delete your account.',
+          'WebWallet’s use and transfer of information received from Google APIs adheres to the Google API Services User Data Policy, including the Limited Use requirements.',
         ],
       },
       {
