@@ -109,11 +109,12 @@
     },
     "source": {
       "title": "Source code",
-      "text": "The project is developed in the open: a Spring Boot server and a React web client. You can read the code, study it and check how your data is stored.",
-      "license": "PolyForm Noncommercial 1.0.0 license: the code is open for study and noncommercial use; commercial use is not allowed.",
+      "text": "The code of the project is published: a Spring Boot server and a React web client. You can read it and check how your data is stored.",
+      "license": "All rights reserved. The code is published for reference only: running, copying, modifying or distributing it requires written permission from the author.",
       "server": "Server",
       "client": "Web client"
     },
+    "footer": "All rights reserved",
     "cta": {
       "title": "Try WebWallet",
       "text": "All it takes is a name, an email and a password."

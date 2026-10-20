@@ -364,7 +364,7 @@ export function LandingPage() {
 
       <footer className={classes.footer}>
         <div className={`${classes.container} ${classes.footerRow}`}>
-          <span>© 2026 WebWallet · PolyForm Noncommercial 1.0.0</span>
+          <span>© 2026 WebWallet · {t('landing.footer')}</span>
           <Group gap={16}>
             <Anchor href={SERVER_REPO} c="dimmed" size="sm" target="_blank" rel="noreferrer">
               GitHub
