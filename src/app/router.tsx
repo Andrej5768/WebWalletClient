@@ -22,6 +22,7 @@ import { RestoreAccountPage } from '../auth/pages/RestoreAccountPage';
 import { VerifyEmailPage } from '../auth/pages/VerifyEmailPage';
 import { GuestOnly, RequireAuth } from '../auth/RequireAuth';
 import { LandingPage } from '../landing/LandingPage';
+import { LegalPage } from '../legal/LegalPage';
 import { AppShell } from '../shell/AppShell';
 
 export const routes = [
@@ -55,6 +56,9 @@ export const routes = [
       { path: '/reset-password', element: <ResetPasswordPage /> },
       { path: '/verify-email', element: <VerifyEmailPage /> },
       { path: '/restore-account', element: <RestoreAccountPage /> },
+      // Open to everyone, signed in or not
+      { path: '/privacy', element: <LegalPage page="privacy" /> },
+      { path: '/terms', element: <LegalPage page="terms" /> },
       {
         element: (
           <RequireAuth home={<LandingPage />}>

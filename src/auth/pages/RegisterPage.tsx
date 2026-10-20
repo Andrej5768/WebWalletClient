@@ -11,7 +11,7 @@ import {
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { api } from '../../api/client';
 import { fieldErrors, problemMessage, toProblem, type ApiProblem } from '../../api/errors';
@@ -125,6 +125,15 @@ export function RegisterPage() {
           <Button type="submit" fullWidth size="md" loading={submitting}>
             {t('auth.register.submit')}
           </Button>
+          <Text size="xs" c="dimmed" ta="center">
+            <Trans
+              i18nKey="auth.register.agree"
+              components={{
+                terms: <Anchor component={Link} to="/terms" size="xs" />,
+                privacy: <Anchor component={Link} to="/privacy" size="xs" />,
+              }}
+            />
+          </Text>
           <Text c="dimmed" ta="center">
             {t('auth.register.haveAccount')}{' '}
             <Anchor component={Link} to="/login" fw={500}>
