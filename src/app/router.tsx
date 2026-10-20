@@ -19,6 +19,7 @@ import { RegisterPage } from '../auth/pages/RegisterPage';
 import { ResetPasswordPage } from '../auth/pages/ResetPasswordPage';
 import { VerifyEmailPage } from '../auth/pages/VerifyEmailPage';
 import { GuestOnly, RequireAuth } from '../auth/RequireAuth';
+import { LandingPage } from '../landing/LandingPage';
 import { AppShell } from '../shell/AppShell';
 
 export const routes = [
@@ -51,7 +52,7 @@ export const routes = [
       { path: '/verify-email', element: <VerifyEmailPage /> },
       {
         element: (
-          <RequireAuth>
+          <RequireAuth home={<LandingPage />}>
             <AppShell />
           </RequireAuth>
         ),

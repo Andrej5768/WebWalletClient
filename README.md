@@ -31,9 +31,7 @@ backend, so a page reload starts with `POST /api/v1/auth/refresh`.
 | `npm run build`                                       | Production build into `dist/`                                                                                                                                                         |
 
 CI runs all of the above on every push; the `api-drift` job reports when the backend spec moved ahead of the
-committed copy. On `master`, once the checks pass, the `image` job publishes the build as
-the private image `ghcr.io/andrej5768/webwalletclient`, which the production server picks up within a few minutes (see "Production
-server" in the backend README).
+committed copy.
 
 ## Design
 
@@ -146,5 +144,6 @@ Tracked in the backend roadmap (phase 2); listed here with the client step that 
 
 ## License
 
-This project is source-available under the [PolyForm Noncommercial License 1.0.0](LICENSE.md).
-Personal and other noncommercial use is allowed. Commercial use requires a separate agreement with the author.
+All rights reserved. The source code is published for reference only: running, copying, modifying or distributing it
+requires written permission from the author. See [LICENSE.md](LICENSE.md); versions before 20 October 2026 were
+available under the PolyForm Noncommercial License 1.0.0.

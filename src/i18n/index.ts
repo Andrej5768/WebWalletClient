@@ -16,6 +16,8 @@ import invInstrumentEn from '../investments/instrument/locales/en.json';
 import invInstrumentUk from '../investments/instrument/locales/uk.json';
 import invOperationsEn from '../investments/operations/locales/en.json';
 import invOperationsUk from '../investments/operations/locales/uk.json';
+import landingEn from '../landing/locales/en.json';
+import landingUk from '../landing/locales/uk.json';
 import recurringEn from '../recurring/locales/en.json';
 import recurringUk from '../recurring/locales/uk.json';
 import reportsEn from '../reports/locales/en.json';
@@ -59,6 +61,7 @@ void i18n.use(initReactI18next).init({
         ...invInstrumentUk,
         ...invOperationsUk,
         ...taxesUk,
+        ...landingUk,
       },
     },
     en: {
@@ -76,6 +79,7 @@ void i18n.use(initReactI18next).init({
         ...invInstrumentEn,
         ...invOperationsEn,
         ...taxesEn,
+        ...landingEn,
       },
     },
   },
