@@ -66,7 +66,11 @@ export function TwoFactorCard() {
               </Text>
             </Stack>
           </Group>
-          {!enabled && <Button onClick={() => setDialog('setup')}>{t('settings.twoFactor.enable')}</Button>}
+          {!enabled && (
+            <Button onClick={() => setDialog('setup')} style={{ flexShrink: 0 }}>
+              {t('settings.twoFactor.enable')}
+            </Button>
+          )}
         </Group>
         {enabled && (
           <Group justify="space-between" gap="md" pt="md" style={{ borderTop: '1px solid var(--ww-border)' }}>

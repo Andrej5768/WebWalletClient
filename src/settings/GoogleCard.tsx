@@ -59,6 +59,7 @@ export function GoogleCard() {
   const unlinkButton = (
     <Button
       variant="default"
+      style={{ flexShrink: 0 }}
       disabled={!user?.hasPassword}
       loading={unlink.isPending}
       onClick={() => unlink.mutate()}
@@ -94,7 +95,12 @@ export function GoogleCard() {
             </Stack>
           </Group>
           {!linkedEmail ? (
-            <Button variant="default" loading={link.isPending} onClick={() => link.mutate()}>
+            <Button
+              variant="default"
+              loading={link.isPending}
+              onClick={() => link.mutate()}
+              style={{ flexShrink: 0 }}
+            >
               {t('settings.google.link')}
             </Button>
           ) : user?.hasPassword ? (
@@ -138,7 +144,12 @@ export function SetPasswordCard() {
               </Text>
             </Stack>
           </Group>
-          <Button variant="default" loading={send.isPending} onClick={() => send.mutate()}>
+          <Button
+            variant="default"
+            loading={send.isPending}
+            onClick={() => send.mutate()}
+            style={{ flexShrink: 0 }}
+          >
             {t('settings.password.send')}
           </Button>
         </Group>
