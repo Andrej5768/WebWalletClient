@@ -1,7 +1,8 @@
 # WebWallet Client
 
 Web client for the [WebWallet](https://github.com/Andrej5768/WebWallet) personal finance API: accounts,
-transactions, envelope budget, bank imports, reports and goals.
+transactions and recurring payments, envelope budget, bank and broker imports, reports and analytics, goals,
+investments and taxes.
 
 React + TypeScript on Vite, [Mantine](https://mantine.dev) components, TanStack Query, React Router,
 i18next (Ukrainian and English), an API client generated from the backend OpenAPI spec
@@ -30,7 +31,9 @@ backend, so a page reload starts with `POST /api/v1/auth/refresh`.
 | `npm run build`                                       | Production build into `dist/`                                                                                                                                                         |
 
 CI runs all of the above on every push; the `api-drift` job reports when the backend spec moved ahead of the
-committed copy.
+committed copy. On `master`, once the checks pass, the `image` job publishes the build as
+the private image `ghcr.io/andrej5768/webwalletclient`, which the production server picks up within a few minutes (see "Production
+server" in the backend README).
 
 ## Design
 
@@ -71,6 +74,9 @@ expenses red and income green, [Fixel](https://github.com/MacPaw/Fixel) for text
 
 - [x] Monobank: connect, synchronization schedule, card and jar links, differences, history progress
 - [x] PrivatBank PDF statement and Zen Money (token or file) with a preview before import
+- [x] Freedom Finance reports (trades and cash flows XLSX) with a preview: the instrument for each ticker (found at
+      the provider, already held or created by hand), every row with its status, rows left out, money and
+      positions after the import
 
 ### 6. Envelopes
 
@@ -95,7 +101,35 @@ expenses red and income green, [Fixel](https://github.com/MacPaw/Fixel) for text
 - [x] Goals on an account (e.g. a Monobank jar) or kept by hand, with the pace to the deadline
 - [x] Recurring payments in the feed: planned payments above today, matching with bank operations, linking,
       saving as a transaction, the series editor; balance forecast with planned payments on the overview
-- [ ] FIRE, FYM and the compound interest calculator (investments phase)
+- [x] FIRE, FYM and the compound interest calculator on the goals page
+
+### Investments
+
+- [x] Overview: key figures, value over time against the same deposits in S&P 500 / MSCI World / Nasdaq 100,
+      allocation by asset class and currency, the next payments; one ₴ / $ switch for the whole section
+- [x] Positions by account or by asset class
+- [x] Dividend calendar and list: received, expected, declared and forecast payments, yield
+- [x] Instrument page with lots (FIFO) and sales; side panel for trades, dividends, coupons, fees and splits,
+      instruments entered by hand (e.g. government bonds)
+- [x] Freedom Finance import (see step 5)
+- [x] Operations tab: every operation of the accounts with filters by kind; deposits, withdrawals and currency
+      exchanges entered by hand in the operation panel
+- [ ] Interactive Brokers import
+- [x] Returns over the period of the chart: time-weighted (TWR) and money-weighted (XIRR), also of the benchmark;
+      allocation by sector
+- [ ] Allocation by country, rebalancing
+
+### Taxes
+
+- [x] «Податки» page by year: the sole proprietor (ФОП) by quarter — income, single tax, military levy, social
+      contribution, deadlines, paid marks, the income limit, every income with a switch to leave it out — and the
+      investment income — dividends with the foreign tax credit, sales in hryvnias, the carried loss, the declaration
+      summary; CSV export of both
+- [x] Rates of each year with the defaults, a way back to them and links to the sources; income categories of the
+      sole proprietor
+- [x] «ФОП» account type; a switch in the transaction panel adds an income on another account to the taxes
+- [x] Declaration files for the tax service cabinet: XML of the quarter of the sole proprietor (group 3, with the
+      social contribution in the fourth quarter) and of the yearly declaration with Ф1; the taxpayer details they need
 
 ### Backend changes this client needs
 

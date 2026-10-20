@@ -90,8 +90,10 @@
     "budget": "Envelopes",
     "reports": "Reports",
     "goals": "Goals",
+    "investments": "Investments",
     "imports": "Import",
-    "settings": "Settings"
+    "settings": "Settings",
+    "taxes": "Taxes"
   },
   "shell": {
     "mainNav": "Main",
@@ -147,7 +149,8 @@
       "savings": "Savings",
       "debts": "Loans and debts",
       "investments": "Investments",
-      "archived": "Archive"
+      "archived": "Archive",
+      "fop": "Sole proprietor"
     },
     "types": {
       "CARD": "Card",
@@ -157,13 +160,15 @@
       "DEPOSIT": "Deposit",
       "LOAN": "Loan",
       "DEBT": "Debts with people",
-      "INVESTMENT": "Investments"
+      "INVESTMENT": "Investments",
+      "FOP": "Sole proprietor (FOP)"
     },
     "empty": {
       "title": "No accounts yet",
       "text": "Add an account by hand or connect Monobank in Import."
     },
     "menu": {
+      "positions": "Positions",
       "edit": "Edit",
       "transactions": "Account transactions",
       "newTransaction": "New transaction",

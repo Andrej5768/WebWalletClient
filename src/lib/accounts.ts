@@ -12,6 +12,7 @@ const TYPE_COLORS: Record<AccountType, string> = {
   LOAN: 'orange',
   DEBT: 'yellow',
   INVESTMENT: 'teal',
+  FOP: 'indigo',
 };
 
 export function accountColorName(type: AccountType | undefined): string {
@@ -25,5 +26,5 @@ export function accountColor(type: AccountType | undefined): string {
 
 /** Everyday money is budgeted by default; savings, deposits, loans, debts and investments are not. */
 export function inBudgetByDefault(type: AccountType): boolean {
-  return type === 'CASH' || type === 'CARD' || type === 'CREDIT_CARD';
+  return type === 'CASH' || type === 'CARD' || type === 'CREDIT_CARD' || type === 'FOP';
 }

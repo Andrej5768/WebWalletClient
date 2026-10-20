@@ -5,8 +5,11 @@ import {
   DashboardPage,
   GoalsPage,
   ImportsPage,
+  InstrumentPage,
+  InvestmentsPage,
   ReportsPage,
   SettingsPage,
+  TaxesPage,
   TransactionsPage,
 } from './pages';
 import { AuthProvider } from '../auth/AuthProvider';
@@ -61,6 +64,9 @@ export const routes = [
           { path: 'goals', element: <GoalsPage /> },
           { path: 'settings', element: <SettingsPage /> },
           { path: 'imports', element: <ImportsPage /> },
+          { path: 'investments', element: <InvestmentsPage /> },
+          { path: 'investments/instruments/:id', element: <InstrumentPage /> },
+          { path: 'taxes', element: <TaxesPage /> },
           { path: '*', element: <Navigate to="/" replace /> },
         ],
       },

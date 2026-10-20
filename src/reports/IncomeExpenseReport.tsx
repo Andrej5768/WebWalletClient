@@ -1,7 +1,8 @@
 import { BarChart } from '@mantine/charts';
+import { moneyAxis } from '../components/chartAxis';
 import { Card, SimpleGrid, Skeleton, Stack, Table, Text } from '@mantine/core';
 import { useTranslation } from 'react-i18next';
-import { formatMonthShort, formatPercent } from '../lib/format';
+import { capitalize, formatMonthShort, formatPercent } from '../lib/format';
 import { formatMoney } from '../lib/money';
 import type { Period } from '../lib/periods';
 import { useIncomeExpense } from './api';
@@ -49,6 +50,7 @@ export function IncomeExpenseReport({ period }: { period: Period }) {
           ]}
           withLegend
           valueFormatter={(value) => formatMoney(value, currency)}
+          yAxisProps={moneyAxis}
           gridAxis="y"
           tickLine="none"
         />
@@ -67,7 +69,7 @@ export function IncomeExpenseReport({ period }: { period: Period }) {
           <Table.Tbody>
             {[...(data?.months ?? [])].reverse().map((month) => (
               <Table.Tr key={month.month}>
-                <Table.Td tt="capitalize">{formatMonthShort(month.month)}</Table.Td>
+                <Table.Td>{capitalize(formatMonthShort(month.month))}</Table.Td>
                 <Table.Td ta="right" className="num income">
                   {formatMoney(month.income ?? 0, currency)}
                 </Table.Td>

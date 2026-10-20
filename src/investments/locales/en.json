@@ -1,0 +1,52 @@
+{
+  "investments": {
+    "title": "Investments",
+    "allAccounts": "All accounts",
+    "addOperation": "Add operation",
+    "noAccounts": "No investment accounts yet. Create an account of type “Investments” in Accounts to record trades.",
+    "pricesAsOf": "Closing prices of {{date}} · updated daily",
+    "tabs": {
+      "overview": "Overview",
+      "positions": "Positions",
+      "dividends": "Dividends",
+      "operations": "Operations"
+    },
+    "types": {
+      "STOCK": "Stocks",
+      "ETF": "ETFs",
+      "FUND": "Funds",
+      "BOND": "Bonds",
+      "GOVERNMENT_BOND": "Government bonds",
+      "CRYPTO": "Crypto",
+      "OTHER": "Other",
+      "CASH": "Cash"
+    },
+    "operationTypes": {
+      "BUY": "Buy",
+      "SELL": "Sell",
+      "DIVIDEND": "Dividend",
+      "COUPON": "Coupon",
+      "FEE": "Fee",
+      "SPLIT": "Split",
+      "DEPOSIT": "Deposit",
+      "WITHDRAWAL": "Withdrawal",
+      "EXCHANGE": "Currency exchange"
+    },
+    "sectors": {
+      "ENERGY": "Energy",
+      "MATERIALS": "Materials",
+      "INDUSTRIALS": "Industrials",
+      "CONSUMER_DISCRETIONARY": "Consumer discretionary",
+      "CONSUMER_STAPLES": "Consumer staples",
+      "HEALTH_CARE": "Health care",
+      "FINANCIALS": "Financials",
+      "INFORMATION_TECHNOLOGY": "Information technology",
+      "COMMUNICATION_SERVICES": "Communication services",
+      "UTILITIES": "Utilities",
+      "REAL_ESTATE": "Real estate",
+      "BONDS": "Bonds",
+      "OTHER": "Other",
+      "UNKNOWN": "Not known yet"
+    }
+  }
+}

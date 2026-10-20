@@ -20,40 +20,6 @@
   gap: 16px;
 }
 
-.track {
-  position: relative;
-  height: 8px;
-  border-radius: 4px;
-  background: var(--ww-subtle);
-  border: 1px solid var(--ww-border);
-  overflow: visible;
-}
-
-.fill {
-  position: absolute;
-  inset: 0 auto 0 0;
-  border-radius: 4px;
-  background: var(--mantine-primary-color-filled);
-}
-
-.fillOver {
-  background: var(--ww-expense);
-}
-
-.fillWarn {
-  background: var(--ww-warn-border);
-}
-
-.today {
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  width: 2px;
-  margin-left: -1px;
-  background: var(--ww-text);
-  opacity: 0.55;
-}
-
 .child td:first-child {
   padding-left: 48px;
 }

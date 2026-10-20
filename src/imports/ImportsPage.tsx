@@ -14,12 +14,20 @@ import {
   Title,
 } from '@mantine/core';
 import { useMutation } from '@tanstack/react-query';
-import { ChevronDown, FileText, Landmark, Upload } from 'lucide-react';
+import { ChevronDown, FileText, Landmark, TrendingUp, Upload } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAccounts } from '../api/queries';
 import { ProblemAlert } from '../components/feedback';
-import { previewPrivatBank, previewZenMoneyFile, previewZenMoneyToken, type Preview } from './api';
+import {
+  previewFreedom,
+  previewPrivatBank,
+  previewZenMoneyFile,
+  previewZenMoneyToken,
+  type BrokerPreview,
+  type Preview,
+} from './api';
+import { BrokerPreviewModal } from './BrokerPreviewModal';
 import { ImportPreviewModal } from './ImportPreviewModal';
 import { MonobankSection } from './MonobankSection';
 
@@ -40,6 +48,10 @@ export function ImportsPage() {
   const [zenMode, setZenMode] = useState<ZenMode>('token');
   const [zenToken, setZenToken] = useState('');
   const [zenFile, setZenFile] = useState<File | null>(null);
+  const [brokerPreview, setBrokerPreview] = useState<BrokerPreview | null>(null);
+  const [freedomTrades, setFreedomTrades] = useState<File | null>(null);
+  const [freedomCash, setFreedomCash] = useState<File | null>(null);
+  const [freedomAccount, setFreedomAccount] = useState<string | null>(null);
 
   const privat = useMutation({
     mutationFn: () => previewPrivatBank(privatFile!, privatAccount ? Number(privatAccount) : undefined),
@@ -57,6 +69,19 @@ export function ImportsPage() {
     meta: { errorShown: true },
   });
 
+  const freedom = useMutation({
+    mutationFn: () =>
+      previewFreedom(
+        [freedomTrades, freedomCash].filter((file): file is File => file !== null),
+        freedomAccount ? Number(freedomAccount) : undefined,
+      ),
+    onSuccess: setBrokerPreview,
+    meta: { errorShown: true },
+  });
+
+  const brokerageAccounts = (accounts.data ?? [])
+    .filter((account) => !account.archived && account.type === 'INVESTMENT')
+    .map((account) => ({ value: String(account.id), label: `${account.name} · ${account.currency}` }));
   const cardAccounts = (accounts.data ?? [])
     .filter((account) => !account.archived && (account.type === 'CARD' || account.type === 'CREDIT_CARD'))
     .map((account) => ({ value: String(account.id), label: account.name }));
@@ -99,13 +124,15 @@ export function ImportsPage() {
             >
               {t('imports.sources.zenFile')}
             </Menu.Item>
+            <Menu.Divider />
+            <Menu.Item onClick={() => scrollTo('freedom')}>{t('imports.sources.freedom')}</Menu.Item>
           </Menu.Dropdown>
         </Menu>
       </Group>
 
       <MonobankSection connectOpen={connectOpen} setConnectOpen={setConnectOpen} />
 
-      <SimpleGrid cols={{ base: 1, md: 2 }} spacing="md">
+      <SimpleGrid cols={{ base: 1, md: 2, lg: 3 }} spacing="md">
         <Card withBorder radius="md" padding="lg" id="privatbank">
           <Stack gap="md">
             <Group gap="sm">
@@ -203,9 +230,64 @@ export function ImportsPage() {
             </Button>
           </Stack>
         </Card>
+
+        <Card withBorder radius="md" padding="lg" id="freedom">
+          <Stack gap="md">
+            <Group gap="sm">
+              <ThemeIcon variant="light" color="gray" size={36} radius="md">
+                <TrendingUp size={18} />
+              </ThemeIcon>
+              <Stack gap={0}>
+                <Title order={2} size="h4">
+                  {t('imports.freedom.title')}
+                </Title>
+                <Text size="xs" c="dimmed">
+                  {t('imports.freedom.subtitle')}
+                </Text>
+              </Stack>
+            </Group>
+            <FileInput
+              label={t('imports.freedom.trades')}
+              placeholder={t('imports.privat.choose')}
+              accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+              clearable
+              value={freedomTrades}
+              onChange={setFreedomTrades}
+            />
+            <FileInput
+              label={t('imports.freedom.cashFlows')}
+              placeholder={t('imports.privat.choose')}
+              accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+              clearable
+              value={freedomCash}
+              onChange={setFreedomCash}
+              description={t('imports.freedom.filesHint')}
+              inputWrapperOrder={['label', 'input', 'description', 'error']}
+            />
+            <Select
+              label={t('imports.freedom.account')}
+              placeholder={t('imports.freedom.auto')}
+              description={t('imports.freedom.accountHint')}
+              inputWrapperOrder={['label', 'input', 'description', 'error']}
+              clearable
+              data={brokerageAccounts}
+              value={freedomAccount}
+              onChange={setFreedomAccount}
+            />
+            <ProblemAlert error={freedom.error} />
+            <Button
+              disabled={!freedomTrades && !freedomCash}
+              loading={freedom.isPending}
+              onClick={() => freedom.mutate()}
+            >
+              {t('imports.privat.submit')}
+            </Button>
+          </Stack>
+        </Card>
       </SimpleGrid>
 
       {preview && <ImportPreviewModal preview={preview} onClose={() => setPreview(null)} />}
+      {brokerPreview && <BrokerPreviewModal preview={brokerPreview} onClose={() => setBrokerPreview(null)} />}
     </Stack>
   );
 }

@@ -28,3 +28,23 @@ export function currencyOptions(current?: string): { value: string; label: strin
   const names = new Intl.DisplayNames([document.documentElement.lang || 'uk'], { type: 'currency' });
   return codes.map((code) => ({ value: code, label: `${code} — ${names.of(code) ?? code}` }));
 }
+
+interface Converted {
+  currency: string;
+  balance: number;
+  balanceInBase: number | null;
+}
+
+/**
+ * Today's rates to the base currency as the accounts show them (balance in base / balance), per currency; a currency
+ * of the base itself is 1. Accounts with a zero balance or without a rate say nothing about it.
+ */
+export function ratesFromAccounts(accounts: Converted[], baseCurrency: string): Map<string, number> {
+  const rates = new Map<string, number>([[baseCurrency, 1]]);
+  for (const account of accounts) {
+    if (!rates.has(account.currency) && account.balance !== 0 && account.balanceInBase != null) {
+      rates.set(account.currency, account.balanceInBase / account.balance);
+    }
+  }
+  return rates;
+}

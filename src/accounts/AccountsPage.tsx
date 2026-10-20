@@ -21,6 +21,7 @@ import {
   ArchiveRestore,
   ArrowLeftRight,
   Banknote,
+  BriefcaseBusiness,
   CircleCheck,
   CreditCard,
   EllipsisVertical,
@@ -56,6 +57,7 @@ const TYPE_ICONS: Record<AccountType, ReactNode> = {
   LOAN: <FileText size={16} />,
   DEBT: <Users size={16} />,
   INVESTMENT: <TrendingUp size={16} />,
+  FOP: <BriefcaseBusiness size={16} />,
 };
 
 type Link = Schemas['LinkResponse'];
@@ -200,6 +202,11 @@ export function AccountsPage() {
                   onArchive={() => archive.mutate(account)}
                   onTransactions={() => void navigate(`/transactions?accountId=${account.id}`)}
                   onNewTransaction={() => void navigate(`/transactions?new=1&accountId=${account.id}`)}
+                  onPositions={
+                    account.type === 'INVESTMENT'
+                      ? () => void navigate(`/investments?tab=positions&accountId=${account.id}`)
+                      : undefined
+                  }
                 />
               ))}
             </div>
@@ -220,6 +227,8 @@ interface RowProps {
   onArchive(): void;
   onTransactions(): void;
   onNewTransaction(): void;
+  /** A brokerage account opens its positions; its balance is mostly them. */
+  onPositions?: () => void;
 }
 
 function AccountRow({
@@ -230,6 +239,7 @@ function AccountRow({
   onArchive,
   onTransactions,
   onNewTransaction,
+  onPositions,
 }: RowProps) {
   const { t } = useTranslation();
   const balance = account.balance ?? 0;
@@ -240,7 +250,7 @@ function AccountRow({
     <div
       className={`${classes.row} ${classes.item}`}
       style={{ opacity: account.archived ? 0.6 : 1 }}
-      onDoubleClick={onEdit}
+      onDoubleClick={onPositions ?? onEdit}
     >
       <Group gap={12} wrap="nowrap" py={8}>
         <ThemeIcon variant="light" color={accountColorName(account.type)} size={32} radius="md">
@@ -311,6 +321,11 @@ function AccountRow({
           </ActionIcon>
         </Menu.Target>
         <Menu.Dropdown>
+          {onPositions && (
+            <Menu.Item leftSection={<TrendingUp size={14} />} onClick={onPositions}>
+              {t('accounts.menu.positions')}
+            </Menu.Item>
+          )}
           <Menu.Item onClick={onEdit}>{t('accounts.menu.edit')}</Menu.Item>
           <Menu.Item leftSection={<ArrowLeftRight size={14} />} onClick={onTransactions}>
             {t('accounts.menu.transactions')}

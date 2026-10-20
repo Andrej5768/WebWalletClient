@@ -46,3 +46,36 @@ export const confirmPreview = (id: string, operations: OperationEdit[]): Promise
   unwrap(
     api.POST('/api/v1/imports/previews/{id}/confirm', { params: { path: { id } }, body: { operations } }),
   );
+
+export type BrokerPreview = Schemas['BrokerPreviewResponse'];
+export type BrokerOperation = Schemas['OperationPreview'];
+export type BrokerTicker = Schemas['TickerPreview'];
+export type InstrumentChoice = Schemas['InstrumentChoice'];
+export type TickerChoice = Schemas['TickerChoice'];
+export type BrokerImportResult = Schemas['BrokerImportResult'];
+
+/** The trades and cash flows reports of Freedom Finance, in any order. */
+export const previewFreedom = (files: File[], accountId?: number): Promise<BrokerPreview> =>
+  unwrap(
+    api.POST('/api/v1/imports/freedom/preview', {
+      params: { query: { accountId } },
+      body: { files: files as unknown as string[] },
+      bodySerializer: (body) => {
+        const form = new FormData();
+        (body?.files ?? []).forEach((file) => form.append('files', file as unknown as Blob));
+        return form;
+      },
+    }),
+  );
+
+export const confirmFreedom = (
+  id: string,
+  instruments: TickerChoice[],
+  excluded: string[],
+): Promise<BrokerImportResult> =>
+  unwrap(
+    api.POST('/api/v1/imports/freedom/previews/{id}/confirm', {
+      params: { path: { id } },
+      body: { instruments, excluded },
+    }),
+  );

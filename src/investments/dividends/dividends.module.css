@@ -1,0 +1,120 @@
+.calendar {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  border-top: 1px solid var(--ww-border);
+  border-left: 1px solid var(--ww-border);
+}
+
+.weekday {
+  padding: 6px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--ww-faint);
+  border-right: 1px solid var(--ww-border);
+  border-bottom: 1px solid var(--ww-border);
+}
+
+.cell {
+  min-height: 92px;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border-right: 1px solid var(--ww-border);
+  border-bottom: 1px solid var(--ww-border);
+  min-width: 0;
+}
+
+.outside {
+  background: var(--ww-subtle);
+}
+
+.today .dayNumber {
+  color: var(--mantine-primary-color-contrast);
+  background: var(--mantine-primary-color-filled);
+}
+
+.dayNumber {
+  align-self: flex-start;
+  min-width: 22px;
+  padding: 1px 6px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 500;
+  text-align: center;
+}
+
+.payment {
+  display: flex;
+  justify-content: space-between;
+  gap: 4px;
+  padding: 2px 6px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  font-size: 11px;
+  line-height: 1.5;
+  min-width: 0;
+}
+
+.payment span:first-child {
+  font-family: var(--mantine-font-family-monospace);
+  font-weight: 600;
+}
+
+.RECEIVED {
+  background: color-mix(in srgb, var(--ww-income) 14%, transparent);
+  color: var(--ww-income);
+}
+
+.EXPECTED {
+  background: var(--ww-warn-bg);
+  border-color: var(--ww-warn-border);
+  color: var(--ww-warn-text);
+}
+
+.DECLARED {
+  background: color-mix(in srgb, var(--mantine-primary-color-filled) 14%, transparent);
+  color: var(--ww-accent-text);
+}
+
+.FORECAST {
+  border: 1px dashed var(--ww-accent-text);
+  color: var(--ww-accent-text);
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 120px minmax(180px, 1fr) 140px 150px 110px 120px 110px 100px;
+  align-items: center;
+  column-gap: 12px;
+  padding: 8px 16px;
+  min-height: 52px;
+  border-top: 1px solid var(--ww-border);
+}
+
+.head {
+  font-size: 12px;
+  color: var(--ww-faint);
+  min-height: 36px;
+}
+
+.monthHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 36px;
+  padding: 0 16px;
+  background: var(--ww-subtle);
+  border-top: 1px solid var(--ww-border);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.expectedRow {
+  background: var(--ww-warn-bg);
+}
+
+.right {
+  text-align: right;
+}

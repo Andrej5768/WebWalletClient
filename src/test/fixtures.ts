@@ -230,3 +230,176 @@ export function recurringOf(
     ...overrides,
   };
 }
+
+export function instrumentOf(
+  overrides: Partial<Schemas['InstrumentResponse']> = {},
+): Schemas['InstrumentResponse'] {
+  return {
+    id: 1,
+    symbol: 'AAPL',
+    name: 'Apple Inc',
+    type: 'STOCK',
+    currency: 'USD',
+    exchange: 'NASDAQ',
+    micCode: 'XNGS',
+    isin: null,
+    valuation: 'MARKET',
+    own: false,
+    nominal: null,
+    couponRate: null,
+    couponFrequency: null,
+    maturityDate: null,
+    price: null,
+    priceDate: null,
+    ...overrides,
+  };
+}
+
+export function positionOf(
+  overrides: Partial<Schemas['PositionResponse']> = {},
+): Schemas['PositionResponse'] {
+  return {
+    accountId: 1,
+    instrument: instrumentOf(),
+    quantity: 0,
+    averagePrice: 0,
+    price: null,
+    priceDate: null,
+    dayChange: null,
+    value: 0,
+    cost: 0,
+    unrealized: 0,
+    unrealizedShare: null,
+    valueInBase: null,
+    share: null,
+    ...overrides,
+  };
+}
+
+export function portfolioOf(
+  overrides: Partial<Schemas['PortfolioResponse']> = {},
+): Schemas['PortfolioResponse'] {
+  return {
+    currency: 'UAH',
+    value: 0,
+    deposited: 0,
+    invested: 0,
+    unrealized: 0,
+    unrealizedShare: null,
+    realizedThisYear: 0,
+    dividendsLast12Months: 0,
+    dayChange: 0,
+    pricesAsOf: null,
+    positions: [],
+    cash: [],
+    byType: [],
+    byCurrency: [],
+    bySector: [],
+    unconvertedCurrencies: [],
+    ...overrides,
+  };
+}
+
+export function historyOf(overrides: Partial<Schemas['HistoryResponse']> = {}): Schemas['HistoryResponse'] {
+  return {
+    currency: 'UAH',
+    from: '2026-01-01',
+    to: '2026-10-15',
+    benchmark: null,
+    points: [],
+    returns: { twr: null, twrAnnualized: null, xirr: null, benchmarkTwr: null, benchmarkXirr: null },
+    unconvertedCurrencies: [],
+    ...overrides,
+  };
+}
+
+export function dividendEventOf(overrides: Partial<Schemas['CalendarEvent']> = {}): Schemas['CalendarEvent'] {
+  return {
+    date: '2026-11-15',
+    exDate: null,
+    status: 'FORECAST',
+    accountId: 1,
+    instrumentId: 1,
+    symbol: 'AAPL',
+    name: 'Apple Inc',
+    type: 'STOCK',
+    quantity: 10,
+    perShare: 0.26,
+    gross: 2.6,
+    tax: 0.39,
+    net: 2.21,
+    currency: 'USD',
+    grossInTarget: 2.6,
+    netInTarget: 2.21,
+    taxEstimated: true,
+    ...overrides,
+  };
+}
+
+export function dividendCalendarOf(
+  overrides: Partial<Schemas['CalendarResponse']> = {},
+): Schemas['CalendarResponse'] {
+  return {
+    currency: 'USD',
+    from: '2025-10-01',
+    to: '2027-10-31',
+    next12Months: 0,
+    next12MonthsNet: 0,
+    monthly: 0,
+    yield: null,
+    yieldOnCost: null,
+    received12Months: 0,
+    months: [],
+    receivedByInstrument: [],
+    events: [],
+    unconvertedCurrencies: [],
+    ...overrides,
+  };
+}
+
+export function investmentOperationOf(
+  overrides: Partial<Schemas['OperationResponse']> = {},
+): Schemas['OperationResponse'] {
+  return {
+    id: 1,
+    type: 'BUY',
+    accountId: 3,
+    instrumentId: 7,
+    symbol: 'AAPL',
+    date: '2026-01-10',
+    quantity: 10,
+    price: 100,
+    amount: 1000,
+    fee: 0,
+    tax: 0,
+    currency: 'USD',
+    cash: -1000,
+    toAmount: null,
+    toCurrency: null,
+    splitFrom: null,
+    splitTo: null,
+    comment: null,
+    ...overrides,
+  };
+}
+
+export function positionDetailOf(
+  overrides: Partial<Schemas['PositionDetailResponse']> = {},
+): Schemas['PositionDetailResponse'] {
+  return {
+    instrument: instrumentOf({ id: 7, price: 220, priceDate: '2026-10-15' }),
+    accountId: 3,
+    quantity: 0,
+    averagePrice: null,
+    price: 220,
+    value: 0,
+    cost: 0,
+    unrealized: 0,
+    realized: 0,
+    dividends: 0,
+    lots: [],
+    sales: [],
+    operations: [],
+    ...overrides,
+  };
+}

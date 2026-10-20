@@ -4,11 +4,25 @@ import goalsEn from '../goals/locales/en.json';
 import goalsUk from '../goals/locales/uk.json';
 import importsEn from '../imports/locales/en.json';
 import importsUk from '../imports/locales/uk.json';
+import investmentsEn from '../investments/locales/en.json';
+import investmentsUk from '../investments/locales/uk.json';
+import invOverviewEn from '../investments/overview/locales/en.json';
+import invOverviewUk from '../investments/overview/locales/uk.json';
+import invPositionsEn from '../investments/positions/locales/en.json';
+import invPositionsUk from '../investments/positions/locales/uk.json';
+import invDividendsEn from '../investments/dividends/locales/en.json';
+import invDividendsUk from '../investments/dividends/locales/uk.json';
+import invInstrumentEn from '../investments/instrument/locales/en.json';
+import invInstrumentUk from '../investments/instrument/locales/uk.json';
+import invOperationsEn from '../investments/operations/locales/en.json';
+import invOperationsUk from '../investments/operations/locales/uk.json';
 import recurringEn from '../recurring/locales/en.json';
 import recurringUk from '../recurring/locales/uk.json';
 import reportsEn from '../reports/locales/en.json';
 import reportsUk from '../reports/locales/uk.json';
 import settingsEn from '../settings/locales/en.json';
+import taxesEn from '../taxes/locales/en.json';
+import taxesUk from '../taxes/locales/uk.json';
 import settingsUk from '../settings/locales/uk.json';
 import en from './en.json';
 import uk from './uk.json';
@@ -30,8 +44,40 @@ function initialLanguage(): Language {
 void i18n.use(initReactI18next).init({
   // Feature folders keep their own strings; they are merged into one namespace.
   resources: {
-    uk: { translation: { ...uk, ...settingsUk, ...importsUk, ...goalsUk, ...reportsUk, ...recurringUk } },
-    en: { translation: { ...en, ...settingsEn, ...importsEn, ...goalsEn, ...reportsEn, ...recurringEn } },
+    uk: {
+      translation: {
+        ...uk,
+        ...settingsUk,
+        ...importsUk,
+        ...goalsUk,
+        ...reportsUk,
+        ...recurringUk,
+        ...investmentsUk,
+        ...invOverviewUk,
+        ...invPositionsUk,
+        ...invDividendsUk,
+        ...invInstrumentUk,
+        ...invOperationsUk,
+        ...taxesUk,
+      },
+    },
+    en: {
+      translation: {
+        ...en,
+        ...settingsEn,
+        ...importsEn,
+        ...goalsEn,
+        ...reportsEn,
+        ...recurringEn,
+        ...investmentsEn,
+        ...invOverviewEn,
+        ...invPositionsEn,
+        ...invDividendsEn,
+        ...invInstrumentEn,
+        ...invOperationsEn,
+        ...taxesEn,
+      },
+    },
   },
   lng: initialLanguage(),
   fallbackLng: 'uk',

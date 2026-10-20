@@ -1,0 +1,58 @@
+{
+  "invOverview": {
+    "currency": "Currency",
+    "value": "Portfolio value",
+    "dayChange": "{{amount}} today",
+    "invested": "Invested",
+    "investedNote": "net deposits · result {{result}}",
+    "unrealized": "Unrealized profit",
+    "realized": "Realized in {{year}}",
+    "realizedNote": "sales by FIFO",
+    "dividends": "Dividends over 12 months",
+    "dividendsNote": "after withheld tax",
+    "chart": {
+      "title": "Portfolio value",
+      "range": "Period",
+      "ranges": {
+        "3m": "3 mo",
+        "6m": "6 mo",
+        "1y": "1 yr",
+        "all": "All"
+      },
+      "compareWith": "Compare with:",
+      "benchmarks": {
+        "none": "No comparison",
+        "SP500": "S&P 500",
+        "MSCI_WORLD": "MSCI World",
+        "NASDAQ100": "Nasdaq 100"
+      },
+      "value": "Value",
+      "deposited": "Deposited",
+      "benchmark": "If the same deposits went into {{name}}",
+      "difference": "{{amount}} vs {{name}}",
+      "loading": "Index prices are loading — the comparison appears in a few minutes.",
+      "empty": "No data for the chart yet: add a transfer to the brokerage account or the first trade.",
+      "portfolio": "Portfolio",
+      "sameDeposits": "Same deposits in {{name}}",
+      "differenceLabel": "Difference",
+      "note": "Deposits “buy” the index fund at the close of their day; dividends are not reinvested."
+    },
+    "allocation": {
+      "byType": "Asset classes",
+      "byCurrency": "Currencies",
+      "empty": "No positions",
+      "bySector": "By sector",
+      "sectorsLoading": "The sectors of instruments load gradually, a few a day."
+    },
+    "unrealizedNote": "{{share}} of the cost of {{cost}}",
+    "returns": {
+      "twr": "Investment return (TWR)",
+      "xirr": "Your return (XIRR), per year",
+      "benchmarkTwr": "{{name}}: TWR",
+      "benchmarkXirr": "{{name}}: XIRR",
+      "perYear": "{{value}} per year",
+      "what": "What TWR and XIRR mean",
+      "hint": "TWR shows how the investments themselves did: deposits and their timing do not affect it, which makes it fit for comparing with an index. XIRR is your annual return including when and how much you deposited, like the rate of a deposit that would give the same result. Example: the portfolio grew 10 %, but most money came in right before a fall — TWR is 10 %, XIRR is lower."
+    }
+  }
+}

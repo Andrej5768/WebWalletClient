@@ -12,7 +12,7 @@
 
 .row {
   display: grid;
-  grid-template-columns: 32px minmax(240px, 1fr) 200px 160px;
+  grid-template-columns: 32px minmax(200px, 1fr) minmax(120px, 200px) minmax(140px, max-content);
   align-items: center;
   column-gap: 14px;
   padding: 8px 20px;
@@ -40,4 +40,9 @@
 
 .footer {
   border-top: 1px solid var(--ww-border);
+}
+
+/* Amounts keep their currency sign on one line, also on narrow screens */
+.row .num {
+  white-space: nowrap;
 }

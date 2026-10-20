@@ -1,12 +1,13 @@
 import { Checkbox, Loader, Modal, Radio, Stack, Text, TextInput } from '@mantine/core';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useDebouncedValue } from '@mantine/hooks';
 import dayjs from 'dayjs';
 import { Search } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api, type Schemas } from '../api/client';
-import { check } from '../api/http';
-import { invalidateLedger } from '../api/queries';
+import { check, unwrap } from '../api/http';
+import { invalidateLedger, queryKeys } from '../api/queries';
 import { ProblemAlert } from '../components/feedback';
 import { FormFooter } from '../components/FormFooter';
 import { formatDayShort } from '../lib/format';
@@ -15,6 +16,9 @@ import { requestOf, useCandidates, useRecurringPayments, type Occurrence } from 
 import classes from './recurring.module.css';
 
 type Transaction = Schemas['TransactionResponse'];
+
+/** The search looks this many days around the date, further than the suggested candidates. */
+const SEARCH_DAYS = 60;
 
 /** Links an existing operation to a planned payment, e.g. one paid from another card. */
 export function LinkModal({
@@ -34,7 +38,43 @@ export function LinkModal({
   const [search, setSearch] = useState('');
   const [updateAmount, setUpdateAmount] = useState(false);
 
-  const chosen = candidates.data?.find((item) => String(item.id) === selected);
+  const [query] = useDebouncedValue(search.trim(), 300);
+  // A search goes through all operations of the type around the date, not only the near candidates
+  const found = useQuery({
+    queryKey: [...queryKeys.transactions, 'link-search', occurrence.recurringId, occurrence.date, query],
+    queryFn: () =>
+      unwrap(
+        api.GET('/api/v1/transactions', {
+          params: {
+            query: {
+              q: query,
+              type: occurrence.type,
+              from: dayjs(occurrence.date).subtract(SEARCH_DAYS, 'day').format('YYYY-MM-DD'),
+              to: dayjs(occurrence.date).add(SEARCH_DAYS, 'day').format('YYYY-MM-DD'),
+              size: 50,
+            },
+          },
+        }),
+      ),
+    enabled: query.length > 0,
+    placeholderData: keepPreviousData,
+  });
+  const lower = query.toLowerCase();
+  const near = (candidates.data ?? []).filter(
+    (item) =>
+      !lower ||
+      [item.payee?.name, item.comment, String(item.amount)].some((text) =>
+        text?.toLowerCase().includes(lower),
+      ),
+  );
+  // The near candidates stay on top; operations that already pay a payment are left out
+  const visible: Transaction[] = [
+    ...near,
+    ...(lower ? (found.data?.items ?? []) : []).filter(
+      (item) => item.recurring == null && !near.some((candidate) => candidate.id === item.id),
+    ),
+  ];
+  const chosen = visible.find((item) => String(item.id) === selected);
   const amountDiffers = chosen !== undefined && chosen.amount !== occurrence.amount;
   const series = recurring.data?.find((item) => item.id === occurrence.recurringId);
 
@@ -61,15 +101,6 @@ export function LinkModal({
     },
     meta: { errorShown: true },
   });
-
-  const query = search.trim().toLowerCase();
-  const visible = (candidates.data ?? []).filter(
-    (item) =>
-      !query ||
-      [item.payee?.name, item.comment, String(item.amount)].some((text) =>
-        text?.toLowerCase().includes(query),
-      ),
-  );
 
   const reason = (item: Transaction) => {
     const parts: string[] = [];

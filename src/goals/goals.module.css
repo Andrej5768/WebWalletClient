@@ -16,18 +16,27 @@
   border-top: 1px solid var(--ww-border);
 }
 
-/* The marker of where the progress should be today, over the bar. */
-.pace {
-  position: relative;
+/* Inputs on the left, results on the right; stacked on narrow screens. */
+.two {
+  display: grid;
+  grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
 }
 
-.pace > i {
+@media (max-width: 860px) {
+  .two {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.track > i > b {
   position: absolute;
-  top: -4px;
-  bottom: -4px;
-  width: 2px;
-  margin-left: -1px;
-  border-radius: 1px;
-  background: var(--ww-text);
-  opacity: 0.55;
+  top: 22px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ww-faint);
+  white-space: nowrap;
 }

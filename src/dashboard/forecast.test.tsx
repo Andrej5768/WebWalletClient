@@ -1,6 +1,6 @@
 import { screen, within } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
-import { categoryOf, forecastOf } from '../test/fixtures';
+import { categoryOf, forecastOf, recurringOf } from '../test/fixtures';
 import { json, mockApi, plain, renderApp, signedInApi } from '../test/render';
 import { expectedDate, forecastChart, loadMinimum } from './forecast';
 
@@ -32,7 +32,7 @@ function renderDashboard(handlers: Parameters<typeof mockApi>[0] = {}) {
   mockApi({
     ...signedInApi,
     'GET /api/v1/categories': () => json([categoryOf({ id: 7, name: 'Комуналка', icon: 'house' })]),
-    'GET /api/v1/recurring': () => json([{ id: 1 }]),
+    'GET /api/v1/recurring': () => json([recurringOf({ id: 1 })]),
     'GET /api/v1/forecast': () => json(forecast),
     ...handlers,
   });

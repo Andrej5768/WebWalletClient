@@ -1,4 +1,5 @@
 import { BarChart } from '@mantine/charts';
+import { moneyAxis } from '../components/chartAxis';
 import { Alert, Anchor, Button, Card, Group, SimpleGrid, Skeleton, Stack, Text, Title } from '@mantine/core';
 import { TriangleAlert } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -10,7 +11,7 @@ import { Amount } from '../components/Amount';
 import { CategoryIcon } from '../components/CategoryIcon';
 import { QueryError } from '../components/feedback';
 import { Figure, ShareBar } from '../components/Figure';
-import { formatMonthLong, formatMonthShort } from '../lib/format';
+import { formatMonthShort, formatMonthTitle } from '../lib/format';
 import { formatMoney } from '../lib/money';
 import { mantineColor } from '../lib/palette';
 import { isoDate, kyivToday, periodOf } from '../lib/periods';
@@ -50,9 +51,7 @@ export function DashboardPage() {
         <Title order={1} size="h2">
           {t('nav.dashboard')}
         </Title>
-        <Text c="dimmed" tt="capitalize">
-          {formatMonthLong(month)}
-        </Text>
+        <Text c="dimmed">{formatMonthTitle(month)}</Text>
       </Stack>
       <QueryError error={error} />
 
@@ -180,6 +179,7 @@ export function DashboardPage() {
                 ]}
                 withLegend
                 valueFormatter={(value) => formatMoney(value, currency)}
+                yAxisProps={moneyAxis}
                 gridAxis="y"
                 tickLine="none"
               />
@@ -214,10 +214,11 @@ export function DashboardPage() {
                           {formatMoney(available, budget.data?.currency ?? currency)}
                         </Text>
                       </Group>
-                      <div className={classes.pace}>
-                        <ShareBar share={share} color={available < 0 ? 'var(--ww-expense)' : undefined} />
-                        <i style={{ left: `${progress * 100}%` }} />
-                      </div>
+                      <ShareBar
+                        share={share}
+                        color={available < 0 ? 'var(--ww-expense)' : undefined}
+                        marker={progress}
+                      />
                     </Stack>
                   );
                 })}

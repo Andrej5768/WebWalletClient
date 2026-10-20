@@ -6,7 +6,8 @@
       "monobank": "Monobank — connect",
       "privatbank": "PrivatBank — PDF statement",
       "zenToken": "Zen Money — token",
-      "zenFile": "Zen Money — file"
+      "zenFile": "Zen Money — file",
+      "freedom": "Freedom Finance — XLSX reports"
     },
     "monobank": {
       "intro": "Connect Monobank with a personal token: cards and jars become accounts and transactions arrive on their own.",
@@ -125,6 +126,106 @@
       "warnings": "Warnings",
       "close": "Close",
       "toTransactions": "Go to transactions"
+    },
+    "freedom": {
+      "title": "Freedom Finance",
+      "subtitle": "Trades and cash flows from the Freedom24 cabinet",
+      "trades": "Trades",
+      "cashFlows": "Cash flows",
+      "filesHint": "Both reports are needed: only the cash flows give the currency of the fees. The files are not stored.",
+      "account": "Brokerage account",
+      "auto": "Account “Freedom Finance” — created when missing",
+      "accountHint": "Importing again skips what is already there."
+    },
+    "broker": {
+      "newAccount": "new account “{{name}}”",
+      "account": "account “{{name}}”",
+      "operations_one": "{{count}} operation",
+      "operations_other": "{{count}} operations",
+      "kinds": {
+        "BUY_SELL_one": "{{count}} trade",
+        "BUY_SELL_other": "{{count}} trades",
+        "EXCHANGE_one": "{{count}} currency exchange",
+        "EXCHANGE_other": "{{count}} currency exchanges",
+        "DIVIDEND_one": "{{count}} dividend",
+        "DIVIDEND_other": "{{count}} dividends",
+        "FEE_one": "{{count}} fee",
+        "FEE_other": "{{count}} fees",
+        "DEPOSIT_one": "{{count}} deposit",
+        "DEPOSIT_other": "{{count}} deposits",
+        "WITHDRAWAL_one": "{{count}} withdrawal",
+        "WITHDRAWAL_other": "{{count}} withdrawals"
+      },
+      "duplicates_one": "{{count}} imported before",
+      "duplicates_other": "{{count}} imported before",
+      "manualCount_one": "{{count}} instrument is created by hand",
+      "manualCount_other": "{{count}} instruments are created by hand",
+      "providerUnavailable": "The price provider did not answer, so instruments not yet in the ledger will be created by hand. Try later or choose another instrument.",
+      "instruments": "Instruments",
+      "rows": "Operations",
+      "columns": {
+        "ticker": "In the report",
+        "instrument": "Instrument in WebWallet",
+        "state": "State",
+        "after": "After the import",
+        "date": "Date",
+        "type": "Type",
+        "what": "Instrument or description",
+        "quantity": "Quantity × price",
+        "cash": "Money",
+        "status": "Status"
+      },
+      "state": {
+        "found": "Found",
+        "known": "Already in the ledger",
+        "manual": "Unknown to the provider",
+        "shortfall": "Purchases missing"
+      },
+      "createManual": "Create by hand: {{symbol}} · {{currency}}",
+      "otherInstrument": "Another instrument…",
+      "instrumentFor": "Instrument for {{ticker}}",
+      "wrongCurrency": "An instrument in {{currency}} is needed",
+      "units_one": "{{quantity}} unit",
+      "units_other": "{{quantity}} units",
+      "closed": "closed",
+      "filters": {
+        "all": "All",
+        "trades": "Trades and exchanges",
+        "income": "Dividends",
+        "fees": "Fees",
+        "cash": "Deposits",
+        "skipped": "Skipped"
+      },
+      "notes": {
+        "fee": "fee {{fee}}",
+        "trade": "trade {{number}}",
+        "tax": "tax {{tax}}",
+        "rate": "at {{rate}}"
+      },
+      "skip": {
+        "SERVICE": "Service row",
+        "UNKNOWN": "Unrecognized row",
+        "badge": "Skip"
+      },
+      "status": {
+        "NEW": "New",
+        "DUPLICATE": "Imported before",
+        "SKIPPED": "Skipped"
+      },
+      "include": "Import: {{what}}, {{date}}",
+      "after": "After the import the account holds: {{positions}}; money: {{cash}}",
+      "noPositions": "no positions",
+      "afterHint": "Compare with the broker cabinet. Trade fees come from the cash flows; blocking and unblocking rows of a withdrawal move no money and are skipped.",
+      "shortfall": "The reports sell more {{tickers}} than they buy before: such an import fails. Add the reports of an earlier period or leave these sales out.",
+      "skipped_one": "{{count}} row skipped",
+      "skipped_other": "{{count}} rows skipped",
+      "result": {
+        "operationsImported": "operations imported",
+        "duplicates": "already in the ledger",
+        "instrumentsCreated": "instruments created by hand",
+        "accountsCreated": "accounts created",
+        "toInvestments": "Go to investments"
+      }
     }
   }
 }

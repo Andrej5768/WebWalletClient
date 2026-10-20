@@ -1,4 +1,5 @@
 import { LineChart } from '@mantine/charts';
+import { moneyAxis } from '../../components/chartAxis';
 import { Button, Card, Skeleton, Stack, Text, Title } from '@mantine/core';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -6,7 +7,7 @@ import type { Schemas } from '../../api/client';
 import { useCategoriesById } from '../../api/queries';
 import { QueryError, UnconvertedAlert } from '../../components/feedback';
 import { locale } from '../../i18n';
-import { formatMonthShort } from '../../lib/format';
+import { capitalize, formatMonthShort } from '../../lib/format';
 import { formatMoney } from '../../lib/money';
 import { mantineColor } from '../../lib/palette';
 import { useTrends } from './api';
@@ -80,6 +81,7 @@ export function TrendsView() {
               }))}
               curveType="linear"
               valueFormatter={(value) => money(value)}
+              yAxisProps={moneyAxis}
               gridAxis="y"
               tickLine="none"
               lineChartProps={{
@@ -92,9 +94,7 @@ export function TrendsView() {
           </div>
           {data.months.length > 0 && (
             <div className={classes.trendSide}>
-              <Text fw={500} tt="capitalize">
-                {formatMonthShort(data.months[shown]?.month)}
-              </Text>
+              <Text fw={500}>{capitalize(formatMonthShort(data.months[shown]?.month))}</Text>
               <Text size="xs" c="dimmed" mb={4}>
                 {t('analytics.trends.sideHint')}
               </Text>

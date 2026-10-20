@@ -6,7 +6,8 @@
       "monobank": "Monobank — підключення",
       "privatbank": "ПриватБанк — виписка PDF",
       "zenToken": "Дзен-мані — токен",
-      "zenFile": "Дзен-мані — файл"
+      "zenFile": "Дзен-мані — файл",
+      "freedom": "Freedom Finance — звіти XLSX"
     },
     "monobank": {
       "intro": "Підключіть Monobank особистим токеном: картки й банки з’являться як рахунки, а операції підтягуватимуться самі.",
@@ -131,6 +132,128 @@
       "warnings": "Попередження",
       "close": "Закрити",
       "toTransactions": "Перейти до операцій"
+    },
+    "freedom": {
+      "title": "Freedom Finance",
+      "subtitle": "Угоди й рух коштів з кабінету Freedom24",
+      "trades": "Угоди",
+      "cashFlows": "Рух коштів",
+      "filesHint": "Потрібні обидва звіти: валюта комісій є лише в русі коштів. Файли не зберігаються.",
+      "account": "Брокерський рахунок",
+      "auto": "Рахунок «Freedom Finance» — створити, якщо немає",
+      "accountHint": "Повторний імпорт пропускає вже завантажене."
+    },
+    "broker": {
+      "newAccount": "новий рахунок «{{name}}»",
+      "account": "рахунок «{{name}}»",
+      "operations_one": "{{count}} операція",
+      "operations_few": "{{count}} операції",
+      "operations_many": "{{count}} операцій",
+      "operations_other": "{{count}} операції",
+      "kinds": {
+        "BUY_SELL_one": "{{count}} угода",
+        "BUY_SELL_few": "{{count}} угоди",
+        "BUY_SELL_many": "{{count}} угод",
+        "BUY_SELL_other": "{{count}} угоди",
+        "EXCHANGE_one": "{{count}} обмін валют",
+        "EXCHANGE_few": "{{count}} обміни валют",
+        "EXCHANGE_many": "{{count}} обмінів валют",
+        "EXCHANGE_other": "{{count}} обміни валют",
+        "DIVIDEND_one": "{{count}} дивіденд",
+        "DIVIDEND_few": "{{count}} дивіденди",
+        "DIVIDEND_many": "{{count}} дивідендів",
+        "DIVIDEND_other": "{{count}} дивіденди",
+        "FEE_one": "{{count}} комісія",
+        "FEE_few": "{{count}} комісії",
+        "FEE_many": "{{count}} комісій",
+        "FEE_other": "{{count}} комісії",
+        "DEPOSIT_one": "{{count}} поповнення",
+        "DEPOSIT_few": "{{count}} поповнення",
+        "DEPOSIT_many": "{{count}} поповнень",
+        "DEPOSIT_other": "{{count}} поповнення",
+        "WITHDRAWAL_one": "{{count}} виведення",
+        "WITHDRAWAL_few": "{{count}} виведення",
+        "WITHDRAWAL_many": "{{count}} виведень",
+        "WITHDRAWAL_other": "{{count}} виведення"
+      },
+      "duplicates_one": "{{count}} вже імпортована",
+      "duplicates_few": "{{count}} вже імпортовані",
+      "duplicates_many": "{{count}} вже імпортованих",
+      "duplicates_other": "{{count}} вже імпортовані",
+      "manualCount_one": "{{count}} інструмент створюється вручну",
+      "manualCount_few": "{{count}} інструменти створюються вручну",
+      "manualCount_many": "{{count}} інструментів створюються вручну",
+      "manualCount_other": "{{count}} інструменти створюються вручну",
+      "providerUnavailable": "Провайдер цін не відповів, тож інструменти, яких ще немає в обліку, буде створено вручну. Спробуйте пізніше або виберіть інший інструмент.",
+      "instruments": "Інструменти",
+      "rows": "Операції",
+      "columns": {
+        "ticker": "У звіті",
+        "instrument": "Інструмент у WebWallet",
+        "state": "Стан",
+        "after": "Після імпорту",
+        "date": "Дата",
+        "type": "Тип",
+        "what": "Інструмент або опис",
+        "quantity": "Кількість × ціна",
+        "cash": "Гроші",
+        "status": "Статус"
+      },
+      "state": {
+        "found": "Знайдено",
+        "known": "Уже в обліку",
+        "manual": "Немає у провайдера",
+        "shortfall": "Бракує купівель"
+      },
+      "createManual": "Створити вручну: {{symbol}} · {{currency}}",
+      "otherInstrument": "Інший інструмент…",
+      "instrumentFor": "Інструмент для {{ticker}}",
+      "wrongCurrency": "Потрібен інструмент у валюті {{currency}}",
+      "units_one": "{{quantity}} шт.",
+      "units_few": "{{quantity}} шт.",
+      "units_many": "{{quantity}} шт.",
+      "units_other": "{{quantity}} шт.",
+      "closed": "закрита",
+      "filters": {
+        "all": "Усі",
+        "trades": "Угоди й обміни",
+        "income": "Дивіденди",
+        "fees": "Комісії",
+        "cash": "Поповнення",
+        "skipped": "Пропущені"
+      },
+      "notes": {
+        "fee": "комісія {{fee}}",
+        "trade": "угода {{number}}",
+        "tax": "податок {{tax}}",
+        "rate": "за курсом {{rate}}"
+      },
+      "skip": {
+        "SERVICE": "Службовий рядок",
+        "UNKNOWN": "Нерозпізнаний рядок",
+        "badge": "Пропуск"
+      },
+      "status": {
+        "NEW": "Нова",
+        "DUPLICATE": "Вже імпортовано",
+        "SKIPPED": "Пропущено"
+      },
+      "include": "Імпортувати: {{what}}, {{date}}",
+      "after": "Після імпорту на рахунку: {{positions}}; гроші: {{cash}}",
+      "noPositions": "позицій немає",
+      "afterHint": "Звірте з кабінетом брокера. Комісії угод узято з руху коштів; рядки блокування й розблокування при виведенні не є рухом грошей і пропускаються.",
+      "shortfall": "У звітах {{tickers}} продано більше, ніж куплено перед тим: такий імпорт не пройде. Додайте звіти за раніший період або виключіть ці продажі.",
+      "skipped_one": "Пропущено {{count}} рядок",
+      "skipped_few": "Пропущено {{count}} рядки",
+      "skipped_many": "Пропущено {{count}} рядків",
+      "skipped_other": "Пропущено {{count}} рядки",
+      "result": {
+        "operationsImported": "операцій імпортовано",
+        "duplicates": "вже були в обліку",
+        "instrumentsCreated": "інструментів створено вручну",
+        "accountsCreated": "рахунків створено",
+        "toInvestments": "Перейти до інвестицій"
+      }
     }
   }
 }

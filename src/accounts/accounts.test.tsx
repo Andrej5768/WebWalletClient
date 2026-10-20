@@ -117,3 +117,29 @@ it('keeps savings out of the budget by default unless the switch was set', async
   await userEvent.click(await screen.findByRole('option', { name: 'Депозит', hidden: true }));
   expect(inBudget).toBeChecked();
 });
+
+it('opens the positions of a brokerage account from its menu', async () => {
+  mockApi({
+    ...signedInApi,
+    'GET /api/v1/accounts': () =>
+      json([
+        {
+          id: 9,
+          name: 'Interactive Brokers',
+          type: 'INVESTMENT',
+          currency: 'USD',
+          balance: 6555,
+          balanceInBase: 262200,
+          inBudget: false,
+          archived: false,
+        },
+      ]),
+  });
+  const router = renderApp('/accounts');
+
+  await userEvent.click(await screen.findByRole('button', { name: 'Дії з рахунком' }));
+  await userEvent.click(await screen.findByRole('menuitem', { name: 'Позиції' }));
+
+  await waitFor(() => expect(router.state.location.pathname).toBe('/investments'));
+  expect(router.state.location.search).toBe('?tab=positions&accountId=9');
+});

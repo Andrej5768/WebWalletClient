@@ -207,3 +207,57 @@ it('opens a transfer to a given account from a link', async () => {
     'Банка «Відпустка» · 32 000,00 ₴',
   );
 });
+
+it('keeps what the editor does not show when a series is saved', async () => {
+  const requests = api({
+    'GET /api/v1/recurring': () =>
+      json([
+        recurringOf({
+          id: 1,
+          name: 'Оренда',
+          comment: 'Договір до 2027',
+          payee: { id: 4, name: 'Landlord' },
+        }),
+      ]),
+    'PUT /api/v1/recurring/1': () => json(recurringOf({ id: 1 })),
+  });
+  renderApp('/transactions?recurring=1');
+
+  const drawer = await screen.findByRole('dialog');
+  const name = await within(drawer).findByLabelText('Назва');
+  await userEvent.clear(name);
+  await userEvent.type(name, 'Оренда квартири');
+  await userEvent.click(within(drawer).getByRole('button', { name: 'Зберегти' }));
+
+  await waitFor(async () =>
+    expect(await bodyOf(requests, 'PUT', '/api/v1/recurring/1')).toMatchObject({
+      name: 'Оренда квартири',
+      comment: 'Договір до 2027',
+      payeeName: 'Landlord',
+    }),
+  );
+  expect(await bodyOf(requests, 'PUT', '/api/v1/recurring/1')).not.toHaveProperty('payeeId');
+});
+
+it('moves a weekly payment to the chosen day of the week', async () => {
+  const requests = api({
+    'GET /api/v1/recurring': () =>
+      json([recurringOf({ id: 1, name: 'Спортзал', frequency: 'WEEKLY', startDate: '2026-10-19' })]),
+    'PUT /api/v1/recurring/1': () => json(recurringOf({ id: 1 })),
+  });
+  renderApp('/transactions?recurring=1');
+
+  const drawer = await screen.findByRole('dialog');
+  // 2026-10-19 is a Monday; the first Friday from it is the 23rd
+  expect(await within(drawer).findByRole('radio', { name: 'пн' })).toBeChecked();
+  await userEvent.click(within(drawer).getByRole('radio', { name: 'пт' }));
+  expect(within(drawer).getByText('Перший платіж: 23 жовт.')).toBeInTheDocument();
+  await userEvent.click(within(drawer).getByRole('button', { name: 'Зберегти' }));
+
+  await waitFor(async () =>
+    expect(await bodyOf(requests, 'PUT', '/api/v1/recurring/1')).toMatchObject({
+      frequency: 'WEEKLY',
+      startDate: '2026-10-23',
+    }),
+  );
+});

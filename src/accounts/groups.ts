@@ -5,6 +5,7 @@ export type Account = Schemas['AccountResponse'];
 
 export const accountTypes: AccountType[] = [
   'CARD',
+  'FOP',
   'CREDIT_CARD',
   'CASH',
   'SAVINGS',
@@ -17,6 +18,7 @@ export const accountTypes: AccountType[] = [
 /** Table groups, in display order; the translation key is `accounts.groups.<key>`. */
 const accountGroups: { key: string; types: AccountType[] }[] = [
   { key: 'cards', types: ['CARD'] },
+  { key: 'fop', types: ['FOP'] },
   { key: 'cash', types: ['CASH'] },
   { key: 'credit', types: ['CREDIT_CARD'] },
   { key: 'savings', types: ['SAVINGS', 'DEPOSIT'] },

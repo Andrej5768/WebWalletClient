@@ -1,4 +1,5 @@
 import { CompositeChart, LineChart } from '@mantine/charts';
+import { moneyAxis } from '../../components/chartAxis';
 import { Card, Group, SimpleGrid, Skeleton, Stack, Text, Title } from '@mantine/core';
 import { useTranslation } from 'react-i18next';
 import type { Schemas } from '../../api/client';
@@ -68,6 +69,7 @@ export function SavingsView() {
           withLegend
           referenceLines={[{ y: 0, color: 'gray.5' }]}
           valueFormatter={(value) => money(value)}
+          yAxisProps={moneyAxis}
           gridAxis="y"
           tickLine="none"
         />
@@ -88,7 +90,6 @@ export function SavingsView() {
             { y: data.target * 100, color: 'gray.6', label: t('analytics.savings.target', { target }) },
           ]}
           valueFormatter={(value) => `${value}%`}
-          unit="%"
           connectNulls={false}
           gridAxis="y"
           tickLine="none"

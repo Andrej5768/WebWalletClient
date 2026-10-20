@@ -1,10 +1,22 @@
-import { ActionIcon, Badge, Button, Card, Group, Menu, Skeleton, Stack, Text, Title } from '@mantine/core';
+import {
+  ActionIcon,
+  Badge,
+  Button,
+  Card,
+  Group,
+  Menu,
+  Skeleton,
+  Stack,
+  Tabs,
+  Text,
+  Title,
+} from '@mantine/core';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { TFunction } from 'i18next';
 import { EllipsisVertical, Plus } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { lazy, Suspense, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router';
+import { useNavigate, useSearchParams } from 'react-router';
 import { api } from '../api/client';
 import { check } from '../api/http';
 import { queryKeys, useAccounts } from '../api/queries';
@@ -12,15 +24,21 @@ import { CategoryIcon } from '../components/CategoryIcon';
 import { confirmDelete } from '../components/confirm';
 import { QueryError, UnconvertedAlert } from '../components/feedback';
 import { Figure, ShareBar } from '../components/Figure';
-import { locale } from '../i18n';
-import { formatPercent } from '../lib/format';
+import { formatDay, formatPercent } from '../lib/format';
 import { formatMoney } from '../lib/money';
-import { periodOf } from '../lib/periods';
-import { useIncomeExpense } from '../reports/api';
 import { requestOf, useGoals, type Goal } from './api';
 import { ContributionModal } from './ContributionModal';
 import { GoalModal } from './GoalModal';
+import { useAverages } from './useAverages';
 import classes from './goals.module.css';
+
+// The calculators and their charts load when their tab is opened.
+const FireTab = lazy(() => import('./FireTab').then((m) => ({ default: m.FireTab })));
+const FymTab = lazy(() => import('./FymTab').then((m) => ({ default: m.FymTab })));
+const CalculatorTab = lazy(() => import('./CalculatorTab').then((m) => ({ default: m.CalculatorTab })));
+
+const tabs = ['goals', 'fire', 'fym', 'calc'] as const;
+type Tab = (typeof tabs)[number];
 
 const STATUS_COLORS: Record<Goal['status'], string> = {
   ACHIEVED: 'green',
@@ -30,24 +48,24 @@ const STATUS_COLORS: Record<Goal['status'], string> = {
   OVERDUE: 'red',
 };
 
-/** "1 черв. 2027" / "1 Jun 2027". */
-function formatDay(date: string): string {
-  return new Date(`${date}T00:00:00`).toLocaleDateString(locale(), {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  });
-}
-
 export function GoalsPage() {
   const { t } = useTranslation();
   const goals = useGoals();
   const accounts = useAccounts();
-  const year = useMemo(() => periodOf('twelveMonths'), []);
-  const income = useIncomeExpense(year);
+  const averages = useAverages();
   const [editing, setEditing] = useState<Goal | null | undefined>(undefined);
   const [contributing, setContributing] = useState<Goal | null>(null);
   const navigate = useNavigate();
+  const [params, setParams] = useSearchParams();
+  const tab = (tabs as readonly string[]).includes(params.get('tab') ?? '')
+    ? (params.get('tab') as Tab)
+    : 'goals';
+  const setTab = (value: string | null) => {
+    const next = new URLSearchParams(params);
+    if (!value || value === 'goals') next.delete('tab');
+    else next.set('tab', value);
+    setParams(next, { replace: true });
+  };
   // A goal on an account grows by a transfer to it; one kept by hand by a contribution.
   const contribute = (goal: Goal) =>
     goal.accountId != null
@@ -57,8 +75,7 @@ export function GoalsPage() {
 
   const data = goals.data;
   const currency = data?.currency ?? 'UAH';
-  const months = income.data?.months.length ?? 0;
-  const average = income.data && months > 0 && income.data.income > 0 ? income.data.net / months : null;
+  const average = averages.savingsRate != null ? averages.monthlySavings : null;
 
   return (
     <Stack gap="lg" maw={1200}>
@@ -69,62 +86,89 @@ export function GoalsPage() {
           </Title>
           <Text c="dimmed">{t('goals.subtitle')}</Text>
         </Stack>
-        <Button leftSection={<Plus size={16} />} onClick={() => setEditing(null)}>
-          {t('goals.add')}
-        </Button>
+        {tab === 'goals' && (
+          <Button leftSection={<Plus size={16} />} onClick={() => setEditing(null)}>
+            {t('goals.add')}
+          </Button>
+        )}
       </Group>
 
-      <QueryError error={goals.error} onRetry={() => void goals.refetch()} />
-      <UnconvertedAlert currencies={data?.unconvertedCurrencies} />
+      <Tabs value={tab} onChange={setTab}>
+        <Tabs.List>
+          {tabs.map((value) => (
+            <Tabs.Tab key={value} value={value}>
+              {t(`goals.tabs.${value}`)}
+            </Tabs.Tab>
+          ))}
+        </Tabs.List>
+      </Tabs>
 
-      {data && data.goals.length > 0 && (
-        <div className={classes.figures}>
-          <Figure
-            label={t('goals.saved')}
-            value={formatMoney(data.saved, currency)}
-            note={t('goals.savedOf', { target: formatMoney(data.target, currency) })}
-          />
-          <Figure
-            label={t('goals.monthly')}
-            value={formatMoney(data.monthlyNeeded, currency)}
-            note={t('goals.monthlyNote')}
-          />
-          <Figure
-            label={t('goals.averageSavings')}
-            value={average != null ? formatMoney(average, currency) : '—'}
-            note={
-              average != null
-                ? t('goals.averageSavingsNote', { rate: formatPercent(income.data?.savingsRate) })
-                : t('goals.averageSavingsEmpty')
-            }
-          />
-        </div>
+      {tab !== 'goals' && (
+        <Suspense fallback={<Skeleton height={420} radius="md" />}>
+          {tab === 'fire' && <FireTab />}
+          {tab === 'fym' && <FymTab />}
+          {tab === 'calc' && <CalculatorTab />}
+        </Suspense>
       )}
 
-      {goals.isPending ? (
-        <div className={classes.grid}>
-          {[0, 1, 2].map((index) => (
-            <Skeleton key={index} h={200} radius="md" />
-          ))}
-        </div>
-      ) : data && data.goals.length === 0 ? (
-        <Card withBorder radius="md" padding="xl">
-          <Text c="dimmed" ta="center">
-            {t('goals.empty')}
-          </Text>
-        </Card>
-      ) : (
-        <div className={classes.grid}>
-          {(data?.goals ?? []).map((goal) => (
-            <GoalCard
-              key={goal.id}
-              goal={goal}
-              accountName={goal.accountId != null ? accountNames.get(goal.accountId) : undefined}
-              onEdit={() => setEditing(goal)}
-              onContribute={() => contribute(goal)}
-            />
-          ))}
-        </div>
+      {tab === 'goals' && (
+        <>
+          <QueryError error={goals.error} onRetry={() => void goals.refetch()} />
+          <UnconvertedAlert currencies={data?.unconvertedCurrencies} />
+
+          {data && data.goals.length > 0 && (
+            <div className={classes.figures}>
+              <Figure
+                label={t('goals.saved')}
+                value={formatMoney(data.saved, currency)}
+                note={t('goals.savedOf', { target: formatMoney(data.target, currency) })}
+              />
+              <Figure
+                label={t('goals.monthly')}
+                value={formatMoney(data.monthlyNeeded, currency)}
+                note={t('goals.monthlyNote')}
+              />
+              <Figure
+                label={t('goals.averageSavings')}
+                value={average != null ? formatMoney(average, currency) : '—'}
+                note={
+                  average != null
+                    ? t('goals.averageSavingsNote', {
+                        rate: formatPercent(averages.savingsRate),
+                        count: averages.months,
+                      })
+                    : t('goals.averageSavingsEmpty')
+                }
+              />
+            </div>
+          )}
+
+          {goals.isPending ? (
+            <div className={classes.grid}>
+              {[0, 1, 2].map((index) => (
+                <Skeleton key={index} h={200} radius="md" />
+              ))}
+            </div>
+          ) : data && data.goals.length === 0 ? (
+            <Card withBorder radius="md" padding="xl">
+              <Text c="dimmed" ta="center">
+                {t('goals.empty')}
+              </Text>
+            </Card>
+          ) : (
+            <div className={classes.grid}>
+              {(data?.goals ?? []).map((goal) => (
+                <GoalCard
+                  key={goal.id}
+                  goal={goal}
+                  accountName={goal.accountId != null ? accountNames.get(goal.accountId) : undefined}
+                  onEdit={() => setEditing(goal)}
+                  onContribute={() => contribute(goal)}
+                />
+              ))}
+            </div>
+          )}
+        </>
       )}
 
       {editing !== undefined && (
@@ -167,9 +211,10 @@ function GoalCard({
     onSuccess: done,
   });
 
+  // The deadline first: it matters most and must not be cut off
   const subtitle = [
-    accountName ?? (goal.accountId == null ? t('goals.manual') : undefined),
     goal.targetDate ? t('goals.until', { date: formatDay(goal.targetDate) }) : undefined,
+    accountName ?? (goal.accountId == null ? t('goals.manual') : undefined),
   ]
     .filter(Boolean)
     .join(' · ');
@@ -184,7 +229,7 @@ function GoalCard({
             <Text fw={600} truncate>
               {goal.name}
             </Text>
-            <Text size="xs" c="dimmed" truncate>
+            <Text size="xs" c="dimmed">
               {subtitle}
             </Text>
           </Stack>
@@ -229,21 +274,18 @@ function GoalCard({
               {t('goals.progress', { target: money(goal.targetAmount), share: formatPercent(goal.progress) })}
             </Text>
           </Group>
-          <div className={classes.pace}>
-            <ShareBar
-              share={goal.progress}
-              color={
-                goal.status === 'BEHIND' || goal.status === 'OVERDUE'
-                  ? 'var(--mantine-color-yellow-filled)'
-                  : achieved
-                    ? 'var(--ww-income)'
-                    : undefined
-              }
-            />
-            {expectedShare != null && (
-              <i style={{ left: `${Math.min(1, expectedShare) * 100}%` }} title={t('goals.paceMarker')} />
-            )}
-          </div>
+          <ShareBar
+            share={goal.progress}
+            color={
+              goal.status === 'BEHIND' || goal.status === 'OVERDUE'
+                ? 'var(--mantine-color-yellow-filled)'
+                : achieved
+                  ? 'var(--ww-income)'
+                  : undefined
+            }
+            marker={expectedShare}
+            markerTitle={t('goals.paceMarker')}
+          />
           <Text size="xs" c="dimmed">
             {paceText(goal, money, t)}
           </Text>
