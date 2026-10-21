@@ -28,7 +28,8 @@ import { ConfirmIdentityModal } from './ConfirmIdentityModal';
 import { identityMethod, type IdentityProof } from './identity';
 
 type Settings = components['schemas']['NotificationSettingsDto'];
-type Kind = Exclude<keyof Settings, 'hour'>;
+type EmailKind = 'emailWeekly' | 'emailMonthly';
+type Kind = Exclude<keyof Settings, 'hour' | EmailKind>;
 type PendingLink = components['schemas']['TelegramLinkResponse'];
 
 const telegramKey = ['telegram'] as const;
@@ -40,6 +41,12 @@ const groups: { title: string; kinds: Kind[] }[] = [
   { title: 'events', kinds: ['banks', 'forecast', 'goals'] },
   { title: 'reports', kinds: ['weekly', 'monthly'] },
 ];
+
+/** The reports that also come by email, with their own switch. */
+const emailKinds: Partial<Record<Kind, EmailKind>> = { weekly: 'emailWeekly', monthly: 'emailMonthly' };
+
+/** Width of a column of switches, so the switches line up under their labels. */
+const column = 64;
 
 const hours = Array.from({ length: 24 }, (_, hour) => ({
   value: String(hour),
@@ -244,9 +251,10 @@ function TelegramCard() {
   );
 }
 
-/** A switch per kind of notification and the hour they come at; saved on every change. */
+/** A switch per kind of notification (and by email for the reports) and the hour they come at; saved on every change. */
 function KindsCard({ linked }: { linked: boolean }) {
   const { t } = useTranslation();
+  const { user } = useAuth();
   const queryClient = useQueryClient();
   const settings = useQuery({
     queryKey: settingsKey,
@@ -292,50 +300,88 @@ function KindsCard({ linked }: { linked: boolean }) {
           w={120}
         />
       </Group>
-      {groups.map((group) => (
+      {groups.map((group, index) => (
         <div key={group.title}>
-          <Text
-            size="xs"
-            fw={600}
+          <Group
+            justify="space-between"
+            wrap="nowrap"
             px="lg"
             py={8}
             bg="var(--ww-subtle)"
             style={{ borderTop: '1px solid var(--ww-border)' }}
           >
-            {t(`settings.notifications.groups.${group.title}`)}
-          </Text>
-          {group.kinds.map((kind) => (
-            <Group
-              key={kind}
-              justify="space-between"
-              align="flex-start"
-              wrap="nowrap"
-              px="lg"
-              py="sm"
-              style={{ borderTop: '1px solid var(--ww-border)' }}
-            >
-              <Stack gap={2}>
-                <Text fw={500}>{t(`settings.notifications.kinds.${kind}.title`)}</Text>
-                <Text size="sm" c="dimmed">
-                  {t(`settings.notifications.kinds.${kind}.text`)}
-                </Text>
-              </Stack>
-              <Switch
-                aria-label={t(`settings.notifications.kinds.${kind}.title`)}
-                checked={linked && current[kind]}
-                disabled={!linked}
-                onChange={(event) => save.mutate({ ...current, [kind]: event.currentTarget.checked })}
-                mt={4}
-              />
-            </Group>
-          ))}
+            <Text size="xs" fw={600}>
+              {t(`settings.notifications.groups.${group.title}`)}
+            </Text>
+            {index === 0 && (
+              <Group gap="xs" wrap="nowrap" aria-hidden>
+                {(['telegram', 'email'] as const).map((name) => (
+                  <Text key={name} size="xs" c="dimmed" fw={600} ta="center" w={column}>
+                    {t(`settings.notifications.columns.${name}`)}
+                  </Text>
+                ))}
+              </Group>
+            )}
+          </Group>
+          {group.kinds.map((kind) => {
+            const emailKind = emailKinds[kind];
+            const title = t(`settings.notifications.kinds.${kind}.title`);
+            return (
+              <Group
+                key={kind}
+                justify="space-between"
+                align="flex-start"
+                wrap="nowrap"
+                px="lg"
+                py="sm"
+                style={{ borderTop: '1px solid var(--ww-border)' }}
+              >
+                <Stack gap={2}>
+                  <Text fw={500}>{title}</Text>
+                  <Text size="sm" c="dimmed">
+                    {t(`settings.notifications.kinds.${kind}.text`)}
+                  </Text>
+                </Stack>
+                <Group gap="xs" wrap="nowrap" mt={4} style={{ flexShrink: 0 }}>
+                  <Group justify="center" w={column}>
+                    <Switch
+                      aria-label={title}
+                      checked={linked && current[kind]}
+                      disabled={!linked}
+                      onChange={(event) => save.mutate({ ...current, [kind]: event.currentTarget.checked })}
+                    />
+                  </Group>
+                  <Group justify="center" w={column}>
+                    {emailKind ? (
+                      <Switch
+                        aria-label={t('settings.notifications.emailSwitch', { title })}
+                        checked={current[emailKind] ?? false}
+                        onChange={(event) =>
+                          save.mutate({ ...current, [emailKind]: event.currentTarget.checked })
+                        }
+                      />
+                    ) : (
+                      <Text c="dimmed" aria-hidden>
+                        —
+                      </Text>
+                    )}
+                  </Group>
+                </Group>
+              </Group>
+            );
+          })}
         </div>
       ))}
-      {!linked && (
-        <Text size="sm" c="dimmed" px="lg" py="md" style={{ borderTop: '1px solid var(--ww-border)' }}>
-          {t('settings.notifications.notLinked')}
+      <Stack gap={4} px="lg" py="md" style={{ borderTop: '1px solid var(--ww-border)' }}>
+        {!linked && (
+          <Text size="sm" c="dimmed">
+            {t('settings.notifications.notLinked')}
+          </Text>
+        )}
+        <Text size="sm" c="dimmed">
+          {t('settings.notifications.emailHint', { email: user?.email })}
         </Text>
-      )}
+      </Stack>
       <ProblemAlert error={save.error} />
     </Card>
   );

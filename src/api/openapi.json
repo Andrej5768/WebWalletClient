@@ -3158,6 +3158,12 @@
           "budgets": {
             "type": "boolean"
           },
+          "emailMonthly": {
+            "type": "boolean"
+          },
+          "emailWeekly": {
+            "type": "boolean"
+          },
           "forecast": {
             "type": "boolean"
           },
@@ -9849,6 +9855,39 @@
         ]
       }
     },
+    "/api/v1/notifications/resubscribe": {
+      "post": {
+        "operationId": "resubscribe",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        },
+        "summary": "Subscribe to the email digest again, by the link of a digest email",
+        "tags": [
+          "Notifications"
+        ]
+      }
+    },
     "/api/v1/notifications/settings": {
       "get": {
         "operationId": "get_2",
@@ -9903,6 +9942,71 @@
             "bearer": []
           }
         ],
+        "tags": [
+          "Notifications"
+        ]
+      }
+    },
+    "/api/v1/notifications/unsubscribe": {
+      "get": {
+        "operationId": "page",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "summary": "Open the unsubscribe page of the web client",
+        "tags": [
+          "Notifications"
+        ]
+      },
+      "post": {
+        "description": "By the signed link of a digest email; also the one-click unsubscribe of the mail client. NOT_FOUND for a link that is not valid.",
+        "operationId": "unsubscribe",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        },
+        "summary": "Unsubscribe from the email digest",
         "tags": [
           "Notifications"
         ]

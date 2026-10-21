@@ -15,6 +15,8 @@ const settings = {
   goals: true,
   weekly: true,
   monthly: true,
+  emailWeekly: true,
+  emailMonthly: true,
 };
 
 const notLinked: Status = {
@@ -50,7 +52,9 @@ it('connects Telegram by the link and notices when Start was pressed', async () 
   });
   renderApp('/settings?tab=notifications');
 
-  expect(await screen.findByText('Перемикачі запрацюють після підключення Telegram.')).toBeInTheDocument();
+  expect(
+    await screen.findByText('Перемикачі Telegram запрацюють після підключення бота.'),
+  ).toBeInTheDocument();
   expect(screen.getByRole('switch', { name: 'Бюджети' })).toBeDisabled();
 
   await userEvent.click(await screen.findByRole('button', { name: 'Підключити Telegram' }));
@@ -116,6 +120,32 @@ it('saves a switch at once', async () => {
     }),
   );
   expect(screen.getByRole('switch', { name: 'Тижневий аналіз' })).not.toBeChecked();
+});
+
+it('saves an email switch without Telegram', async () => {
+  const requests = mockApi({
+    ...signedInApi,
+    'GET /api/v1/telegram': () => json(notLinked),
+    'GET /api/v1/notifications/settings': () => json(settings),
+    'PUT /api/v1/notifications/settings': async (request) => json(await request.clone().json()),
+  });
+  renderApp('/settings?tab=notifications');
+
+  const email = await screen.findByRole('switch', { name: 'Тижневий аналіз: пошта' });
+  expect(email).toBeEnabled();
+  expect(screen.getByRole('switch', { name: 'Тижневий аналіз' })).toBeDisabled();
+  expect(screen.getByText(/Аналіз витрат приходить на olena@example\.com/)).toBeInTheDocument();
+
+  await userEvent.click(email);
+
+  await waitFor(async () =>
+    expect(await bodyOf(requests, 'PUT', '/api/v1/notifications/settings')).toEqual({
+      ...settings,
+      emailWeekly: false,
+    }),
+  );
+  expect(screen.getByRole('switch', { name: 'Тижневий аналіз: пошта' })).not.toBeChecked();
+  expect(screen.getByRole('switch', { name: 'Підсумок місяця: пошта' })).toBeChecked();
 });
 
 it('stops waiting for Start when the link expires', async () => {

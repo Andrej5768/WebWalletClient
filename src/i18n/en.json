@@ -126,6 +126,15 @@
     "expired": {
       "oops": "Oops!",
       "title": "The link has expired"
+    },
+    "unsubscribe": {
+      "doneTitle": "You have unsubscribed from the digest",
+      "doneText": "Spending analysis emails will no longer arrive. Other emails, such as confirmations and password resets, will still come as before.",
+      "resubscribe": "Subscribe again",
+      "backTitle": "The digest is on again",
+      "backText": "The next email will arrive on Monday.",
+      "settings": "Notification settings",
+      "invalid": "The link is not valid"
     }
   },
   "nav": {
@@ -145,7 +154,7 @@
     "collapse": "Collapse or expand the menu",
     "signOut": "Sign out",
     "addTransaction": "Transaction",
-    "signOutFailed": "Could not end the session on the server. You are signed out on this device; if the computer is shared, change your password."
+    "signOutFailed": "Could not end the session. You are signed out on this device; if the computer is shared, change your password."
   },
   "balance": {
     "netWorth": {
