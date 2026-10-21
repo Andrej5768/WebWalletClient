@@ -1,4 +1,4 @@
-import type { ApiProblem } from '../../api/errors';
+import { roundTo } from '../../lib/money';
 import { isoDate, kyivToday } from '../../lib/periods';
 import type { Operation, OperationRequest, OperationType, PositionDetail } from '../api';
 
@@ -31,7 +31,6 @@ export const INCOMES: OperationType[] = ['DIVIDEND', 'COUPON'];
 export const MONEY: OperationType[] = ['DEPOSIT', 'WITHDRAWAL', 'EXCHANGE'];
 
 export const toNumber = (value: number | string): number => (value === '' ? 0 : Number(value));
-const round = (value: number, digits = 2) => Math.round(value * 10 ** digits) / 10 ** digits;
 
 export function initialOperationValues(
   operation: Operation | null,
@@ -67,7 +66,7 @@ export function initialOperationValues(
 /** The amount of a trade: the recorded one of an edited trade, else quantity × price rounded to 4 decimals. */
 export function tradeAmount(values: OperationValues): number {
   if (values.amount !== '') return toNumber(values.amount);
-  return round(toNumber(values.quantity) * toNumber(values.price), 4);
+  return roundTo(toNumber(values.quantity) * toNumber(values.price), 4);
 }
 
 /** How the operation changes the free cash of the account, in its currency. */
@@ -162,21 +161,16 @@ export function fifoPreview(
     const taken = Math.min(left, lot.remaining);
     parts.push({ operationId: lot.operationId, date: lot.date, quantity: taken, unitCost: lot.unitCost });
     cost += taken * lot.unitCost;
-    left = round(left - taken, 8);
+    left = roundTo(left - taken, 8);
   }
   const proceeds = quantity * price - fee;
   return {
     parts,
     missing: Math.max(0, left),
-    proceeds: round(proceeds),
-    cost: round(cost),
-    realized: round(proceeds - cost),
+    proceeds: roundTo(proceeds, 2),
+    cost: roundTo(cost, 2),
+    realized: roundTo(proceeds - cost, 2),
     realizedByAverage:
-      position.averagePrice != null ? round(proceeds - quantity * position.averagePrice) : null,
+      position.averagePrice != null ? roundTo(proceeds - quantity * position.averagePrice, 2) : null,
   };
-}
-
-/** Form errors from the backend's field errors. */
-export function formErrors(problem: ApiProblem): Record<string, string> {
-  return Object.fromEntries((problem.errors ?? []).map(({ field, message }) => [field, message]));
 }

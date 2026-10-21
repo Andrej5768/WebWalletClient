@@ -43,7 +43,7 @@ import { invalidateLedger, useAccounts, useAccountsSummary, useMonobankStatus } 
 import { QueryError } from '../components/feedback';
 import { Figure } from '../components/Figure';
 import { formatDateTime } from '../lib/format';
-import { accountColorName, type AccountType } from '../lib/accounts';
+import { accountColorName, sumInBase, type AccountType } from '../lib/accounts';
 import { formatMoney } from '../lib/money';
 import { AccountFormModal } from './AccountFormModal';
 import { groupAccounts, type Account } from './groups';
@@ -105,12 +105,9 @@ export function AccountsPage() {
   const credits = active.filter((account) => account.type === 'CREDIT_CARD' || account.type === 'LOAN');
   const people = active.filter((account) => account.type === 'DEBT');
   // What the user owes: the negative balances; a positive debt account is money others owe the user
-  const owed = (list: Account[]) =>
-    list.reduce((sum, account) => sum + Math.min(account.balanceInBase ?? 0, 0), 0);
-  const creditDebt = owed(credits);
-  const peopleDebt = owed(people);
-  const owedToUser = people.reduce((sum, account) => sum + Math.max(account.balanceInBase ?? 0, 0), 0);
-  const incomplete = (list: Account[]) => list.some((account) => account.balanceInBase == null);
+  const creditDebt = sumInBase(credits, (balance) => Math.min(balance, 0));
+  const peopleDebt = sumInBase(people, (balance) => Math.min(balance, 0));
+  const owedToUser = sumInBase(people, (balance) => Math.max(balance, 0)).total;
 
   return (
     <Stack gap="lg" maw={1200}>
@@ -162,14 +159,14 @@ export function AccountsPage() {
         />
         <Figure
           label={t('accounts.creditDebt')}
-          value={formatMoney(-creditDebt, currency)}
-          note={incomplete(credits) ? t('accounts.withoutRate') : undefined}
+          value={formatMoney(-creditDebt.total, currency)}
+          note={creditDebt.incomplete ? t('accounts.withoutRate') : undefined}
         />
         <Figure
           label={t('accounts.peopleDebt')}
-          value={formatMoney(-peopleDebt, currency)}
+          value={formatMoney(-peopleDebt.total, currency)}
           note={
-            incomplete(people)
+            peopleDebt.incomplete
               ? t('accounts.withoutRate')
               : owedToUser > 0
                 ? t('accounts.owedToYou', { amount: formatMoney(owedToUser, currency) })

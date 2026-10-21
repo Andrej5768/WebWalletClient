@@ -1,4 +1,5 @@
-import type { ApiProblem } from '../api/errors';
+import { fieldErrors, type ApiProblem } from '../api/errors';
+import { roundTo } from '../lib/money';
 import { isoDate, kyivToday } from '../lib/periods';
 import { isSplit, singleCategoryId, type Transaction, type TransactionRequest } from './model';
 
@@ -29,7 +30,6 @@ export interface TransactionValues {
 }
 
 export const toNumber = (value: number | string): number => (value === '' ? 0 : Number(value));
-const round2 = (value: number) => Math.round(value * 100) / 100;
 
 const emptySplit = (): SplitValue => ({ categoryId: null, amount: '', comment: '' });
 
@@ -65,8 +65,9 @@ export function initialTransactionValues(
 
 /** Unassigned part of a split: amount minus the parts. */
 export function splitRemainder(values: TransactionValues): number {
-  return round2(
+  return roundTo(
     toNumber(values.amount) - values.splits.reduce((sum, item) => sum + toNumber(item.amount), 0),
+    2,
   );
 }
 
@@ -101,7 +102,5 @@ export function toTransactionBody(values: TransactionValues, tagIds: number[]): 
 
 /** Form errors from the backend's field errors; `splits[1].amount` becomes `splits.1.amount`. */
 export function formErrors(problem: ApiProblem): Record<string, string> {
-  return Object.fromEntries(
-    (problem.errors ?? []).map(({ field, message }) => [field.replace(/\[(\d+)]/g, '.$1'), message]),
-  );
+  return fieldErrors(problem, (field) => field.replace(/\[(\d+)]/g, '.$1'));
 }

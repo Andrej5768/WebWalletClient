@@ -1,5 +1,5 @@
 import type { Schemas } from '../api/client';
-import type { AccountType } from '../lib/accounts';
+import { sumInBase, type AccountType } from '../lib/accounts';
 
 export type Account = Schemas['AccountResponse'];
 
@@ -37,9 +37,8 @@ const bySortOrder = (a: Account, b: Account) =>
   (a.sortOrder ?? 0) - (b.sortOrder ?? 0) || (a.name ?? '').localeCompare(b.name ?? '');
 
 function total(accounts: Account[]): number | null {
-  return accounts.every((account) => account.balanceInBase != null)
-    ? accounts.reduce((sum, account) => sum + (account.balanceInBase ?? 0), 0)
-    : null;
+  const { total, incomplete } = sumInBase(accounts);
+  return incomplete ? null : total;
 }
 
 /** Splits accounts into the display groups; archived accounts go to their own group at the end. */

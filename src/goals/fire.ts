@@ -165,21 +165,3 @@ export function compound(input: CompoundInput): CompoundResult {
     realBalance: balance / Math.pow(1 + input.inflation, years),
   };
 }
-
-/** A value kept per viewer in the browser; storage may be unavailable (private mode), then it is not kept. */
-export function loadStored<T>(key: string, fallback: T): T {
-  try {
-    const raw = localStorage.getItem(key);
-    return raw == null ? fallback : { ...fallback, ...(JSON.parse(raw) as T) };
-  } catch {
-    return fallback;
-  }
-}
-
-export function store(key: string, value: unknown): void {
-  try {
-    localStorage.setItem(key, JSON.stringify(value));
-  } catch {
-    // Not critical: the values just will not survive a reload.
-  }
-}

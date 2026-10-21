@@ -8,7 +8,7 @@ import { createMemoryRouter, MemoryRouter, RouterProvider } from 'react-router';
 import { createQueryClient } from '../app/queryClient';
 import { routes } from '../app/router';
 import { kyivToday } from '../lib/periods';
-import { dividendCalendarOf, forecastOf, historyOf, portfolioOf } from './fixtures';
+import { accountsSummaryOf, dividendCalendarOf, forecastOf, historyOf, portfolioOf } from './fixtures';
 import { theme } from '../theme/theme';
 
 type Handler = (request: Request) => Response | Promise<Response>;
@@ -104,8 +104,7 @@ export const signedInApi: Record<string, Handler> = {
   'GET /api/v1/investments/dividends': () => json(dividendCalendarOf()),
   'GET /api/v1/goals': () =>
     json({ currency: 'UAH', saved: 0, target: 0, monthlyNeeded: 0, goals: [], unconvertedCurrencies: [] }),
-  'GET /api/v1/accounts/summary': () =>
-    json({ currency: 'UAH', netWorth: 0, available: 0, availableWithCredit: 0, readyToAssign: 0 }),
+  'GET /api/v1/accounts/summary': () => json(accountsSummaryOf()),
 };
 
 /**

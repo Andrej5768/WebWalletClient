@@ -2,7 +2,6 @@ import { Alert, Anchor, Modal, PasswordInput, Stack, Text } from '@mantine/core'
 import { DateInput } from '@mantine/dates';
 import { useForm } from '@mantine/form';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import dayjs from 'dayjs';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
@@ -11,6 +10,7 @@ import { check } from '../api/http';
 import { invalidateLedger } from '../api/queries';
 import { ProblemAlert } from '../components/feedback';
 import { FormFooter } from '../components/FormFooter';
+import { kyivToday } from '../lib/periods';
 import type { Connection, Schedule } from './api';
 import { scheduleOf } from './schedule';
 import { ScheduleFields } from './ScheduleFields';
@@ -21,9 +21,11 @@ export function ConnectModal({ current, onClose }: { current?: Connection | null
   const queryClient = useQueryClient();
   const [schedule, setSchedule] = useState<Required<Schedule>>(scheduleOf(current));
   const [scheduleErrors, setScheduleErrors] = useState<Record<string, string>>({});
-  const earliest = dayjs().subtract(3, 'year').add(1, 'day').format('YYYY-MM-DD');
+  // Days as the bank counts them, in Kyiv, whatever the time zone of the browser
+  const today = kyivToday();
+  const earliest = today.subtract(3, 'year').add(1, 'day').format('YYYY-MM-DD');
   const form = useForm({
-    initialValues: { token: '', since: dayjs().subtract(1, 'year').format('YYYY-MM-DD') as string | null },
+    initialValues: { token: '', since: today.subtract(1, 'year').format('YYYY-MM-DD') as string | null },
     validate: { token: (value) => (value.trim() ? null : t('validation.required')) },
   });
 
@@ -80,7 +82,7 @@ export function ConnectModal({ current, onClose }: { current?: Connection | null
             inputWrapperOrder={['label', 'input', 'description', 'error']}
             valueFormat="DD.MM.YYYY"
             minDate={earliest}
-            maxDate={dayjs().format('YYYY-MM-DD')}
+            maxDate={today.format('YYYY-MM-DD')}
             w={220}
             {...form.getInputProps('since')}
           />

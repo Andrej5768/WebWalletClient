@@ -34,7 +34,8 @@ export const copyPreviousMonth = (month: string) =>
 
 /**
  * Stores the month the server returned after a change and refreshes what else depends on it: the
- * following months (rollover) and the money ready to assign in the accounts summary.
+ * following months (rollover), the money ready to assign in the accounts summary and the reports (the plan of the
+ * analytics compares spending with the budget).
  */
 export async function budgetChanged(queryClient: QueryClient, month: MonthBudget): Promise<void> {
   queryClient.setQueryData(queryKeys.budgetMonth(month.month), month);
@@ -44,5 +45,6 @@ export async function budgetChanged(queryClient: QueryClient, month: MonthBudget
       predicate: (query) => query.queryKey[1] !== month.month,
     }),
     queryClient.invalidateQueries({ queryKey: queryKeys.accountsSummary }),
+    queryClient.invalidateQueries({ queryKey: queryKeys.reports }),
   ]);
 }

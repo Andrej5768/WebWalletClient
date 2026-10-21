@@ -7,7 +7,6 @@ import {
   Pagination,
   SegmentedControl,
   Select,
-  SimpleGrid,
   Stack,
   Table,
   TagsInput,
@@ -17,7 +16,6 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { TriangleAlert } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router';
 import {
   invalidateCategories,
   invalidateLedger,
@@ -49,11 +47,23 @@ import {
   type Pair,
   type RowEdit,
 } from './edits';
+import { ImportResultView } from './ImportResultView';
 import { PreviewRow } from './PreviewRow';
 
 type Filter = 'all' | 'uncategorized' | 'duplicates';
 
 const PAGE_SIZE = 100;
+
+const RESULT_COUNTS = [
+  'transactionsImported',
+  'transactionsMatched',
+  'transactionsSkipped',
+  'accountsCreated',
+  'accountsUpdated',
+  'categoriesCreated',
+  'payeesCreated',
+  'budgetsImported',
+] as const;
 
 export function ImportPreviewModal({ preview, onClose }: { preview: Preview; onClose: () => void }) {
   const { t } = useTranslation();
@@ -209,6 +219,8 @@ export function ImportPreviewModal({ preview, onClose }: { preview: Preview; onC
   };
 
   const cancel = () => {
+    // Closing is blocked while the import runs, so it never discards a preview being confirmed.
+    if (confirm.isPending) return;
     // The server forgets an unconfirmed preview on its own too; a failed discard changes nothing.
     if (!result) discardPreview(id).catch(() => undefined);
     onClose();
@@ -257,11 +269,24 @@ export function ImportPreviewModal({ preview, onClose }: { preview: Preview; onC
     <Modal
       opened
       onClose={cancel}
+      closeOnEscape={!confirm.isPending}
+      closeOnClickOutside={!confirm.isPending}
+      closeButtonProps={{ disabled: confirm.isPending }}
       size={1100}
       title={<Text fw={600}>{t(result ? 'imports.result.title' : 'imports.preview.title')}</Text>}
     >
       {result ? (
-        <ResultView result={result} onClose={onClose} />
+        <ImportResultView
+          stats={RESULT_COUNTS.map((key) => ({
+            key,
+            label: t(`imports.result.${key}`),
+            value: result[key],
+          }))}
+          link={{ to: '/transactions', label: t('imports.result.toTransactions') }}
+          onClose={onClose}
+        >
+          <Warnings warnings={result.warnings} title={t('imports.result.warnings')} />
+        </ImportResultView>
       ) : (
         <Stack gap="md">
           <Text size="sm">
@@ -410,44 +435,5 @@ function Warnings({ warnings, title }: { warnings: string[]; title?: string }) {
         ))}
       </Stack>
     </Alert>
-  );
-}
-
-function ResultView({ result, onClose }: { result: ImportResult; onClose: () => void }) {
-  const { t } = useTranslation();
-  const counts = [
-    'transactionsImported',
-    'transactionsMatched',
-    'transactionsSkipped',
-    'accountsCreated',
-    'accountsUpdated',
-    'categoriesCreated',
-    'payeesCreated',
-    'budgetsImported',
-  ] as const;
-  return (
-    <Stack gap="md">
-      <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="sm">
-        {counts.map((key) => (
-          <Stack key={key} gap={2} p="sm" style={{ border: '1px solid var(--ww-border)', borderRadius: 8 }}>
-            <Text className="num" fz={22} fw={600}>
-              {result[key]}
-            </Text>
-            <Text size="xs" c="dimmed">
-              {t(`imports.result.${key}`)}
-            </Text>
-          </Stack>
-        ))}
-      </SimpleGrid>
-      <Warnings warnings={result.warnings} title={t('imports.result.warnings')} />
-      <Group justify="flex-end" gap="xs">
-        <Button variant="default" onClick={onClose}>
-          {t('imports.result.close')}
-        </Button>
-        <Button component={Link} to="/transactions" onClick={onClose}>
-          {t('imports.result.toTransactions')}
-        </Button>
-      </Group>
-    </Stack>
   );
 }

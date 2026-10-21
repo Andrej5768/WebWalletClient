@@ -330,17 +330,29 @@ function Dividends({ operations, money }: { operations: Operation[]; money: Mone
   );
   if (incomes.length === 0) return <Text c="dimmed">{t('invInstrument.dividends.none')}</Text>;
   const yearAgo = kyivToday().subtract(1, 'year').format('YYYY-MM-DD');
-  const total = incomes
+  // Payments may come in different currencies; each one has a total of its own
+  const totals = new Map<string, number>();
+  incomes
     .filter((operation) => operation.date > yearAgo)
-    .reduce((sum, operation) => sum + operation.amount - operation.tax, 0);
+    .forEach((operation) =>
+      totals.set(
+        operation.currency,
+        (totals.get(operation.currency) ?? 0) + operation.amount - operation.tax,
+      ),
+    );
+  const lines = totals.size
+    ? [...totals].map(([currency, total]) => ({ currency, text: formatMoney(total, currency) }))
+    : [{ currency: '', text: money(0) }];
   return (
     <Stack gap="sm">
-      <Text size="sm">
-        {t('invInstrument.dividends.total')}{' '}
-        <Text component="span" fw={600} className="num">
-          {money(total)}
+      {lines.map((line) => (
+        <Text key={line.currency} size="sm">
+          {t('invInstrument.dividends.total')}{' '}
+          <Text component="span" fw={600} className="num">
+            {line.text}
+          </Text>
         </Text>
-      </Text>
+      ))}
       <Card withBorder radius="md" p={0} style={{ overflowX: 'auto' }}>
         <Table verticalSpacing="sm" horizontalSpacing="md" miw={560}>
           <Table.Thead>

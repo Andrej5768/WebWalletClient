@@ -4,16 +4,16 @@ import { useForm } from '@mantine/form';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { api } from '../../api/client';
-import { toProblem } from '../../api/errors';
+import { fieldErrors, toProblem } from '../../api/errors';
 import { check, unwrap } from '../../api/http';
+import { invalidateLedger } from '../../api/queries';
 import { confirmDelete } from '../../components/confirm';
 import { ProblemAlert } from '../../components/feedback';
 import { MoneyInput } from '../../components/MoneyInput';
 import { currencyOptions } from '../../lib/currencies';
 import { formatDay } from '../../lib/format';
 import { formatMoney } from '../../lib/money';
-import { investmentKeys, type Instrument, type InstrumentRequest } from '../api';
-import { formErrors } from '../operations/form';
+import type { Instrument, InstrumentRequest } from '../api';
 
 const TYPES: InstrumentRequest['type'][] = ['GOVERNMENT_BOND', 'BOND', 'STOCK', 'ETF', 'FUND', 'OTHER'];
 const FREQUENCIES = [1, 2, 4, 12];
@@ -113,17 +113,18 @@ export function InstrumentModal({
       );
     },
     onSuccess: async (saved) => {
-      await queryClient.invalidateQueries({ queryKey: investmentKeys.all });
+      // The price of an instrument values the investment accounts, so balances, reports and taxes change too
+      await invalidateLedger(queryClient);
       onSaved?.(saved);
       onClose();
     },
-    onError: (error) => form.setErrors(formErrors(toProblem(error))),
+    onError: (error) => form.setErrors(fieldErrors(toProblem(error))),
   });
   const remove = useMutation({
     mutationFn: () =>
       check(api.DELETE('/api/v1/investments/instruments/{id}', { params: { path: { id: instrument!.id } } })),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: investmentKeys.all });
+      await invalidateLedger(queryClient);
       onClose();
     },
     meta: { errorShown: true },
