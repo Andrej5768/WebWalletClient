@@ -1363,6 +1363,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/notifications/resubscribe": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Subscribe to the email digest again, by the link of a digest email */
+        post: operations["resubscribe"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/notifications/settings": {
         parameters: {
             query?: never;
@@ -1374,6 +1391,27 @@ export interface paths {
         get: operations["get_2"];
         put: operations["update_2"];
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/notifications/unsubscribe": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Open the unsubscribe page of the web client */
+        get: operations["page"];
+        put?: never;
+        /**
+         * Unsubscribe from the email digest
+         * @description By the signed link of a digest email; also the one-click unsubscribe of the mail client. NOT_FOUND for a link that is not valid.
+         */
+        post: operations["unsubscribe"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2825,6 +2863,8 @@ export interface components {
         NotificationSettingsDto: {
             banks?: boolean;
             budgets?: boolean;
+            emailMonthly?: boolean;
+            emailWeekly?: boolean;
             forecast?: boolean;
             goals?: boolean;
             /** Format: int32 */
@@ -5743,6 +5783,27 @@ export interface operations {
             };
         };
     };
+    resubscribe: {
+        parameters: {
+            query: {
+                user: number;
+                token: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     get_2: {
         parameters: {
             query?: never;
@@ -5784,6 +5845,48 @@ export interface operations {
                 content: {
                     "*/*": components["schemas"]["NotificationSettingsDto"];
                 };
+            };
+        };
+    };
+    page: {
+        parameters: {
+            query: {
+                user: number;
+                token: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    unsubscribe: {
+        parameters: {
+            query: {
+                user: number;
+                token: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

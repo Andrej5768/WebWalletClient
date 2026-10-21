@@ -222,13 +222,13 @@
         "linkedAs": "{{name}}, connected on {{date}}. You can also disconnect with /stop in the bot.",
         "badge": "Connected",
         "unlink": "Disconnect",
-        "disabled": "The Telegram bot is not set up on the server.",
+        "disabled": "The Telegram bot is unavailable right now.",
         "account": "Account for quick entry",
-        "accountHint": "\"150 coffee\" and \"+5000 salary\" go here when the message names no account. When the bank sends the same operation, it is merged with the recorded one, without a duplicate.",
+        "accountHint": "\"150 coffee\" and \"+5000 salary\" go here when the message names no account. When the bank sends the same operation, there is no duplicate.",
         "accountDefault": "The first card"
       },
       "hour": "Time of reminders and reports",
-      "notLinked": "The switches work once Telegram is connected.",
+      "notLinked": "The Telegram switches work once the bot is connected.",
       "groups": {
         "reminders": "Reminders",
         "events": "Problems and events",
@@ -268,7 +268,13 @@
           "title": "Month summary",
           "text": "On the 1st: the previous month against the month before — income, spending, savings and a chart by category."
         }
-      }
+      },
+      "columns": {
+        "telegram": "Telegram",
+        "email": "Email"
+      },
+      "emailSwitch": "{{title}}: email",
+      "emailHint": "The spending analysis goes to {{email}}. Every email has an “Unsubscribe” link."
     }
   }
 }

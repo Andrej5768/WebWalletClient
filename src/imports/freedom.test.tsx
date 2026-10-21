@@ -199,7 +199,7 @@ it('previews Freedom Finance reports and imports them without the excluded rows'
   expect(within(dialog).getByText('4 операції')).toBeInTheDocument();
   expect(within(dialog).getByText('1 вже імпортована')).toBeInTheDocument();
   expect(within(dialog).getByText('1 інструмент створюється вручну')).toBeInTheDocument();
-  expect(within(dialog).getByText('Немає у провайдера')).toBeInTheDocument();
+  expect(within(dialog).getByText('Не знайдено')).toBeInTheDocument();
   expect(within(dialog).getByText('EUR → USD')).toBeInTheDocument();
   expect(within(dialog).getByText('Службовий рядок')).toBeInTheDocument();
   expect(within(dialog).getByText('Вже імпортовано')).toBeInTheDocument();

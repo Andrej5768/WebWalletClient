@@ -33,7 +33,7 @@
     },
     "link": {
       "plannedOn": "Planned for {{date}} · {{account}} · {{amount}}",
-      "hint": "Matching found no similar transaction. Choose the transaction that paid this payment.",
+      "hint": "Choose the transaction that paid this payment.",
       "candidates": "Similar transactions",
       "none": "No similar transactions within 10 days of the date",
       "sameAccount": "Same account",

@@ -9,7 +9,7 @@
     "yieldOnCost": "Yield on cost",
     "yieldOnCostNote": "on the cost of the positions",
     "currency": "Currency",
-    "sources": "The forecast repeats last year's payments for the current positions; declared payments come from the data provider, received ones from your operations.",
+    "sources": "The forecast repeats last year's payments for the current positions.",
     "chart": "Payments over 12 months",
     "chartHint": "Click a month to open it in the calendar",
     "status": {
