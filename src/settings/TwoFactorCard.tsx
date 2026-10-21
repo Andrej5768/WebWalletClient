@@ -24,11 +24,13 @@ import { ShieldCheck, TriangleAlert } from 'lucide-react';
 import QRCode from 'qrcode';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { api } from '../api/client';
+import { api, type Schemas } from '../api/client';
 import { check, unwrap } from '../api/http';
 import { useAuth } from '../auth/context';
 import { ProblemAlert } from '../components/feedback';
 import { saveBlob } from '../lib/download';
+import { ConfirmIdentityModal } from './ConfirmIdentityModal';
+import { identityMethod, type IdentityProof } from './identity';
 import { useReloadUser } from './useReloadUser';
 
 const codeInputStyles = {
@@ -39,8 +41,22 @@ const codeInputStyles = {
 export function TwoFactorCard() {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const [dialog, setDialog] = useState<'setup' | 'disable' | 'codes' | null>(null);
+  const [dialog, setDialog] = useState<'confirm' | 'setup' | 'disable' | 'codes' | null>(null);
   const enabled = user?.twoFactorEnabled ?? false;
+  // Two-factor authentication is off here, so only a password can confirm the identity
+  const method = identityMethod(user, false);
+
+  // The secret leaves the mutation cache as soon as the dialog closes
+  const setup = useMutation({
+    mutationFn: (proof: IdentityProof) => unwrap(api.POST('/api/v1/me/two-factor/setup', { body: proof })),
+    onSuccess: () => setDialog('setup'),
+    gcTime: 0,
+    meta: { errorShown: true },
+  });
+  const closeSetup = () => {
+    setup.reset();
+    setDialog(null);
+  };
 
   return (
     <Card withBorder radius="md" padding="lg">
@@ -67,7 +83,11 @@ export function TwoFactorCard() {
             </Stack>
           </Group>
           {!enabled && (
-            <Button onClick={() => setDialog('setup')} style={{ flexShrink: 0 }}>
+            <Button
+              loading={dialog !== 'confirm' && setup.isPending}
+              onClick={() => (method ? setDialog('confirm') : setup.mutate({}))}
+              style={{ flexShrink: 0 }}
+            >
               {t('settings.twoFactor.enable')}
             </Button>
           )}
@@ -87,54 +107,63 @@ export function TwoFactorCard() {
             </Group>
           </Group>
         )}
+        {dialog === null && <ProblemAlert error={setup.error} />}
       </Stack>
-      {dialog === 'setup' && <SetupModal onClose={() => setDialog(null)} />}
+      {dialog === 'confirm' && method && (
+        <ConfirmIdentityModal
+          method={method}
+          pending={setup.isPending}
+          error={setup.error}
+          onConfirm={(proof) => setup.mutate(proof)}
+          onClose={closeSetup}
+        />
+      )}
+      {dialog === 'setup' && setup.data && <SetupModal setup={setup.data} onClose={closeSetup} />}
       {dialog === 'disable' && <DisableModal onClose={() => setDialog(null)} />}
       {dialog === 'codes' && <NewCodesModal onClose={() => setDialog(null)} />}
     </Card>
   );
 }
 
-function SetupModal({ onClose }: { onClose(): void }) {
+function SetupModal({ setup, onClose }: { setup: Schemas['TwoFactorSetupResponse']; onClose(): void }) {
   const { t } = useTranslation();
   const reloadUser = useReloadUser();
   const [code, setCode] = useState('');
   const [qr, setQr] = useState<string | null>(null);
   const [codes, setCodes] = useState<string[] | null>(null);
 
-  const setup = useMutation({
-    mutationFn: () => unwrap(api.POST('/api/v1/me/two-factor/setup')),
-    meta: { errorShown: true },
-  });
+  // The recovery codes leave the mutation cache as soon as the dialog closes
   const enable = useMutation({
     mutationFn: () => unwrap(api.POST('/api/v1/me/two-factor/enable', { body: { code: code.trim() } })),
     onSuccess: async (data) => {
       setCodes(data.recoveryCodes);
       await reloadUser();
     },
+    gcTime: 0,
     meta: { errorShown: true },
   });
+  const close = () => {
+    enable.reset();
+    onClose();
+  };
 
-  const { mutate: startSetup } = setup;
-  useEffect(() => startSetup(), [startSetup]);
   useEffect(() => {
-    if (!setup.data) return;
     // SVG needs no canvas and fits the content security policy as a data: image
-    void QRCode.toString(setup.data.otpauthUri, { type: 'svg', margin: 1 }).then((svg) =>
+    void QRCode.toString(setup.otpauthUri, { type: 'svg', margin: 1 }).then((svg) =>
       setQr(`data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`),
     );
-  }, [setup.data]);
+  }, [setup.otpauthUri]);
 
   return (
     <Modal
       opened
-      onClose={onClose}
+      onClose={close}
       size="lg"
       closeOnClickOutside={!codes}
       title={<Text fw={600}>{t('settings.twoFactor.setupTitle')}</Text>}
     >
       {codes ? (
-        <RecoveryCodes codes={codes} onDone={onClose} />
+        <RecoveryCodes codes={codes} onDone={close} />
       ) : (
         <form
           onSubmit={(event) => {
@@ -146,7 +175,6 @@ function SetupModal({ onClose }: { onClose(): void }) {
             <Text size="sm" c="dimmed">
               {t('settings.twoFactor.scan')}
             </Text>
-            <ProblemAlert error={setup.error} />
             <Group align="flex-start" gap="lg" wrap="nowrap">
               {qr ? (
                 <Image src={qr} w={168} h={168} alt={t('settings.twoFactor.qrAlt')} radius="sm" />
@@ -157,27 +185,16 @@ function SetupModal({ onClose }: { onClose(): void }) {
                 <Text fw={500} size="sm">
                   {t('settings.twoFactor.manual')}
                 </Text>
-                {setup.data ? (
-                  <>
-                    <Code block style={{ wordBreak: 'break-all' }}>
-                      {setup.data.secret.replace(/(.{4})/g, '$1 ').trim()}
-                    </Code>
-                    <CopyButton value={setup.data.secret}>
-                      {({ copied, copy }) => (
-                        <Button
-                          variant="default"
-                          size="xs"
-                          onClick={copy}
-                          style={{ alignSelf: 'flex-start' }}
-                        >
-                          {copied ? t('settings.twoFactor.copied') : t('settings.twoFactor.copyKey')}
-                        </Button>
-                      )}
-                    </CopyButton>
-                  </>
-                ) : (
-                  <Skeleton h={48} />
-                )}
+                <Code block style={{ wordBreak: 'break-all' }}>
+                  {setup.secret.replace(/(.{4})/g, '$1 ').trim()}
+                </Code>
+                <CopyButton value={setup.secret}>
+                  {({ copied, copy }) => (
+                    <Button variant="default" size="xs" onClick={copy} style={{ alignSelf: 'flex-start' }}>
+                      {copied ? t('settings.twoFactor.copied') : t('settings.twoFactor.copyKey')}
+                    </Button>
+                  )}
+                </CopyButton>
               </Stack>
             </Group>
             <TextInput
@@ -192,10 +209,10 @@ function SetupModal({ onClose }: { onClose(): void }) {
             />
             <ProblemAlert error={enable.error} />
             <Group justify="flex-end" gap="xs">
-              <Button variant="default" onClick={onClose}>
+              <Button variant="default" onClick={close}>
                 {t('common.cancel')}
               </Button>
-              <Button type="submit" disabled={!setup.data || !code.trim()} loading={enable.isPending}>
+              <Button type="submit" disabled={!code.trim()} loading={enable.isPending}>
                 {t('settings.twoFactor.confirm')}
               </Button>
             </Group>
@@ -333,18 +350,23 @@ function NewCodesModal({ onClose }: { onClose(): void }) {
     mutationFn: () =>
       unwrap(api.POST('/api/v1/me/two-factor/recovery-codes', { body: { code: code.trim() } })),
     onSuccess: () => reloadUser(),
+    gcTime: 0,
     meta: { errorShown: true },
   });
+  const close = () => {
+    regenerate.reset();
+    onClose();
+  };
 
   return (
     <Modal
       opened
-      onClose={onClose}
+      onClose={close}
       closeOnClickOutside={!regenerate.data}
       title={<Text fw={600}>{t('settings.twoFactor.newCodesTitle')}</Text>}
     >
       {regenerate.data ? (
-        <RecoveryCodes codes={regenerate.data.recoveryCodes} onDone={onClose} />
+        <RecoveryCodes codes={regenerate.data.recoveryCodes} onDone={close} />
       ) : (
         <form
           onSubmit={(event) => {
@@ -368,7 +390,7 @@ function NewCodesModal({ onClose }: { onClose(): void }) {
             />
             <ProblemAlert error={regenerate.error} />
             <Group justify="flex-end" gap="xs">
-              <Button variant="default" onClick={onClose}>
+              <Button variant="default" onClick={close}>
                 {t('common.cancel')}
               </Button>
               <Button type="submit" disabled={!code.trim()} loading={regenerate.isPending}>

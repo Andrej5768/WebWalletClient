@@ -1,7 +1,7 @@
-import { screen, waitFor } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { components } from '../api/schema';
-import { bodyOf, json, mockApi, renderApp, signedInApi } from '../test/render';
+import { bodyOf, json, mockApi, renderApp, signedInApi, user } from '../test/render';
 
 type Status = components['schemas']['TelegramStatus'];
 
@@ -35,15 +35,18 @@ const linked: Status = {
   linkedAt: '2026-10-21T09:12:00Z',
 };
 
+const inMinutes = (minutes: number) => new Date(Date.now() + minutes * 60_000).toISOString();
+
 it('connects Telegram by the link and notices when Start was pressed', async () => {
   const open = vi.spyOn(window, 'open').mockImplementation(() => null);
   let status = notLinked;
-  mockApi({
+  const requests = mockApi({
     ...signedInApi,
+    'GET /api/v1/me': () => json({ ...user, hasPassword: false, twoFactorEnabled: false }),
     'GET /api/v1/telegram': () => json(status),
     'GET /api/v1/notifications/settings': () => json(settings),
     'POST /api/v1/telegram/link': () =>
-      json({ url: 'https://t.me/WebWalletUaBot?start=code', expiresAt: '2026-10-21T09:27:00Z' }),
+      json({ url: 'https://t.me/WebWalletUaBot?start=code', expiresAt: inMinutes(15) }),
   });
   renderApp('/settings?tab=notifications');
 
@@ -52,7 +55,12 @@ it('connects Telegram by the link and notices when Start was pressed', async () 
 
   await userEvent.click(await screen.findByRole('button', { name: 'Підключити Telegram' }));
 
-  expect(open).toHaveBeenCalledWith('https://t.me/WebWalletUaBot?start=code', '_blank', 'noopener');
+  // Nothing to confirm without a password and two-factor authentication
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  await waitFor(() =>
+    expect(open).toHaveBeenCalledWith('https://t.me/WebWalletUaBot?start=code', '_blank', 'noopener'),
+  );
+  expect(await bodyOf(requests, 'POST', '/api/v1/telegram/link')).toEqual({});
   expect(await screen.findByText(/Відкрийте бота @WebWalletUaBot/)).toBeInTheDocument();
   expect(screen.getByRole('link', { name: 'Відкрити Telegram' })).toHaveAttribute(
     'href',
@@ -63,6 +71,30 @@ it('connects Telegram by the link and notices when Start was pressed', async () 
 
   expect(await screen.findByText('Telegram підключено', {}, { timeout: 5000 })).toBeInTheDocument();
   expect(await screen.findByText(/Олена · @olena_k/)).toBeInTheDocument();
+  open.mockRestore();
+});
+
+it('asks for the password before connecting Telegram', async () => {
+  const open = vi.spyOn(window, 'open').mockImplementation(() => null);
+  const requests = mockApi({
+    ...signedInApi,
+    'GET /api/v1/me': () => json({ ...user, hasPassword: true }),
+    'GET /api/v1/telegram': () => json(notLinked),
+    'GET /api/v1/notifications/settings': () => json(settings),
+    'POST /api/v1/telegram/link': () =>
+      json({ url: 'https://t.me/WebWalletUaBot?start=code', expiresAt: inMinutes(15) }),
+  });
+  renderApp('/settings?tab=notifications');
+
+  await userEvent.click(await screen.findByRole('button', { name: 'Підключити Telegram' }));
+  const dialog = await screen.findByRole('dialog', { name: 'Підтвердіть, що це ви' });
+  await userEvent.type(within(dialog).getByLabelText('Поточний пароль'), 'secret-password');
+  await userEvent.click(within(dialog).getByRole('button', { name: 'Продовжити' }));
+
+  await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+  expect(open).toHaveBeenCalledWith('https://t.me/WebWalletUaBot?start=code', '_blank', 'noopener');
+  expect(await bodyOf(requests, 'POST', '/api/v1/telegram/link')).toEqual({ password: 'secret-password' });
+  expect(await screen.findByText(/Відкрийте бота @WebWalletUaBot/)).toBeInTheDocument();
   open.mockRestore();
 });
 
@@ -84,6 +116,64 @@ it('saves a switch at once', async () => {
     }),
   );
   expect(screen.getByRole('switch', { name: 'Тижневий аналіз' })).not.toBeChecked();
+});
+
+it('stops waiting for Start when the link expires', async () => {
+  const open = vi.spyOn(window, 'open').mockImplementation(() => null);
+  const requests = mockApi({
+    ...signedInApi,
+    'GET /api/v1/telegram': () => json(notLinked),
+    'GET /api/v1/notifications/settings': () => json(settings),
+    'POST /api/v1/telegram/link': () =>
+      json({ url: 'https://t.me/WebWalletUaBot?start=code', expiresAt: inMinutes(0.02) }),
+  });
+  renderApp('/settings?tab=notifications');
+
+  await userEvent.click(await screen.findByRole('button', { name: 'Підключити Telegram' }));
+
+  expect(
+    await screen.findByText('Посилання для підключення Telegram минуло. Створіть нове.'),
+  ).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'Підключити Telegram' })).toBeInTheDocument();
+  expect(screen.queryByText(/Відкрийте бота @WebWalletUaBot/)).not.toBeInTheDocument();
+  // No more checks once the link is gone
+  const checks = requests.filter((request) => new URL(request.url).pathname === '/api/v1/telegram').length;
+  await new Promise((resolve) => setTimeout(resolve, 3500));
+  expect(requests.filter((request) => new URL(request.url).pathname === '/api/v1/telegram')).toHaveLength(
+    checks,
+  );
+  open.mockRestore();
+});
+
+it('saves quick switches one after another and keeps the last state', async () => {
+  const answers: (() => void)[] = [];
+  const requests = mockApi({
+    ...signedInApi,
+    'GET /api/v1/telegram': () => json(linked),
+    'GET /api/v1/notifications/settings': () => json(settings),
+    'PUT /api/v1/notifications/settings': async (request) => {
+      const body: unknown = await request.clone().json();
+      await new Promise<void>((resolve) => answers.push(resolve));
+      return json(body);
+    },
+  });
+  renderApp('/settings?tab=notifications');
+  const puts = () => requests.filter((request) => request.method === 'PUT');
+
+  await userEvent.click(await screen.findByRole('switch', { name: 'Тижневий аналіз' }));
+  await userEvent.click(screen.getByRole('switch', { name: 'Підсумок місяця' }));
+
+  // The second save waits for the first one
+  await waitFor(() => expect(answers).toHaveLength(1));
+  expect(puts()).toHaveLength(1);
+  answers[0]!();
+  await waitFor(() => expect(answers).toHaveLength(2));
+  expect(await puts()[1]!.clone().json()).toEqual({ ...settings, weekly: false, monthly: false });
+  // The answer of the first save does not turn the second switch back on
+  expect(screen.getByRole('switch', { name: 'Підсумок місяця' })).not.toBeChecked();
+  answers[1]!();
+  await waitFor(() => expect(screen.getByRole('switch', { name: 'Тижневий аналіз' })).not.toBeChecked());
+  expect(screen.getByRole('switch', { name: 'Підсумок місяця' })).not.toBeChecked();
 });
 
 it('disconnects the chat', async () => {

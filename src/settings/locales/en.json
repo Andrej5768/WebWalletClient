@@ -42,6 +42,12 @@
       "othersSignedOut": "Other devices will be signed out.",
       "changed": "Password changed"
     },
+    "confirmIdentity": {
+      "title": "Confirm it is you",
+      "passwordHint": "To change how you sign in, enter your current password.",
+      "codeHint": "To change how you sign in, enter a code from the authenticator app or a recovery code.",
+      "submit": "Continue"
+    },
     "google": {
       "title": "Sign in with Google",
       "text": "Sign in with one click, without a password. The 2FA code is still asked when it is on.",
@@ -212,6 +218,7 @@
         "pending": "Open the bot {{bot}} and press \"Start\". The link works once, for 15 minutes. This page updates by itself.",
         "open": "Open Telegram",
         "connected": "Telegram is connected",
+        "expired": "The link to connect Telegram has expired. Create a new one.",
         "linkedAs": "{{name}}, connected on {{date}}. You can also disconnect with /stop in the bot.",
         "badge": "Connected",
         "unlink": "Disconnect",

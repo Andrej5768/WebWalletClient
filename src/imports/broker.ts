@@ -1,3 +1,4 @@
+import { roundTo } from '../lib/money';
 import type { BrokerOperation, BrokerPreview, BrokerTicker, TickerChoice } from './api';
 
 export const FILTERS = ['all', 'trades', 'income', 'fees', 'cash', 'skipped'] as const;
@@ -55,7 +56,7 @@ export function quantityAfter(
     if (operation.type === 'BUY') quantity -= operation.quantity ?? 0;
     if (operation.type === 'SELL') quantity += operation.quantity ?? 0;
   }
-  return round(quantity, 8);
+  return roundTo(quantity, 8);
 }
 
 /** Money per currency after the import without the excluded rows. */
@@ -72,10 +73,5 @@ export function cashAfter(
       amounts.set(operation.toCurrency, (amounts.get(operation.toCurrency) ?? 0) - operation.toAmount);
     }
   }
-  return [...amounts].map(([currency, amount]) => ({ currency, amount: round(amount, 4) }));
-}
-
-function round(value: number, decimals: number): number {
-  const factor = 10 ** decimals;
-  return Math.round(value * factor) / factor;
+  return [...amounts].map(([currency, amount]) => ({ currency, amount: roundTo(amount, 4) }));
 }

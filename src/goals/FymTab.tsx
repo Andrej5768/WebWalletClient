@@ -5,8 +5,10 @@ import type { Schemas } from '../api/client';
 import { useAccounts } from '../api/queries';
 import { locale } from '../i18n';
 import { ShareBar } from '../components/Figure';
+import { sumInBase } from '../lib/accounts';
 import { formatMoney } from '../lib/money';
-import { fym, FYM_MILESTONES, loadStored, store, trackPosition } from './fire';
+import { loadStored, store } from '../lib/storage';
+import { fym, FYM_MILESTONES, trackPosition } from './fire';
 import classes from './goals.module.css';
 import { ShortHistory } from './ShortHistory';
 import { useAverages } from './useAverages';
@@ -46,9 +48,8 @@ export function FymTab() {
   );
   const liquidOf = (account: Account) =>
     settings.accounts[String(account.id)] ?? LIQUID_BY_DEFAULT.includes(account.type);
-  const liquid = list
-    .filter(liquidOf)
-    .reduce((sum, account) => sum + Math.max(0, account.balanceInBase ?? 0), 0);
+  // An account without an exchange rate is left out of the liquid money; the note says so
+  const { total: liquid, incomplete } = sumInBase(list.filter(liquidOf), (balance) => Math.max(0, balance));
   const expenses = averages.monthlyExpenses ?? 0;
   const result = fym(liquid, expenses, settings.target, Math.max(0, averages.monthlySavings ?? 0));
   const months = result.months ?? 0;
@@ -102,6 +103,11 @@ export function FymTab() {
               <Text size="sm" c="dimmed">
                 {t('goals.fym.liquidNote', { liquid: money(liquid), expenses: money(expenses) })}
               </Text>
+              {incomplete && (
+                <Text size="sm" c="dimmed">
+                  {t('accounts.withoutRate')}
+                </Text>
+              )}
               <ShareBar
                 share={trackPosition(months)}
                 height={8}

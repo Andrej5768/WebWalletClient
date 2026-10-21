@@ -20,11 +20,16 @@ import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
 import { check, unwrap } from '../api/http';
 import { useAccounts } from '../api/queries';
+import { useAuth } from '../auth/context';
 import type { components } from '../api/schema';
 import { ProblemAlert } from '../components/feedback';
+import { formatDay } from '../lib/format';
+import { ConfirmIdentityModal } from './ConfirmIdentityModal';
+import { identityMethod, type IdentityProof } from './identity';
 
 type Settings = components['schemas']['NotificationSettingsDto'];
 type Kind = Exclude<keyof Settings, 'hour'>;
+type PendingLink = components['schemas']['TelegramLinkResponse'];
 
 const telegramKey = ['telegram'] as const;
 const settingsKey = ['notifications', 'settings'] as const;
@@ -53,19 +58,37 @@ export function NotificationsTab() {
   );
 }
 
-/** Connects the chat by a one-time t.me link; the page checks until the user has pressed Start in the bot. */
+/**
+ * Connects the chat by a one-time t.me link; the page checks until the user has pressed Start in the bot, or until
+ * the link expires, then a new one can be made.
+ */
 function TelegramCard() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const [pendingUrl, setPendingUrl] = useState<string | null>(null);
+  const { user } = useAuth();
+  const [pending, setPending] = useState<PendingLink | null>(null);
+  const [confirming, setConfirming] = useState(false);
+  const method = identityMethod(user);
   const status = useQuery({
     queryKey: telegramKey,
     queryFn: () => unwrap(api.GET('/api/v1/telegram')),
-    refetchInterval: (query) => (pendingUrl && !query.state.data?.linked ? 3000 : false),
+    refetchInterval: (query) => (pending && !query.state.data?.linked ? 3000 : false),
   });
   const accounts = useAccounts();
   const linked = status.data?.linked ?? false;
-  const waiting = pendingUrl !== null && !linked;
+  const waiting = pending !== null && !linked;
+
+  useEffect(() => {
+    if (!pending || linked) return;
+    const timer = setTimeout(
+      () => {
+        setPending(null);
+        notifications.show({ message: t('settings.notifications.telegram.expired'), color: 'yellow' });
+      },
+      Math.max(0, Date.parse(pending.expiresAt) - Date.now()),
+    );
+    return () => clearTimeout(timer);
+  }, [pending, linked, t]);
 
   // Tells when the chat got connected while the page was waiting for it
   const wasWaiting = useRef(false);
@@ -79,17 +102,19 @@ function TelegramCard() {
   }, [waiting, linked, t]);
 
   const link = useMutation({
-    mutationFn: () => unwrap(api.POST('/api/v1/telegram/link')),
+    mutationFn: (proof: IdentityProof) => unwrap(api.POST('/api/v1/telegram/link', { body: proof })),
     onSuccess: (data) => {
-      setPendingUrl(data.url);
+      setConfirming(false);
+      setPending(data);
       window.open(data.url, '_blank', 'noopener');
     },
+    gcTime: 0,
     meta: { errorShown: true },
   });
   const unlink = useMutation({
     mutationFn: () => check(api.DELETE('/api/v1/telegram')),
     onSuccess: () => {
-      setPendingUrl(null);
+      setPending(null);
       return queryClient.invalidateQueries({ queryKey: telegramKey });
     },
     meta: { errorShown: true },
@@ -130,7 +155,7 @@ function TelegramCard() {
                       name: [data.firstName, data.username ? `@${data.username}` : null]
                         .filter(Boolean)
                         .join(' · '),
-                      date: new Date(data.linkedAt!).toLocaleDateString(i18n.language),
+                      date: formatDay(data.linkedAt),
                     })
                   : t('settings.notifications.telegram.text')}
               </Text>
@@ -151,7 +176,11 @@ function TelegramCard() {
               </Button>
             </Group>
           ) : data.enabled && !waiting ? (
-            <Button loading={link.isPending} onClick={() => link.mutate()} style={{ flexShrink: 0 }}>
+            <Button
+              loading={link.isPending}
+              onClick={() => (method ? setConfirming(true) : link.mutate({}))}
+              style={{ flexShrink: 0 }}
+            >
               {t('settings.notifications.telegram.link')}
             </Button>
           ) : null}
@@ -169,10 +198,10 @@ function TelegramCard() {
               {t('settings.notifications.telegram.pending', { bot: `@${data.botUsername}` })}
             </Alert>
             <Group gap="xs">
-              <Button component="a" href={pendingUrl!} target="_blank" rel="noopener">
+              <Button component="a" href={pending!.url} target="_blank" rel="noopener">
                 {t('settings.notifications.telegram.open')}
               </Button>
-              <Button variant="subtle" color="gray" onClick={() => setPendingUrl(null)}>
+              <Button variant="subtle" color="gray" onClick={() => setPending(null)}>
                 {t('common.cancel')}
               </Button>
             </Group>
@@ -197,8 +226,20 @@ function TelegramCard() {
             />
           </>
         )}
-        <ProblemAlert error={link.error ?? unlink.error ?? updateSettings.error} />
+        <ProblemAlert error={(confirming ? null : link.error) ?? unlink.error ?? updateSettings.error} />
       </Stack>
+      {confirming && method && (
+        <ConfirmIdentityModal
+          method={method}
+          pending={link.isPending}
+          error={link.error}
+          onConfirm={(proof) => link.mutate(proof)}
+          onClose={() => {
+            setConfirming(false);
+            link.reset();
+          }}
+        />
+      )}
     </Card>
   );
 }
@@ -211,11 +252,23 @@ function KindsCard({ linked }: { linked: boolean }) {
     queryKey: settingsKey,
     queryFn: () => unwrap(api.GET('/api/v1/notifications/settings')),
   });
+  // Saves run one after another and each sends all the switches as shown, so only the last one to finish takes the
+  // answer of the server: an earlier answer would turn back a switch changed since.
+  const last = () => queryClient.isMutating({ mutationKey: settingsKey }) === 1;
   const save = useMutation({
+    mutationKey: settingsKey,
+    scope: { id: 'notification-settings' },
     mutationFn: (body: Settings) => unwrap(api.PUT('/api/v1/notifications/settings', { body })),
-    onMutate: (body) => queryClient.setQueryData(settingsKey, body),
-    onSuccess: (data) => queryClient.setQueryData(settingsKey, data),
-    onError: () => queryClient.invalidateQueries({ queryKey: settingsKey }),
+    onMutate: async (body) => {
+      await queryClient.cancelQueries({ queryKey: settingsKey });
+      queryClient.setQueryData(settingsKey, body);
+    },
+    onSuccess: (data) => {
+      if (last()) queryClient.setQueryData(settingsKey, data);
+    },
+    onError: () => {
+      if (last()) return queryClient.invalidateQueries({ queryKey: settingsKey });
+    },
     meta: { errorShown: true },
   });
 

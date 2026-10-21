@@ -51,10 +51,15 @@ export function esvMonthly(rates: TaxRates): number {
   return rates.esvEnabled ? Math.round(rates.minWage * rates.esvRate) / 100 : 0;
 }
 
-/** A CSV file: values with separators or quotes are quoted; Excel opens it as UTF-8 thanks to the BOM. */
+/**
+ * A CSV file: values with separators or quotes are quoted; Excel opens it as UTF-8 thanks to the BOM. Numbers take a
+ * decimal comma without grouping, since the separator is ';' and Ukrainian Excel reads "12.05" as a date; text that
+ * starts like a formula gets a leading quote so a spreadsheet shows it as text instead of running it.
+ */
 export function toCsv(rows: (string | number | null | undefined)[][]): string {
   const cell = (value: string | number | null | undefined) => {
-    const text = value == null ? '' : String(value);
+    if (typeof value === 'number') return String(value).replace('.', ',');
+    const text = value == null ? '' : /^[=+\-@\t\r]/.test(value) ? `'${value}` : value;
     return /[",;\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
   };
   return '﻿' + rows.map((row) => row.map(cell).join(';')).join('\n');

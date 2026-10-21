@@ -1,5 +1,7 @@
 import dayjs from 'dayjs';
 import type { components } from '../api/schema';
+import { roundTo } from '../lib/money';
+import { loadStored, store } from '../lib/storage';
 
 export type Forecast = components['schemas']['ForecastResponse'];
 export type ForecastEvent = components['schemas']['ForecastEvent'];
@@ -33,8 +35,9 @@ export function forecastChart(forecast: Forecast, minimum: number | null): Forec
   const lo = Math.floor((Math.min(...balances) - STEP / 2) / STEP) * STEP;
   const hi = Math.ceil((Math.max(...balances) + STEP / 2) / STEP) * STEP;
   const span = Math.max(1, days.length - 1);
-  const x = (index: number) => round(plot.left + (index * (plot.right - plot.left)) / span);
-  const y = (balance: number) => round(plot.top + ((hi - balance) / (hi - lo)) * (plot.bottom - plot.top));
+  const x = (index: number) => roundTo(plot.left + (index * (plot.right - plot.left)) / span, 1);
+  const y = (balance: number) =>
+    roundTo(plot.top + ((hi - balance) / (hi - lo)) * (plot.bottom - plot.top), 1);
   const todayIndex = days.findIndex((day) => day.date === forecast.today);
   const points = (from: number, to: number) =>
     days
@@ -59,27 +62,14 @@ export function forecastChart(forecast: Forecast, minimum: number | null): Forec
   };
 }
 
-function round(value: number): number {
-  return Math.round(value * 10) / 10;
-}
-
 const storageKey = 'ww-forecast-minimum';
 
 /** The minimum balance the viewer wants to keep, or null when not set. */
 export function loadMinimum(): number | null {
-  try {
-    const value = localStorage.getItem(storageKey);
-    return value != null && value !== '' && Number.isFinite(Number(value)) ? Number(value) : null;
-  } catch {
-    return null;
-  }
+  const value = loadStored<unknown>(storageKey, null);
+  return typeof value === 'number' && Number.isFinite(value) ? value : null;
 }
 
 export function saveMinimum(value: number | null) {
-  try {
-    if (value == null) localStorage.removeItem(storageKey);
-    else localStorage.setItem(storageKey, String(value));
-  } catch {
-    // Not critical: the line just will not survive a reload.
-  }
+  store(storageKey, value);
 }

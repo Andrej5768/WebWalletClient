@@ -167,6 +167,10 @@ it('tells the state of a quarter and which mark an income switch sets', () => {
   expect(markFor(true, null)).toBe(true);
   expect(markFor(false, undefined)).toBeNull();
   expect(toCsv([['a;b', 1, null], ['"x"']])).toBe('﻿"a;b";1;\n"""x"""');
+  // Decimal commas without grouping, and text that looks like a formula stays text
+  expect(toCsv([[12.05, -1234.5, '=SUM(A1)', '+1', '-x', '@a', 'ok']])).toBe(
+    "﻿12,05;-1234,5;'=SUM(A1);'+1;'-x;'@a;ok",
+  );
 });
 
 it('shows the quarters of the sole proprietor, marks one paid and takes an income out', async () => {

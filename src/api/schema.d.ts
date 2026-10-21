@@ -1214,7 +1214,7 @@ export interface paths {
         put?: never;
         /**
          * Start linking a Google account
-         * @description Returns the Google page to send the browser to and sets the cookie that binds the link to this browser; Google then redirects to the security settings
+         * @description Returns the Google page to send the browser to and sets the cookie that binds the link to this browser; Google then redirects to the security settings. Needs the current password, or for an account without one a two-factor code when it is on.
          */
         post: operations["link_3"];
         delete?: never;
@@ -1354,7 +1354,7 @@ export interface paths {
         put?: never;
         /**
          * Start turning on two-factor authentication
-         * @description Returns a new secret for the authenticator app; it becomes active once /enable gets a code of it. Fails with CONFLICT when two-factor authentication is already on.
+         * @description Returns a new secret for the authenticator app; it becomes active once /enable gets a code of it. Needs the current password when the account has one (INVALID_CURRENT_PASSWORD). Fails with CONFLICT when two-factor authentication is already on.
          */
         post: operations["setup"];
         delete?: never;
@@ -1893,7 +1893,7 @@ export interface paths {
         put?: never;
         /**
          * Create a one-time link that connects a Telegram chat
-         * @description The link opens the bot; pressing Start there connects the chat. It works once, for 15 minutes; a new link replaces the previous one. NOT_FOUND when the bot is not configured.
+         * @description The link opens the bot; pressing Start there connects the chat. It works once, for 15 minutes; a new link replaces the previous one. Needs the current password, or for an account without one a two-factor code when it is on. NOT_FOUND when the bot is not configured.
          */
         post: operations["link_1"];
         delete?: never;
@@ -2303,6 +2303,10 @@ export interface components {
             totalA: number;
             totalB: number;
             unconvertedCurrencies: string[];
+        };
+        ConfirmIdentityRequest: {
+            code?: string | null;
+            password?: string | null;
         };
         ConfirmRequest: {
             operations?: components["schemas"]["OperationEdit"][];
@@ -5564,7 +5568,11 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConfirmIdentityRequest"];
+            };
+        };
         responses: {
             /** @description OK */
             200: {
@@ -5718,7 +5726,11 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConfirmIdentityRequest"];
+            };
+        };
         responses: {
             /** @description OK */
             200: {
@@ -6651,7 +6663,11 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConfirmIdentityRequest"];
+            };
+        };
         responses: {
             /** @description OK */
             200: {

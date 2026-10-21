@@ -5,7 +5,7 @@ import type { Schemas } from '../api/client';
 import { useAccounts, useBaseCurrency } from '../api/queries';
 import { ShareBar } from '../components/Figure';
 import { useGoals } from '../goals/api';
-import { accountColor } from '../lib/accounts';
+import { accountColor, sumInBase } from '../lib/accounts';
 import { formatPercent } from '../lib/format';
 import { formatMoney } from '../lib/money';
 import classes from './shell.module.css';
@@ -29,9 +29,8 @@ export function AccountsWidget() {
 
   const everyday = active.filter((account) => !SAVINGS.includes(account.type)).slice(0, SHOWN);
   const savings = active.filter((account) => SAVINGS.includes(account.type));
-  const savingsTotal = savings.reduce((sum, account) => sum + (account.balanceInBase ?? 0), 0);
   // A savings account without an exchange rate is left out of the total; the total says so.
-  const savingsIncomplete = savings.some((account) => account.balanceInBase == null);
+  const { total: savingsTotal, incomplete: savingsIncomplete } = sumInBase(savings);
 
   return (
     <div className={classes.widget}>

@@ -1,18 +1,12 @@
 import { screen, within } from '@testing-library/react';
-import { budgetRowOf, splitOf, transactionOf } from '../test/fixtures';
+import { accountsSummaryOf, budgetRowOf, splitOf, transactionOf } from '../test/fixtures';
 import { currentMonth as month, json, mockApi, plain, renderApp, signedInApi } from '../test/render';
 
 it('shows the month figures, envelopes, recent transactions and bank differences', async () => {
   mockApi({
     ...signedInApi,
     'GET /api/v1/accounts/summary': () =>
-      json({
-        currency: 'UAH',
-        netWorth: 181493.12,
-        available: 0,
-        availableWithCredit: 0,
-        readyToAssign: 4250,
-      }),
+      json(accountsSummaryOf({ netWorth: 181493.12, readyToAssign: 4250 })),
     'GET /api/v1/reports/income-expense': () =>
       json({
         currency: 'UAH',

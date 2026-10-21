@@ -17,7 +17,7 @@ import { currencyOptions } from '../lib/currencies';
 import { formatMoney } from '../lib/money';
 import { mantineColor, type PaletteColor } from '../lib/palette';
 import { ColorSwatches } from '../settings/ColorSwatches';
-import { requestOf, type Goal, type GoalRequest } from './api';
+import { requestOf, useDeleteGoal, type Goal, type GoalRequest } from './api';
 
 /** Icons offered for goals: things people save for. */
 const GOAL_ICONS = [
@@ -101,11 +101,7 @@ export function GoalModal({
     onSuccess: done,
     meta: { errorShown: true },
   });
-  const remove = useMutation({
-    mutationFn: () => check(api.DELETE('/api/v1/goals/{id}', { params: { path: { id: goal!.id } } })),
-    onSuccess: done,
-    meta: { errorShown: true },
-  });
+  const remove = useDeleteGoal({ onDeleted: onClose, errorShown: true });
   const errors = save.error ? fieldErrors(toProblem(save.error)) : {};
 
   const chooseAccount = (value: string | null) => {
@@ -229,7 +225,7 @@ export function GoalModal({
                     confirmDelete({
                       title: t('goals.deleteTitle', { name: goal.name }),
                       text: t('goals.deleteText'),
-                      onConfirm: () => remove.mutate(),
+                      onConfirm: () => remove.mutate(goal.id),
                     })
                 : undefined
             }

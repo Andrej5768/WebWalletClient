@@ -1,7 +1,7 @@
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { kyivToday } from '../lib/periods';
-import { accountOf } from '../test/fixtures';
+import { accountOf, accountsSummaryOf } from '../test/fixtures';
 import { json, mockApi, plain, renderApp, signedInApi } from '../test/render';
 
 /** Twelve months with 10 000 of expenses and 5 000 saved each. */
@@ -27,15 +27,7 @@ function api(extra = {}) {
   return mockApi({
     ...signedInApi,
     'GET /api/v1/reports/income-expense': () => json(incomeExpense),
-    'GET /api/v1/accounts/summary': () =>
-      json({
-        currency: 'UAH',
-        netWorth: 1_000_000,
-        available: 0,
-        availableWithCredit: 0,
-        readyToAssign: 0,
-        unconvertedCurrencies: [],
-      }),
+    'GET /api/v1/accounts/summary': () => json(accountsSummaryOf({ netWorth: 1_000_000 })),
     ...extra,
   });
 }
@@ -87,6 +79,20 @@ it('counts the months of freedom money from the chosen accounts', async () => {
 
   await userEvent.click(screen.getByRole('radio', { name: '6 місяців' }));
   expect(screen.getByText('Мету досягнуто')).toBeInTheDocument();
+});
+
+it('says the freedom money is incomplete when an account has no exchange rate', async () => {
+  api({
+    'GET /api/v1/accounts': () =>
+      json([
+        accountOf({ id: 1, name: 'Картка', type: 'CARD', balance: 20000, balanceInBase: 20000 }),
+        accountOf({ id: 2, name: 'Злоті', type: 'CASH', currency: 'PLN', balance: 500, balanceInBase: null }),
+      ]),
+  });
+  renderApp('/goals?tab=fym');
+
+  expect(plain((await screen.findByTestId('fym-months')).textContent)).toBe('2,0');
+  expect(screen.getByText('Для частини валют немає курсу, тому сума неповна.')).toBeInTheDocument();
 });
 
 it('calculates compound interest by year', async () => {

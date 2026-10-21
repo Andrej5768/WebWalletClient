@@ -1,5 +1,3 @@
-import { BarChart } from '@mantine/charts';
-import { moneyAxis } from '../components/chartAxis';
 import { Alert, Anchor, Button, Card, Group, SimpleGrid, Skeleton, Stack, Text, Title } from '@mantine/core';
 import { TriangleAlert } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -11,11 +9,12 @@ import { Amount } from '../components/Amount';
 import { CategoryIcon } from '../components/CategoryIcon';
 import { QueryError } from '../components/feedback';
 import { Figure, ShareBar } from '../components/Figure';
-import { formatMonthShort, formatMonthTitle } from '../lib/format';
+import { formatMonthTitle } from '../lib/format';
 import { formatMoney } from '../lib/money';
 import { mantineColor } from '../lib/palette';
 import { isoDate, kyivToday, periodOf } from '../lib/periods';
 import { useIncomeExpense, useSpending } from '../reports/api';
+import { IncomeExpenseChart } from '../reports/IncomeExpenseChart';
 import { displayCategory, signedAmount } from '../transactions/model';
 import classes from './dashboard.module.css';
 import { ForecastCard } from './ForecastCard';
@@ -165,24 +164,7 @@ export function DashboardPage() {
             {monthly.isLoading ? (
               <Skeleton height={220} />
             ) : (
-              <BarChart
-                h={220}
-                data={(monthly.data?.months ?? []).map((item) => ({
-                  month: formatMonthShort(item.month),
-                  [t('reports.income')]: item.income,
-                  [t('reports.expense')]: item.expense,
-                }))}
-                dataKey="month"
-                series={[
-                  { name: t('reports.income'), color: 'green.6' },
-                  { name: t('reports.expense'), color: 'red.6' },
-                ]}
-                withLegend
-                valueFormatter={(value) => formatMoney(value, currency)}
-                yAxisProps={moneyAxis}
-                gridAxis="y"
-                tickLine="none"
-              />
+              <IncomeExpenseChart months={monthly.data?.months ?? []} currency={currency} height={220} />
             )}
           </Card>
         </Stack>

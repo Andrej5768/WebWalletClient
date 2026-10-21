@@ -1,7 +1,13 @@
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { kyivToday } from '../../lib/periods';
-import { accountOf, dividendCalendarOf, dividendEventOf, instrumentOf } from '../../test/fixtures';
+import {
+  accountOf,
+  accountsSummaryOf,
+  dividendCalendarOf,
+  dividendEventOf,
+  instrumentOf,
+} from '../../test/fixtures';
 import { json, mockApi, plain, renderApp, renderWithProviders, signedInApi } from '../../test/render';
 import { monthWeeks, openingMonth, shortName, statusKey, upcoming } from './model';
 import { UpcomingPayments } from './UpcomingPayments';
@@ -80,8 +86,7 @@ function api(data = calendar) {
   return mockApi({
     ...signedInApi,
     'GET /api/v1/accounts': () => json(accounts),
-    'GET /api/v1/accounts/summary': () =>
-      json({ currency: 'USD', netWorth: 0, available: 0, availableWithCredit: 0, readyToAssign: 0 }),
+    'GET /api/v1/accounts/summary': () => json(accountsSummaryOf({ currency: 'USD' })),
     'GET /api/v1/investments/dividends': () => json(data),
     // The operation drawer the warning opens
     'GET /api/v1/investments/instruments/3': () => json(instrumentOf({ id: 3 })),

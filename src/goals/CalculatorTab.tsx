@@ -8,7 +8,8 @@ import { useBaseCurrency } from '../api/queries';
 import { Figure } from '../components/Figure';
 import { MoneyInput } from '../components/MoneyInput';
 import { kyivToday } from '../lib/periods';
-import { compound, loadStored, store, type Capitalization, type CompoundInput } from './fire';
+import { loadStored, store } from '../lib/storage';
+import { compound, type Capitalization, type CompoundInput } from './fire';
 import classes from './goals.module.css';
 
 const STORAGE_KEY = 'ww-compound';
