@@ -51,12 +51,12 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["get_3"];
+        get: operations["get_4"];
         /**
          * Update an account; the currency cannot be changed
          * @description Omitted optional fields keep their values; a credit limit or interest rate of 0 removes it
          */
-        put: operations["update_6"];
+        put: operations["update_7"];
         post?: never;
         /** Delete an account without transactions; accounts with history should be archived */
         delete: operations["delete_8"];
@@ -609,7 +609,7 @@ export interface paths {
          * Update a category
          * @description The parent is always applied (null makes a top-level category); other omitted optional fields keep their values. icon, color and necessity sent as null are removed. A necessity is allowed only on expense categories; it is removed when the category becomes income.
          */
-        put: operations["update_5"];
+        put: operations["update_6"];
         post?: never;
         /** Delete an unused category without subcategories; others should be archived */
         delete: operations["delete_7"];
@@ -660,7 +660,7 @@ export interface paths {
             cookie?: never;
         };
         get?: never;
-        put: operations["update_4"];
+        put: operations["update_5"];
         post?: never;
         delete: operations["delete_6"];
         options?: never;
@@ -712,12 +712,12 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["get_2"];
+        get: operations["get_3"];
         /**
          * Replace a goal
          * @description Omitted achieved and sortOrder keep their values. Moved to another account, the pace starts again from its balance.
          */
-        put: operations["update_3"];
+        put: operations["update_4"];
         post?: never;
         delete: operations["delete_5"];
         options?: never;
@@ -790,7 +790,7 @@ export interface paths {
             cookie?: never;
         };
         /** A page of the operations of an import preview, newest first; 404 when it expired */
-        get: operations["get_4"];
+        get: operations["get_5"];
         put?: never;
         post?: never;
         /** Discard an import preview */
@@ -1099,7 +1099,7 @@ export interface paths {
             cookie?: never;
         };
         get: operations["operation"];
-        put: operations["update_2"];
+        put: operations["update_3"];
         post?: never;
         /** Delete an operation; deleting a purchase whose units were sold later is rejected */
         delete: operations["delete_4"];
@@ -1216,7 +1216,7 @@ export interface paths {
          * Start linking a Google account
          * @description Returns the Google page to send the browser to and sets the cookie that binds the link to this browser; Google then redirects to the security settings
          */
-        post: operations["link_2"];
+        post: operations["link_3"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1357,6 +1357,23 @@ export interface paths {
          * @description Returns a new secret for the authenticator app; it becomes active once /enable gets a code of it. Fails with CONFLICT when two-factor authentication is already on.
          */
         post: operations["setup"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/notifications/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** What the user is notified about in Telegram, and at which hour */
+        get: operations["get_2"];
+        put: operations["update_2"];
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -1527,7 +1544,7 @@ export interface paths {
          * Mark an occurrence as paid by an existing transaction
          * @description The transaction must not pay another occurrence.
          */
-        post: operations["link_1"];
+        post: operations["link_2"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1821,7 +1838,7 @@ export interface paths {
          */
         get: operations["settings"];
         /** Replace the user's own tax values of a year; null takes the default */
-        put: operations["updateSettings"];
+        put: operations["updateSettings_1"];
         post?: never;
         delete?: never;
         options?: never;
@@ -1840,6 +1857,64 @@ export interface paths {
         get: operations["transaction"];
         /** Add a transaction to the income of the sole proprietor, take it out, or forget the mark (null) */
         put: operations["mark"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/telegram": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Whether the bot is available and the Telegram chat of the user, if connected */
+        get: operations["status_1"];
+        put?: never;
+        post?: never;
+        /** Disconnect the Telegram chat */
+        delete: operations["unlink_1"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/telegram/link": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create a one-time link that connects a Telegram chat
+         * @description The link opens the bot; pressing Start there connects the chat. It works once, for 15 minutes; a new link replaces the previous one. NOT_FOUND when the bot is not configured.
+         */
+        post: operations["link_1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/telegram/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Settings of the connected chat
+         * @description NOT_FOUND when no chat is connected
+         */
+        put: operations["updateSettings"];
         post?: never;
         delete?: never;
         options?: never;
@@ -2743,6 +2818,18 @@ export interface components {
             months: components["schemas"]["MonthNetWorth"][];
             unconvertedCurrencies: string[];
         };
+        NotificationSettingsDto: {
+            banks?: boolean;
+            budgets?: boolean;
+            forecast?: boolean;
+            goals?: boolean;
+            /** Format: int32 */
+            hour?: number;
+            monthly?: boolean;
+            recurring?: boolean;
+            taxes?: boolean;
+            weekly?: boolean;
+        };
         OccurrenceConfirmRequest: {
             amount?: number;
             /** Format: date */
@@ -3340,6 +3427,26 @@ export interface components {
             /** Format: int32 */
             year: number;
         };
+        TelegramLinkResponse: {
+            /** Format: date-time */
+            expiresAt: string;
+            url: string;
+        };
+        TelegramSettingsRequest: {
+            /** Format: int64 */
+            quickEntryAccountId?: number;
+        };
+        TelegramStatus: {
+            botUsername: string | null;
+            enabled: boolean;
+            firstName: string | null;
+            linked: boolean;
+            /** Format: date-time */
+            linkedAt: string | null;
+            /** Format: int64 */
+            quickEntryAccountId: number | null;
+            username: string | null;
+        };
         TickerChoice: {
             /** Format: int64 */
             instrumentId?: number;
@@ -3575,7 +3682,7 @@ export interface operations {
             };
         };
     };
-    get_3: {
+    get_4: {
         parameters: {
             query?: never;
             header?: never;
@@ -3597,7 +3704,7 @@ export interface operations {
             };
         };
     };
-    update_6: {
+    update_7: {
         parameters: {
             query?: never;
             header?: never;
@@ -4363,7 +4470,7 @@ export interface operations {
             };
         };
     };
-    update_5: {
+    update_6: {
         parameters: {
             query?: never;
             header?: never;
@@ -4473,7 +4580,7 @@ export interface operations {
             };
         };
     };
-    update_4: {
+    update_5: {
         parameters: {
             query?: never;
             header?: never;
@@ -4585,7 +4692,7 @@ export interface operations {
             };
         };
     };
-    get_2: {
+    get_3: {
         parameters: {
             query?: never;
             header?: never;
@@ -4607,7 +4714,7 @@ export interface operations {
             };
         };
     };
-    update_3: {
+    update_4: {
         parameters: {
             query?: never;
             header?: never;
@@ -4733,7 +4840,7 @@ export interface operations {
             };
         };
     };
-    get_4: {
+    get_5: {
         parameters: {
             query?: {
                 page?: number;
@@ -5270,7 +5377,7 @@ export interface operations {
             };
         };
     };
-    update_2: {
+    update_3: {
         parameters: {
             query?: never;
             header?: never;
@@ -5450,7 +5557,7 @@ export interface operations {
             };
         };
     };
-    link_2: {
+    link_3: {
         parameters: {
             query?: never;
             header?: never;
@@ -5620,6 +5727,50 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["TwoFactorSetupResponse"];
+                };
+            };
+        };
+    };
+    get_2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["NotificationSettingsDto"];
+                };
+            };
+        };
+    };
+    update_2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NotificationSettingsDto"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["NotificationSettingsDto"];
                 };
             };
         };
@@ -5922,7 +6073,7 @@ export interface operations {
             };
         };
     };
-    link_1: {
+    link_2: {
         parameters: {
             query?: never;
             header?: never;
@@ -6383,7 +6534,7 @@ export interface operations {
             };
         };
     };
-    updateSettings: {
+    updateSettings_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -6452,6 +6603,88 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    status_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TelegramStatus"];
+                };
+            };
+        };
+    };
+    unlink_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    link_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TelegramLinkResponse"];
+                };
+            };
+        };
+    };
+    updateSettings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TelegramSettingsRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TelegramStatus"];
+                };
             };
         };
     };
