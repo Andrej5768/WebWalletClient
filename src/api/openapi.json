@@ -190,6 +190,27 @@
         ],
         "type": "object"
       },
+      "AndroidVersions": {
+        "properties": {
+          "latestVersionCode": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "minSupportedVersionCode": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "storeUrl": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "latestVersionCode",
+          "minSupportedVersionCode",
+          "storeUrl"
+        ],
+        "type": "object"
+      },
       "Anomaly": {
         "properties": {
           "amount": {
@@ -210,6 +231,44 @@
           "average",
           "month",
           "ratio"
+        ],
+        "type": "object"
+      },
+      "AppConfigResponse": {
+        "properties": {
+          "android": {
+            "$ref": "#/components/schemas/AndroidVersions"
+          },
+          "features": {
+            "$ref": "#/components/schemas/AppFeatures"
+          }
+        },
+        "required": [
+          "android",
+          "features"
+        ],
+        "type": "object"
+      },
+      "AppFeatures": {
+        "properties": {
+          "googleSignIn": {
+            "type": "boolean"
+          },
+          "marketSearch": {
+            "type": "boolean"
+          },
+          "push": {
+            "type": "boolean"
+          },
+          "telegram": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "googleSignIn",
+          "marketSearch",
+          "push",
+          "telegram"
         ],
         "type": "object"
       },
@@ -6822,6 +6881,28 @@
         "summary": "Monthly spending per top-level category, averages and anomalies",
         "tags": [
           "Analytics"
+        ]
+      }
+    },
+    "/api/v1/app/config": {
+      "get": {
+        "description": "Public. The app refuses to run below minSupportedVersionCode and hides features that are off on this server.",
+        "operationId": "config",
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppConfigResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Versions and features for the native apps",
+        "tags": [
+          "App"
         ]
       }
     },

@@ -165,6 +165,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/app/config": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Versions and features for the native apps
+         * @description Public. The app refuses to run below minSupportedVersionCode and hides features that are off on this server.
+         */
+        get: operations["config"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/auth/forgot-password": {
         parameters: {
             query?: never;
@@ -2121,11 +2141,28 @@ export interface components {
             share: number;
             value: number;
         };
+        AndroidVersions: {
+            /** Format: int32 */
+            latestVersionCode: number;
+            /** Format: int32 */
+            minSupportedVersionCode: number;
+            storeUrl: string;
+        };
         Anomaly: {
             amount: number;
             average: number;
             month: string;
             ratio: number;
+        };
+        AppConfigResponse: {
+            android: components["schemas"]["AndroidVersions"];
+            features: components["schemas"]["AppFeatures"];
+        };
+        AppFeatures: {
+            googleSignIn: boolean;
+            marketSearch: boolean;
+            push: boolean;
+            telegram: boolean;
         };
         ApplyResponse: {
             /** Format: int32 */
@@ -3913,6 +3950,26 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["TrendsResponse"];
+                };
+            };
+        };
+    };
+    config: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AppConfigResponse"];
                 };
             };
         };
