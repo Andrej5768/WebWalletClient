@@ -233,7 +233,7 @@ export interface paths {
         put?: never;
         /**
          * Finish signing in with Google
-         * @description Exchanges the ticket of the callback for a session, like /login: the access token, or twoFactorChallenge when two-factor authentication is on. The ticket works once and briefly.
+         * @description Exchanges the ticket of the callback for a session, like /login: the access token, or twoFactorChallenge when two-factor authentication is on. The ticket works once and briefly. Native apps (header X-WebWallet-Client) get the refresh token in refreshToken instead of the cookie and send trustedDeviceToken in the body.
          */
         post: operations["complete"];
         delete?: never;
@@ -273,7 +273,7 @@ export interface paths {
         put?: never;
         /**
          * Sign in with email and password
-         * @description Returns the access token; the refresh token is set in an HttpOnly cookie that is sent only to /api/v1/auth. With two-factor authentication on, unless the browser is trusted, returns twoFactorChallenge instead, to exchange with a code at /api/v1/auth/login/two-factor.
+         * @description Returns the access token; the refresh token is set in an HttpOnly cookie that is sent only to /api/v1/auth. With two-factor authentication on, unless the device is trusted, returns twoFactorChallenge instead, to exchange with a code at /api/v1/auth/login/two-factor. Native apps (header X-WebWallet-Client) get the refresh token in refreshToken instead of the cookie and send it in the body. Native apps send trustedDeviceToken in the body.
          */
         post: operations["login"];
         delete?: never;
@@ -293,7 +293,7 @@ export interface paths {
         put?: never;
         /**
          * Finish signing in with a two-factor code
-         * @description Exchanges the challenge of the login response and a code of the authenticator app or a recovery code for a session. A wrong code keeps the challenge until it expires; an expired one fails with TWO_FACTOR_EXPIRED. With trustDevice the browser gets a cookie that skips the code for a while.
+         * @description Exchanges the challenge of the login response and a code of the authenticator app or a recovery code for a session. A wrong code keeps the challenge until it expires; an expired one fails with TWO_FACTOR_EXPIRED. With trustDevice the browser gets a cookie that skips the code for a while. Native apps (header X-WebWallet-Client) get the refresh token in refreshToken instead of the cookie and send it in the body. Native apps get the trusted device as trustedDeviceToken in the body.
          */
         post: operations["loginTwoFactor"];
         delete?: never;
@@ -312,8 +312,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * End the session of the refresh token cookie and delete the cookie
-         * @description Succeeds without the cookie or with an unknown token as well
+         * End the session of the refresh token and delete the cookie
+         * @description Succeeds without a token or with an unknown one as well. Native apps (header X-WebWallet-Client) get the refresh token in refreshToken instead of the cookie and send it in the body.
          */
         post: operations["logout"];
         delete?: never;
@@ -349,8 +349,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Exchange the refresh token cookie for a new access token
-         * @description The refresh token is rotated: the response sets a new cookie and the presented token stops working. Presenting an already rotated token ends the whole session.
+         * Exchange the refresh token for a new access token
+         * @description The refresh token is rotated: the response sets a new cookie and the presented token stops working. Presenting an already rotated token ends the whole session. Native apps (header X-WebWallet-Client) get the refresh token in refreshToken instead of the cookie and send it in the body.
          */
         post: operations["refresh"];
         delete?: never;
@@ -1274,7 +1274,7 @@ export interface paths {
         put?: never;
         /**
          * Change the password
-         * @description All sessions are ended, including the current one; a new session is started: the response contains a new access token and sets a new refresh token cookie
+         * @description All sessions are ended, including the current one; a new session is started: the response contains a new access token and sets a new refresh token cookie. Native apps (header X-WebWallet-Client) get the refresh token in refreshToken instead of the cookie.
          */
         post: operations["changePassword"];
         delete?: never;
@@ -2625,6 +2625,7 @@ export interface components {
         };
         GoogleTicketRequest: {
             ticket: string;
+            trustedDeviceToken?: string;
         };
         HistoryPoint: {
             benchmark: number | null;
@@ -2801,11 +2802,13 @@ export interface components {
         LoginRequest: {
             email: string;
             password: string;
+            trustedDeviceToken?: string;
         };
         LoginResponse: {
             accessToken: string | null;
             /** Format: int64 */
             expiresIn: number | null;
+            refreshToken: string | null;
             tokenType: string | null;
             twoFactorChallenge: string | null;
         };
@@ -3280,6 +3283,9 @@ export interface components {
         RedirectResponse: {
             url: string;
         };
+        RefreshTokenRequest: {
+            refreshToken?: string;
+        };
         RegisterRequest: {
             /** Format: email */
             email: string;
@@ -3550,7 +3556,9 @@ export interface components {
             accessToken: string;
             /** Format: int64 */
             expiresIn: number;
+            refreshToken: string | null;
             tokenType: string;
+            trustedDeviceToken: string | null;
         };
         TransactionMarkRequest: {
             included?: boolean;
@@ -4127,7 +4135,11 @@ export interface operations {
                 refresh_token?: string;
             };
         };
-        requestBody?: never;
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["RefreshTokenRequest"];
+            };
+        };
         responses: {
             /** @description No Content */
             204: {
@@ -4168,7 +4180,11 @@ export interface operations {
                 refresh_token?: string;
             };
         };
-        requestBody?: never;
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["RefreshTokenRequest"];
+            };
+        };
         responses: {
             /** @description OK */
             200: {
