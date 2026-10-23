@@ -63,6 +63,39 @@ export function initialTransactionValues(
   };
 }
 
+/**
+ * The other direction of a transfer: the accounts change places. The amounts change places too
+ * when asked and a received amount is set: between currencies the sent amount must stay in the
+ * sending account's currency, while a fee in one currency stays with the sending side.
+ */
+export function swapAccounts(
+  values: TransactionValues,
+  amountsToo = values.toAmount !== '',
+): Partial<TransactionValues> {
+  return {
+    accountId: values.toAccountId,
+    toAccountId: values.accountId,
+    ...(amountsToo && values.toAmount !== '' ? { amount: values.toAmount, toAmount: values.amount } : {}),
+  };
+}
+
+/**
+ * What changes with the type. Categories of the other kind are dropped. The account of an
+ * income is the one that received the money, so when an income becomes a transfer it moves to
+ * "to account", and when a transfer becomes an income the receiving account becomes its account.
+ */
+export function switchType(values: TransactionValues, type: TransactionType): Partial<TransactionValues> {
+  const changes: Partial<TransactionValues> = { type };
+  if ((type === 'INCOME') !== (values.type === 'INCOME')) {
+    changes.categoryId = null;
+    changes.splits = values.splits.map((item) => ({ ...item, categoryId: null }));
+  }
+  const incomeToTransfer = values.type === 'INCOME' && type === 'TRANSFER';
+  const transferToIncome = values.type === 'TRANSFER' && type === 'INCOME' && values.toAccountId !== null;
+  if (incomeToTransfer || transferToIncome) Object.assign(changes, swapAccounts(values));
+  return changes;
+}
+
 /** Unassigned part of a split: amount minus the parts. */
 export function splitRemainder(values: TransactionValues): number {
   return roundTo(

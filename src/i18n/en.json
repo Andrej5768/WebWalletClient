@@ -320,6 +320,8 @@
       "toAccountRequired": "Choose another account",
       "toAmount": "Received",
       "toAmountHint": "The accounts have different currencies: enter the amount received",
+      "toAmountFeeHint": "Leave empty when the whole amount arrived; a smaller amount means a fee",
+      "swapAccounts": "Swap the accounts",
       "payee": "Payee",
       "payeePlaceholder": "Start typing a name",
       "category": "Category",

@@ -1,4 +1,5 @@
 import {
+  ActionIcon,
   Alert,
   Anchor,
   Autocomplete,
@@ -20,7 +21,7 @@ import {
 import { DateInput } from '@mantine/dates';
 import { useForm, type UseFormReturnType } from '@mantine/form';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Info, Unlink } from 'lucide-react';
+import { ArrowLeftRight, Info, Unlink } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
@@ -39,6 +40,8 @@ import {
   formErrors,
   initialTransactionValues,
   splitRemainder,
+  swapAccounts,
+  switchType,
   toNumber,
   toTransactionBody,
   type TransactionType,
@@ -150,18 +153,7 @@ function TransactionForm({ transaction, defaultAccountId, defaults, onClose }: P
   const currency = account?.currency ?? 'UAH';
   const kind = values.type === 'INCOME' ? 'INCOME' : 'EXPENSE';
 
-  /** Switching between expense and income drops categories of the other kind. */
-  const changeType = (type: TransactionType) => {
-    const kindChanged = (type === 'INCOME') !== (values.type === 'INCOME');
-    form.setFieldValue('type', type);
-    if (kindChanged) {
-      form.setFieldValue('categoryId', null);
-      form.setFieldValue(
-        'splits',
-        values.splits.map((item) => ({ ...item, categoryId: null })),
-      );
-    }
-  };
+  const changeType = (type: TransactionType) => form.setValues(switchType(values, type));
 
   const done = async () => {
     await invalidateLedger(queryClient);
@@ -238,29 +230,48 @@ function TransactionForm({ transaction, defaultAccountId, defaults, onClose }: P
             size="md"
             {...form.getInputProps('date')}
           />
-          <Select
-            label={t(
-              values.type === 'TRANSFER' ? 'transactions.form.fromAccount' : 'transactions.form.account',
-            )}
-            searchable
-            data={accountData}
-            {...form.getInputProps('accountId')}
-          />
           {values.type === 'TRANSFER' ? (
-            <Select
-              label={t('transactions.form.toAccount')}
-              searchable
-              data={accountData.filter((item) => item.value !== values.accountId)}
-              {...form.getInputProps('toAccountId')}
-            />
+            <Group style={{ gridColumn: '1 / -1' }} gap="xs" wrap="nowrap" align="flex-end">
+              <Select
+                style={{ flex: 1 }}
+                label={t('transactions.form.fromAccount')}
+                searchable
+                data={accountData}
+                {...form.getInputProps('accountId')}
+              />
+              <ActionIcon
+                variant="default"
+                size="input-sm"
+                aria-label={t('transactions.form.swapAccounts')}
+                title={t('transactions.form.swapAccounts')}
+                onClick={() => form.setValues(swapAccounts(values, account?.currency !== toAccount?.currency))}
+              >
+                <ArrowLeftRight size={16} />
+              </ActionIcon>
+              <Select
+                style={{ flex: 1 }}
+                label={t('transactions.form.toAccount')}
+                searchable
+                data={accountData.filter((item) => item.value !== values.accountId)}
+                {...form.getInputProps('toAccountId')}
+              />
+            </Group>
           ) : (
-            <Autocomplete
-              label={t('transactions.form.payee')}
-              placeholder={t('transactions.form.payeePlaceholder')}
-              data={[...new Set((payees.data ?? []).map((payee) => payee.name))]}
-              limit={8}
-              {...form.getInputProps('payee')}
-            />
+            <>
+              <Select
+                label={t('transactions.form.account')}
+                searchable
+                data={accountData}
+                {...form.getInputProps('accountId')}
+              />
+              <Autocomplete
+                label={t('transactions.form.payee')}
+                placeholder={t('transactions.form.payeePlaceholder')}
+                data={[...new Set((payees.data ?? []).map((payee) => payee.name))]}
+                limit={8}
+                {...form.getInputProps('payee')}
+              />
+            </>
           )}
           {values.type === 'TRANSFER' && (
             <MoneyInput

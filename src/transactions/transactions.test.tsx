@@ -1,5 +1,6 @@
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { formatMoney } from '../lib/money';
 import { isoDate, kyivToday } from '../lib/periods';
 import { accountOf, categoryOf, splitOf, transactionOf } from '../test/fixtures';
 import { bodyOf, json, mockApi, plain, renderApp, signedInApi } from '../test/render';
@@ -151,6 +152,34 @@ it('asks for the received amount of a transfer between currencies', async () => 
   const drawer = await screen.findByRole('dialog');
   expect(await within(drawer).findByLabelText('Зараховано')).toHaveValue('100');
   expect(within(drawer).queryByLabelText('Отримувач')).not.toBeInTheDocument();
+});
+
+it('swaps the accounts of a transfer together with the amounts', async () => {
+  api();
+  renderApp('/transactions?edit=102');
+
+  const drawer = await screen.findByRole('dialog');
+  await within(drawer).findByLabelText('Зараховано');
+  await userEvent.click(within(drawer).getByRole('button', { name: 'Поміняти рахунки місцями' }));
+
+  expect(within(drawer).getByLabelText('З рахунку')).toHaveValue(`Біла картка · ${formatMoney(1240, 'USD')}`);
+  expect(within(drawer).getByLabelText('На рахунок')).toHaveValue(`Чорна картка · ${formatMoney(18452.37, 'UAH')}`);
+  expect(within(drawer).getByLabelText('Сума')).toHaveValue('100');
+  const received = within(drawer).getByLabelText('Зараховано') as HTMLInputElement;
+  expect(received.value.replace(/\s/g, '')).toBe('4130');
+});
+
+it('moves the account of an income to the receiving side when it becomes a transfer', async () => {
+  api();
+  renderApp('/transactions?new=1&accountId=1');
+
+  const drawer = await screen.findByRole('dialog');
+  await within(drawer).findByLabelText('Сума');
+  await userEvent.click(within(drawer).getByRole('radio', { name: 'Дохід' }));
+  await userEvent.click(within(drawer).getByRole('radio', { name: 'Переказ' }));
+
+  expect(within(drawer).getByLabelText('З рахунку')).toHaveValue('');
+  expect(within(drawer).getByLabelText('На рахунок')).toHaveValue(`Чорна картка · ${formatMoney(18452.37, 'UAH')}`);
 });
 
 it('offers the quick category picker only for a single uncategorized part', async () => {
