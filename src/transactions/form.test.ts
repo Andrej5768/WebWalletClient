@@ -1,4 +1,5 @@
 import {
+  debtDirection,
   formErrors,
   initialTransactionValues,
   splitRemainder,
@@ -64,6 +65,62 @@ describe('toTransactionBody', () => {
       ],
     });
     expect(splitRemainder(values)).toBe(0);
+  });
+});
+
+describe('debts', () => {
+  const debtAccounts = new Set([9]);
+
+  it('saves a debt given as a transfer to the debt account with the person as the payee', () => {
+    const values = {
+      ...initialTransactionValues(null, new Map(), 1),
+      type: 'DEBT' as const,
+      debtDirection: 'GAVE' as const,
+      amount: 500,
+      payee: ' Олег ',
+    };
+    expect(toTransactionBody(values, [], 9)).toMatchObject({
+      type: 'TRANSFER',
+      accountId: 1,
+      toAccountId: 9,
+      amount: 500,
+      toAmount: 500,
+      payeeName: 'Олег',
+    });
+  });
+
+  it('saves a debt received as a transfer from the debt account, with the amount in its currency', () => {
+    const values = {
+      ...initialTransactionValues(null, new Map(), 2),
+      type: 'DEBT' as const,
+      debtDirection: 'RECEIVED' as const,
+      amount: 10,
+      toAmount: 415,
+      payee: 'Олег',
+    };
+    expect(toTransactionBody(values, [], 9)).toMatchObject({
+      type: 'TRANSFER',
+      accountId: 9,
+      amount: 415,
+      toAccountId: 2,
+      toAmount: 10,
+      payeeName: 'Олег',
+    });
+  });
+
+  it('opens a transfer with the debt account as a debt, with the own account and amount', () => {
+    const received = transactionOf({ ...transfer, accountId: 9, toAccountId: 2, amount: 415, toAmount: 10 });
+    expect(debtDirection(received, debtAccounts)).toBe('RECEIVED');
+    expect(initialTransactionValues(received, new Map(), undefined, debtAccounts)).toMatchObject({
+      type: 'DEBT',
+      debtDirection: 'RECEIVED',
+      accountId: '2',
+      toAccountId: null,
+      amount: 10,
+      toAmount: 415,
+    });
+    expect(debtDirection(transfer, debtAccounts)).toBeUndefined();
+    expect(initialTransactionValues(transfer, new Map(), undefined, debtAccounts).type).toBe('TRANSFER');
   });
 });
 

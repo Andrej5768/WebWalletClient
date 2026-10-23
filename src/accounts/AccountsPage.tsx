@@ -46,6 +46,7 @@ import { formatDateTime } from '../lib/format';
 import { accountColorName, sumInBase, type AccountType } from '../lib/accounts';
 import { formatMoney } from '../lib/money';
 import { AccountFormModal } from './AccountFormModal';
+import { DebtsCard } from './DebtsCard';
 import { groupAccounts, type Account } from './groups';
 import classes from './accounts.module.css';
 
@@ -227,6 +228,8 @@ export function AccountsPage() {
           ))}
         </div>
       </Card>
+
+      <DebtsCard />
 
       {editing !== undefined && <AccountFormModal account={editing} onClose={() => setEditing(undefined)} />}
     </Stack>

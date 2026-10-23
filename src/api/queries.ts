@@ -18,6 +18,7 @@ export const queryKeys = {
   transactions: ['transactions'] as const,
   transaction: (id: number) => ['transactions', 'one', id] as const,
   budget: ['budget'] as const,
+  debts: ['debts'] as const,
   budgetMonth: (month: string) => ['budget', month] as const,
   reports: ['reports'] as const,
   goals: ['goals'] as const,
@@ -41,6 +42,7 @@ export function invalidateLedger(queryClient: QueryClient): Promise<unknown> {
     [
       queryKeys.transactions,
       queryKeys.accounts,
+      queryKeys.debts,
       queryKeys.budget,
       queryKeys.reports,
       queryKeys.goals,

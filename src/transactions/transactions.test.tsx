@@ -10,6 +10,7 @@ const today = isoDate(kyivToday());
 const accounts = [
   accountOf({ id: 1, name: 'Чорна картка', balance: 18452.37, balanceInBase: 18452.37 }),
   accountOf({ id: 2, name: 'Біла картка', currency: 'USD', balance: 1240, balanceInBase: 51212 }),
+  accountOf({ id: 9, name: 'Борги', type: 'DEBT', balance: 700, balanceInBase: 700, inBudget: false }),
 ];
 
 const categories = [
@@ -184,6 +185,55 @@ it('moves the account of an income to the receiving side when it becomes a trans
   expect(within(drawer).getByLabelText('На рахунок')).toHaveValue(
     `Чорна картка · ${formatMoney(18452.37, 'UAH')}`,
   );
+});
+
+it('adds money given to a person as a transfer to the debt account', async () => {
+  const requests = api({ 'POST /api/v1/transactions': () => json({ id: 201 }, 201) });
+  renderApp('/transactions?new=1&accountId=1');
+
+  const drawer = await screen.findByRole('dialog');
+  await within(drawer).findByLabelText('Сума');
+  await userEvent.click(within(drawer).getByRole('radio', { name: 'Борг' }));
+  await userEvent.type(within(drawer).getByLabelText('Сума'), '500');
+  await userEvent.type(within(drawer).getByLabelText('Кому / від кого'), 'Олег');
+  await userEvent.click(within(drawer).getByRole('button', { name: 'Зберегти' }));
+
+  await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+  expect(await bodyOf(requests, 'POST', '/api/v1/transactions')).toMatchObject({
+    type: 'TRANSFER',
+    accountId: 1,
+    toAccountId: 9,
+    amount: 500,
+    toAmount: 500,
+    payeeName: 'Олег',
+  });
+});
+
+it('shows a transfer with the debt account as a debt with the person', async () => {
+  const debt = transactionOf({
+    id: 105,
+    type: 'TRANSFER',
+    date: today,
+    accountId: 9,
+    toAccountId: 1,
+    amount: 300,
+    toAmount: 300,
+    currency: 'UAH',
+    toCurrency: 'UAH',
+    payee: { id: 7, name: 'Олег' },
+    splits: [],
+    tagIds: [],
+    source: 'MANUAL',
+  });
+  api({
+    'GET /api/v1/transactions': () =>
+      json({ items: [debt], page: 0, size: 50, totalItems: 1, totalPages: 1 }),
+  });
+  renderApp('/transactions');
+
+  const row = await screen.findByTestId('transaction-105');
+  expect(within(row).getByText('Олег')).toBeInTheDocument();
+  expect(within(row).getByText('Борг · отримав')).toBeInTheDocument();
 });
 
 it('offers the quick category picker only for a single uncategorized part', async () => {

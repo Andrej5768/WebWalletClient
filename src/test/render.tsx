@@ -96,6 +96,8 @@ export const signedInApi: Record<string, Handler> = {
   'POST /api/v1/auth/refresh': () => json({ accessToken: 'token', tokenType: 'Bearer', expiresIn: 900 }),
   'GET /api/v1/me': () => json(user),
   'GET /api/v1/accounts': () => json([]),
+  'GET /api/v1/debts': () =>
+    json({ currency: 'UAH', accountId: null, people: [], unconvertedCurrencies: [] }),
   'GET /api/v1/forecast': () => json(emptyForecast),
   'GET /api/v1/recurring': () => json([]),
   'GET /api/v1/recurring/occurrences': () => json([]),

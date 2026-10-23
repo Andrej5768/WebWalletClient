@@ -688,6 +688,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/debts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Debts with people
+         * @description Everyone with a debt operation and their balance in the base currency: a transfer to a debt account is money given to its payee, a transfer from one is money received. Positive means the person owes the user. Operations in a currency without a rate are left out and the currency is listed in unconvertedCurrencies.
+         */
+        get: operations["debts"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/forecast": {
         parameters: {
             query?: never;
@@ -2442,6 +2462,13 @@ export interface components {
         ContributionRequest: {
             amount: number;
         };
+        DebtsResponse: {
+            /** Format: int64 */
+            accountId: number | null;
+            currency: string;
+            people: components["schemas"]["Person"][];
+            unconvertedCurrencies: string[];
+        };
         DeleteAccountRequest: {
             code?: string | null;
             confirmEmail?: string | null;
@@ -3118,6 +3145,16 @@ export interface components {
             /** Format: date */
             to: string;
             unconvertedCurrencies: string[];
+        };
+        Person: {
+            balance: number;
+            /** Format: date */
+            lastDate: string;
+            name: string | null;
+            /** Format: int32 */
+            operations: number;
+            /** Format: int64 */
+            payeeId: number | null;
         };
         PlanResponse: {
             actual: number;
@@ -4743,6 +4780,26 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    debts: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DebtsResponse"];
+                };
             };
         };
     };

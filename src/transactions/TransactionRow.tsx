@@ -15,6 +15,8 @@ interface Props {
   categories: CategoryInfo[];
   accountName?: string;
   toAccountName?: string;
+  /** A transfer with a debt account: shown as a debt with the person, not as accounts. */
+  debt?: 'GAVE' | 'RECEIVED';
   tags: Schemas['TagResponse'][];
   onOpen(): void;
   onCategorize(categoryId: number): void;
@@ -27,15 +29,17 @@ export function TransactionRow({
   categories,
   accountName,
   toAccountName,
+  debt,
   tags,
   onOpen,
   onCategorize,
 }: Props) {
   const { t } = useTranslation();
   const transfer = transaction.type === 'TRANSFER';
-  const title = transfer
-    ? `${accountName ?? ''} → ${toAccountName ?? ''}`
-    : (transaction.payee?.name ?? transaction.comment ?? t('transactions.noPayee'));
+  const title =
+    transfer && !debt
+      ? `${accountName ?? ''} → ${toAccountName ?? ''}`
+      : (transaction.payee?.name ?? transaction.comment ?? t('transactions.noPayee'));
   // Within one currency, what did not arrive is the fee
   const fee =
     transfer &&
@@ -44,22 +48,24 @@ export function TransactionRow({
     transaction.toAmount < transaction.amount
       ? transaction.amount - transaction.toAmount
       : 0;
-  const subtitle = transfer
-    ? fee > 0
-      ? t('transactions.transferFee', { fee: formatMoney(fee, transaction.currency) })
-      : t('transactions.types.TRANSFER')
-    : isSplit(transaction)
-      ? t('transactions.split', {
-          names: transaction.splits
-            .map((split) =>
-              split.categoryId == null
-                ? t('transactions.uncategorized')
-                : categories.find((item) => item.id === split.categoryId)?.name,
-            )
-            .filter(Boolean)
-            .join(', '),
-        })
-      : (category?.path ?? t('transactions.uncategorized'));
+  const subtitle = debt
+    ? t(`transactions.debt.${debt}`)
+    : transfer
+      ? fee > 0
+        ? t('transactions.transferFee', { fee: formatMoney(fee, transaction.currency) })
+        : t('transactions.types.TRANSFER')
+      : isSplit(transaction)
+        ? t('transactions.split', {
+            names: transaction.splits
+              .map((split) =>
+                split.categoryId == null
+                  ? t('transactions.uncategorized')
+                  : categories.find((item) => item.id === split.categoryId)?.name,
+              )
+              .filter(Boolean)
+              .join(', '),
+          })
+        : (category?.path ?? t('transactions.uncategorized'));
 
   return (
     // The row is clickable for the mouse; keyboard users open it with the title button.

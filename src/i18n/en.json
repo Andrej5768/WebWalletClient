@@ -248,7 +248,17 @@
       "deleteTitle": "Delete the account “{{name}}”?",
       "deleteText": "An account can be deleted only while it has no transactions. Otherwise archive it."
     },
-    "withoutRate": "Some currencies have no exchange rate, so the total is incomplete."
+    "withoutRate": "Some currencies have no exchange rate, so the total is incomplete.",
+    "debts": {
+      "title": "Debts with people",
+      "hint": "A person is the payee of a Debt operation. A row opens the operations with them.",
+      "owesYou": "Owes you",
+      "youOwe": "You owe",
+      "noName": "No name",
+      "operations_one": "{{count}} operation",
+      "operations_other": "{{count}} operations",
+      "last": "last {{date}}"
+    }
   },
   "transactions": {
     "count_one": "{{count}} transaction",
@@ -309,7 +319,8 @@
       "types": {
         "EXPENSE": "Expense",
         "INCOME": "Income",
-        "TRANSFER": "Transfer"
+        "TRANSFER": "Transfer",
+        "DEBT": "Debt"
       },
       "amount": "Amount",
       "amountRequired": "Enter the amount",
@@ -339,7 +350,17 @@
       "originalAmount": "Amount in the purchase currency",
       "imported": "Imported from {{source}}: amount, date and account are as in the bank.",
       "deleteTitle": "Delete the transaction?",
-      "splitComment": "Comment on this part"
+      "splitComment": "Comment on this part",
+      "debtDirection": "Direction",
+      "debtDirections": {
+        "GAVE": "Gave",
+        "RECEIVED": "Received"
+      },
+      "debtDirectionHint": "Gave: lent, or repaid what was borrowed. Received: borrowed, or got a loan back.",
+      "debtPerson": "To / from whom",
+      "debtPersonPlaceholder": "The person's name",
+      "debtAmount": "Amount in the debt currency ({{currency}})",
+      "debtAccountName": "Debts"
     },
     "chooseCategoryFor": "Choose a category for “{{name}}”",
     "notFound": "Transaction not found: it may have been deleted.",
@@ -353,7 +374,11 @@
       "dismiss": "Not a transfer"
     },
     "splitTransfer": "Split",
-    "splitTransferHint": "The transfer becomes an expense and an income again, and this pair is not suggested any more."
+    "splitTransferHint": "The transfer becomes an expense and an income again, and this pair is not suggested any more.",
+    "debt": {
+      "GAVE": "Debt · gave",
+      "RECEIVED": "Debt · received"
+    }
   },
   "budget": {
     "previousMonth": "Previous month",

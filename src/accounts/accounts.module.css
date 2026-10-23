@@ -34,3 +34,14 @@
 .right {
   text-align: right;
 }
+
+.person {
+  display: block;
+  width: 100%;
+  padding: 10px 4px;
+  border-top: 1px solid var(--ww-border);
+}
+
+.person:hover {
+  background: var(--ww-subtle);
+}
