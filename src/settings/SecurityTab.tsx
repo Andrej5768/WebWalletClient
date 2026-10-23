@@ -1,4 +1,4 @@
-import { Alert, Button, Card, Group, PasswordInput, Stack, Text, Title } from '@mantine/core';
+import { Button, Card, Group, PasswordInput, Stack, Text, Title } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import { useMutation } from '@tanstack/react-query';
@@ -7,6 +7,7 @@ import { api } from '../api/client';
 import { fieldErrors, problemMessage, toProblem } from '../api/errors';
 import { shareAccessToken } from '../api/session';
 import { useAuth } from '../auth/context';
+import { ProblemAlert } from '../components/feedback';
 import { GoogleCard, SetPasswordCard } from './GoogleCard';
 import { TwoFactorCard } from './TwoFactorCard';
 import { newPassword, required } from '../lib/validation';
@@ -83,10 +84,9 @@ export function SecurityTab() {
               <Text size="sm" c="dimmed">
                 {t('settings.security.othersSignedOut')}
               </Text>
-              {change.error && toProblem(change.error).code === 'TOO_MANY_ATTEMPTS' && (
-                <Alert color="yellow" variant="light" p="xs" role="alert">
-                  {problemMessage(toProblem(change.error))}
-                </Alert>
+              {/* A wrong current password is shown at its field, the other problems here */}
+              {change.error && toProblem(change.error).code !== 'INVALID_CURRENT_PASSWORD' && (
+                <ProblemAlert error={change.error} fieldsShown={['currentPassword', 'newPassword']} />
               )}
               <Group justify="flex-end">
                 <Button type="submit" loading={change.isPending}>

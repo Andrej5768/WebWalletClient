@@ -3,6 +3,7 @@
     "tabs": {
       "profile": "Profile",
       "security": "Security",
+      "notifications": "Notifications",
       "data": "Data",
       "categories": "Categories",
       "rules": "Rules",
@@ -40,6 +41,12 @@
       "submit": "Change password",
       "othersSignedOut": "Other devices will be signed out.",
       "changed": "Password changed"
+    },
+    "confirmIdentity": {
+      "title": "Confirm it is you",
+      "passwordHint": "To change how you sign in, enter your current password.",
+      "codeHint": "To change how you sign in, enter a code from the authenticator app or a recovery code.",
+      "submit": "Continue"
     },
     "google": {
       "title": "Sign in with Google",
@@ -162,7 +169,10 @@
         "over": "{{name}} is over {{target}}.",
         "end": "{{name}} moved to the place of {{target}}.",
         "cancel": "Moving {{name}} cancelled."
-      }
+      },
+      "carryOverSwitch": "Carry the rest over",
+      "carryOverHelp": "What is not spent moves to the next month, and overspending is taken from the next month's free money. Without it the plan is for its month only.",
+      "carryOver": "Carry-over"
     },
     "rules": {
       "hint": "Rules categorize new transactions. When you change a category by hand, a rule for the payee is learned automatically.",
@@ -203,6 +213,71 @@
       "editTitle": "Edit tag",
       "deleteTitle": "Delete the tag #{{name}}?",
       "deleteText": "The tag is removed from all transactions; the transactions stay."
+    },
+    "notifications": {
+      "telegram": {
+        "text": "The bot reminds you of payments, budgets and tax deadlines, and an expense takes one message: \"150 coffee\".",
+        "link": "Connect Telegram",
+        "pending": "Open the bot {{bot}} and press \"Start\". The link works once, for 15 minutes. This page updates by itself.",
+        "open": "Open Telegram",
+        "connected": "Telegram is connected",
+        "expired": "The link to connect Telegram has expired. Create a new one.",
+        "linkedAs": "{{name}}, connected on {{date}}. You can also disconnect with /stop in the bot.",
+        "badge": "Connected",
+        "unlink": "Disconnect",
+        "disabled": "The Telegram bot is unavailable right now.",
+        "account": "Account for quick entry",
+        "accountHint": "\"150 coffee\" and \"+5000 salary\" go here when the message names no account. When the bank sends the same operation, there is no duplicate.",
+        "accountDefault": "The first card"
+      },
+      "hour": "Time of reminders and reports",
+      "notLinked": "The Telegram switches work once the bot is connected.",
+      "groups": {
+        "reminders": "Reminders",
+        "events": "Problems and events",
+        "reports": "Spending analysis"
+      },
+      "kinds": {
+        "title": "What to send",
+        "recurring": {
+          "title": "Recurring payments",
+          "text": "The day before and on the day of a payment not yet linked to an operation. \"Paid\" records the operation, \"All planned\" shows the payments of 30 days (like /planned)."
+        },
+        "budgets": {
+          "title": "Budgets",
+          "text": "When the spending of a category reaches 80 % and 100 % of the month’s budget, once a month each."
+        },
+        "taxes": {
+          "title": "Sole proprietor taxes",
+          "text": "7 days and a day before the deadline to pay the single tax and the social contribution and to file the declaration."
+        },
+        "banks": {
+          "title": "Banks",
+          "text": "Monobank no longer accepts the token. Comes at once, but not from 22:00 to 8:00 — then in the morning."
+        },
+        "forecast": {
+          "title": "Balance forecast",
+          "text": "The forecast goes below zero within 30 days. Again only when the date or the amount changes."
+        },
+        "goals": {
+          "title": "Goals",
+          "text": "A goal is reached."
+        },
+        "weekly": {
+          "title": "Weekly analysis",
+          "text": "Mondays, except in the first week of a month: a chart of the spending from the 1st against the same days of the previous month, and the categories that changed most."
+        },
+        "monthly": {
+          "title": "Month summary",
+          "text": "On the 1st: the previous month against the month before — income, spending, savings and a chart by category."
+        }
+      },
+      "columns": {
+        "telegram": "Telegram",
+        "email": "Email"
+      },
+      "emailSwitch": "{{title}}: email",
+      "emailHint": "The spending analysis goes to {{email}}. Every email has an “Unsubscribe” link."
     }
   }
 }

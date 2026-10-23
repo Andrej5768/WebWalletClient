@@ -29,6 +29,8 @@ import { displayCategory, groupByDay, toRequest, type Transaction } from './mode
 import { PairHint } from './PairHint';
 import { TransactionDrawer } from './TransactionDrawer';
 import { TransactionFiltersBar } from './TransactionFiltersBar';
+import { debtAccountIds } from './debts';
+import { debtDirection } from './form';
 import { TransactionRow } from './TransactionRow';
 import classes from './transactions.module.css';
 import { useTransferPairs } from './transferPairs';
@@ -50,6 +52,7 @@ export function TransactionsPage() {
     () => new Map((accounts.data ?? []).map((account) => [account.id, account])),
     [accounts.data],
   );
+  const debtAccounts = useMemo(() => debtAccountIds(accounts.data ?? []), [accounts.data]);
   const tagsById = useMemo(() => new Map((tags.data ?? []).map((tag) => [tag.id, tag])), [tags.data]);
 
   const recategorize = useMutation({
@@ -198,6 +201,7 @@ export function TransactionsPage() {
                   toAccountName={
                     transaction.toAccountId ? accountsById.get(transaction.toAccountId)?.name : undefined
                   }
+                  debt={debtDirection(transaction, debtAccounts)}
                   tags={transaction.tagIds.map((id) => tagsById.get(id)).filter((tag) => tag !== undefined)}
                   onOpen={() => update({ edit: String(transaction.id), new: null, page: params.get('page') })}
                   onCategorize={(categoryId) => recategorize.mutate({ transaction, categoryId })}

@@ -30,6 +30,7 @@ const budget = {
   month,
   currency: 'UAH',
   readyToAssign: 4250,
+  inflow: 15250,
   assigned: 11000,
   activity: -7290,
   available: 3710,
@@ -46,11 +47,12 @@ function api(extra = {}) {
   });
 }
 
-it('shows ready to assign, group totals counted once, envelopes and overspending', async () => {
+it('shows the free money, the inflow, group totals counted once, plans and overspending', async () => {
   api();
   renderApp('/budget');
 
   expect(plain((await screen.findByText(/4\s250,00/)).textContent)).toBe('4 250,00 ₴');
+  expect(screen.getAllByText((_, element) => plain(element?.textContent) === '15 250,00 ₴').length).toBe(1);
   expect(screen.getByText('Продукти')).toBeInTheDocument();
   // The group row shows the server total, not the total plus its children again.
   expect(
@@ -66,7 +68,7 @@ it('saves a new assignment when the field loses focus', async () => {
   const requests = api({ [`PUT /api/v1/budget/${month}/categories/2`]: () => json(budget) });
   renderApp('/budget');
 
-  const input = await screen.findByLabelText('Призначено: Продукти');
+  const input = await screen.findByLabelText('План: Продукти');
   await userEvent.clear(input);
   await userEvent.type(input, '9500');
   fireEvent.blur(input);

@@ -15,6 +15,8 @@ export interface CategoryInfo {
   parentId: number | null;
   archived: boolean;
   necessity: 'NEEDS' | 'WANTS' | null;
+  /** The budget rest of the category moves to the next month (an envelope) instead of expiring with it. */
+  carryOver: boolean;
   /** The category's own values, without what it inherits from its group; these are what is edited. */
   own: {
     icon: string | null;
@@ -39,6 +41,7 @@ export function flattenCategories(tree: Category[]): CategoryInfo[] {
       parentId: parent?.id ?? null,
       archived: !!category.archived || !!parent?.archived,
       necessity: category.necessity ?? parent?.necessity ?? null,
+      carryOver: !!category.carryOver,
       own: {
         icon: category.icon ?? null,
         color: category.color ?? null,

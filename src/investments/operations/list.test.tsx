@@ -1,15 +1,9 @@
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { accountOf, investmentOperationOf, portfolioOf } from '../../test/fixtures';
+import { brokerOf, investmentOperationOf, portfolioOf } from '../../test/fixtures';
 import { bodyOf, json, mockApi, plain, renderApp, signedInApi } from '../../test/render';
 
-const broker = accountOf({
-  id: 3,
-  name: 'Freedom Finance',
-  type: 'INVESTMENT',
-  currency: 'USD',
-  inBudget: false,
-});
+const broker = brokerOf({ name: 'Freedom Finance' });
 
 const page = (items: ReturnType<typeof investmentOperationOf>[]) =>
   json({ items, page: 0, size: 50, totalItems: items.length, totalPages: 1 });

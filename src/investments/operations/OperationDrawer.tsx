@@ -18,7 +18,7 @@ import { X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api } from '../../api/client';
-import { toProblem } from '../../api/errors';
+import { fieldErrors, toProblem } from '../../api/errors';
 import { check, unwrap } from '../../api/http';
 import { invalidateLedger, useAccounts } from '../../api/queries';
 import { confirmDelete } from '../../components/confirm';
@@ -42,7 +42,6 @@ import { InstrumentModal } from '../instrument/InstrumentModal';
 import {
   cashChange,
   fifoPreview,
-  formErrors,
   INCOMES,
   initialOperationValues,
   MONEY,
@@ -221,7 +220,7 @@ function OperationForm({
       await invalidateLedger(queryClient);
       onClose();
     },
-    onError: (error) => form.setErrors(formErrors(toProblem(error))),
+    onError: (error) => form.setErrors(fieldErrors(toProblem(error))),
   });
   const remove = useMutation({
     mutationFn: () =>

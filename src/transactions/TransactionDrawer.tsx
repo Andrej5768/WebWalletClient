@@ -1,4 +1,5 @@
 import {
+  ActionIcon,
   Alert,
   Anchor,
   Autocomplete,
@@ -20,13 +21,20 @@ import {
 import { DateInput } from '@mantine/dates';
 import { useForm, type UseFormReturnType } from '@mantine/form';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Info, Unlink } from 'lucide-react';
+import { ArrowLeftRight, Info, Unlink } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
 import { toProblem } from '../api/errors';
 import { check } from '../api/http';
-import { invalidateLedger, useAccounts, useCategories, usePayees, useTags } from '../api/queries';
+import {
+  invalidateLedger,
+  useAccounts,
+  useBaseCurrency,
+  useCategories,
+  usePayees,
+  useTags,
+} from '../api/queries';
 import { ensureTagIds } from '../api/tags';
 import { confirmDelete } from '../components/confirm';
 import { ProblemAlert } from '../components/feedback';
@@ -36,14 +44,18 @@ import { categorySelectData } from '../lib/categories';
 import { currencyOptions } from '../lib/currencies';
 import { formatMoney } from '../lib/money';
 import {
+  categorized,
   formErrors,
   initialTransactionValues,
   splitRemainder,
+  swapAccounts,
+  switchType,
   toNumber,
   toTransactionBody,
-  type TransactionType,
+  type FormType,
   type TransactionValues,
 } from './form';
+import { debtAccountIds, ensureDebtAccount } from './debts';
 import type { Transaction } from './model';
 import { FopIncomeSwitch } from '../taxes/FopIncomeSwitch';
 import { SplitEditor } from './SplitEditor';
@@ -74,7 +86,7 @@ interface Props {
   onClose: () => void;
 }
 
-/** Side panel to add or edit an expense, income or transfer. It waits for the lists the form needs. */
+/** Side panel to add or edit an expense, income, transfer or debt. It waits for the lists the form needs. */
 export function TransactionDrawer(props: Props) {
   const { t } = useTranslation();
   const accounts = useAccounts();
@@ -110,6 +122,7 @@ function TransactionForm({ transaction, defaultAccountId, defaults, onClose }: P
   const categories = useCategories();
   const payees = usePayees();
   const tags = useTags();
+  const baseCurrency = useBaseCurrency();
   const [mismatch, setMismatch] = useState(false);
   const editing = transaction !== null;
   const imported = editing && transaction.source !== 'MANUAL';
@@ -120,6 +133,7 @@ function TransactionForm({ transaction, defaultAccountId, defaults, onClose }: P
         transaction,
         new Map((tags.data ?? []).map((tag) => [tag.id, tag.name])),
         defaultAccountId,
+        debtAccountIds(accounts.data ?? []),
       ),
       ...(transaction ? {} : defaults),
     },
@@ -131,9 +145,14 @@ function TransactionForm({ transaction, defaultAccountId, defaults, onClose }: P
         values.type !== 'TRANSFER' || (value && value !== values.accountId)
           ? null
           : t('transactions.form.toAccountRequired'),
+      payee: (value, values) => (values.type === 'DEBT' && !value.trim() ? t('validation.required') : null),
+      toAmount: (value, values) =>
+        values.type === 'DEBT' && debtNeedsOwnAmount(values.accountId) && value === ''
+          ? t('validation.required')
+          : null,
       splits: {
         amount: (value, values) =>
-          !values.split || values.type === 'TRANSFER' || toNumber(value) > 0
+          !values.split || !categorized(values.type) || toNumber(value) > 0
             ? null
             : t('transactions.form.amountRequired'),
       },
@@ -149,19 +168,17 @@ function TransactionForm({ transaction, defaultAccountId, defaults, onClose }: P
   const toAccount = accountList.find((item) => String(item.id) === values.toAccountId);
   const currency = account?.currency ?? 'UAH';
   const kind = values.type === 'INCOME' ? 'INCOME' : 'EXPENSE';
+  // Debts go to the first debt account, created on first use in the base currency
+  const debtAccounts = debtAccountIds(accounts.data ?? []);
+  const debtCurrency =
+    accountList.find((item) => item.type === 'DEBT' && !item.archived)?.currency ?? baseCurrency;
+  /** A debt from an account in another currency needs the amount in the debt account's currency too. */
+  function debtNeedsOwnAmount(ownAccountId: string | null): boolean {
+    const own = accountList.find((item) => String(item.id) === ownAccountId);
+    return !!own && own.currency !== debtCurrency;
+  }
 
-  /** Switching between expense and income drops categories of the other kind. */
-  const changeType = (type: TransactionType) => {
-    const kindChanged = (type === 'INCOME') !== (values.type === 'INCOME');
-    form.setFieldValue('type', type);
-    if (kindChanged) {
-      form.setFieldValue('categoryId', null);
-      form.setFieldValue(
-        'splits',
-        values.splits.map((item) => ({ ...item, categoryId: null })),
-      );
-    }
-  };
+  const changeType = (type: FormType) => form.setValues(switchType(values, type));
 
   const done = async () => {
     await invalidateLedger(queryClient);
@@ -170,7 +187,20 @@ function TransactionForm({ transaction, defaultAccountId, defaults, onClose }: P
 
   const save = useMutation({
     mutationFn: async (input: TransactionValues) => {
-      const body = toTransactionBody(input, await ensureTagIds(input.tags, tags.data ?? [], queryClient));
+      const debtAccountId =
+        input.type === 'DEBT'
+          ? await ensureDebtAccount(
+              accounts.data ?? [],
+              t('transactions.form.debtAccountName'),
+              baseCurrency,
+              queryClient,
+            )
+          : undefined;
+      const body = toTransactionBody(
+        input,
+        await ensureTagIds(input.tags, tags.data ?? [], queryClient),
+        debtAccountId,
+      );
       await check(
         editing
           ? api.PUT('/api/v1/transactions/{id}', { params: { path: { id: transaction.id } }, body })
@@ -194,12 +224,14 @@ function TransactionForm({ transaction, defaultAccountId, defaults, onClose }: P
     value: String(item.id),
     label: `${item.name} · ${formatMoney(item.balance, item.currency)}`,
   }));
-  const amountClass = values.type === 'TRANSFER' ? '' : values.type === 'INCOME' ? 'income' : 'expense';
+  const incoming =
+    values.type === 'INCOME' || (values.type === 'DEBT' && values.debtDirection === 'RECEIVED');
+  const amountClass = values.type === 'TRANSFER' ? '' : incoming ? 'income' : 'expense';
 
   return (
     <form
       onSubmit={form.onSubmit((input) => {
-        const unbalanced = input.split && input.type !== 'TRANSFER' && splitRemainder(input) !== 0;
+        const unbalanced = input.split && categorized(input.type) && splitRemainder(input) !== 0;
         setMismatch(unbalanced);
         if (!unbalanced) save.mutate(input);
       })}
@@ -217,8 +249,8 @@ function TransactionForm({ transaction, defaultAccountId, defaults, onClose }: P
           aria-label={t('transactions.filters.type')}
           style={{ alignSelf: 'flex-start' }}
           value={values.type}
-          onChange={(value) => changeType(value as TransactionType)}
-          data={(['EXPENSE', 'INCOME', 'TRANSFER'] as const).map((value) => ({
+          onChange={(value) => changeType(value as FormType)}
+          data={(['EXPENSE', 'INCOME', 'TRANSFER', 'DEBT'] as const).map((value) => ({
             value,
             label: t(`transactions.form.types.${value}`),
           }))}
@@ -238,29 +270,89 @@ function TransactionForm({ transaction, defaultAccountId, defaults, onClose }: P
             size="md"
             {...form.getInputProps('date')}
           />
-          <Select
-            label={t(
-              values.type === 'TRANSFER' ? 'transactions.form.fromAccount' : 'transactions.form.account',
-            )}
-            searchable
-            data={accountData}
-            {...form.getInputProps('accountId')}
-          />
           {values.type === 'TRANSFER' ? (
-            <Select
-              label={t('transactions.form.toAccount')}
-              searchable
-              data={accountData.filter((item) => item.value !== values.accountId)}
-              {...form.getInputProps('toAccountId')}
-            />
+            <Group style={{ gridColumn: '1 / -1' }} gap="xs" wrap="nowrap" align="flex-end">
+              <Select
+                style={{ flex: 1 }}
+                label={t('transactions.form.fromAccount')}
+                searchable
+                data={accountData}
+                {...form.getInputProps('accountId')}
+              />
+              <ActionIcon
+                variant="default"
+                size="input-sm"
+                aria-label={t('transactions.form.swapAccounts')}
+                title={t('transactions.form.swapAccounts')}
+                onClick={() =>
+                  form.setValues(swapAccounts(values, account?.currency !== toAccount?.currency))
+                }
+              >
+                <ArrowLeftRight size={16} />
+              </ActionIcon>
+              <Select
+                style={{ flex: 1 }}
+                label={t('transactions.form.toAccount')}
+                searchable
+                data={accountData.filter((item) => item.value !== values.accountId)}
+                {...form.getInputProps('toAccountId')}
+              />
+            </Group>
+          ) : values.type === 'DEBT' ? (
+            <>
+              <Stack gap={6}>
+                <Text size="sm" fw={500}>
+                  {t('transactions.form.debtDirection')}
+                </Text>
+                <SegmentedControl
+                  data={(['GAVE', 'RECEIVED'] as const).map((value) => ({
+                    value,
+                    label: t(`transactions.form.debtDirections.${value}`),
+                  }))}
+                  {...form.getInputProps('debtDirection')}
+                />
+              </Stack>
+              <Select
+                label={t('transactions.form.account')}
+                searchable
+                data={accountData.filter((item) => !debtAccounts.has(Number(item.value)))}
+                {...form.getInputProps('accountId')}
+              />
+              <Autocomplete
+                style={{ gridColumn: '1 / -1' }}
+                label={t('transactions.form.debtPerson')}
+                placeholder={t('transactions.form.debtPersonPlaceholder')}
+                description={t('transactions.form.debtDirectionHint')}
+                inputWrapperOrder={['label', 'input', 'description', 'error']}
+                data={[...new Set((payees.data ?? []).map((payee) => payee.name))]}
+                limit={8}
+                {...form.getInputProps('payee')}
+              />
+              {debtNeedsOwnAmount(values.accountId) && (
+                <MoneyInput
+                  style={{ gridColumn: '1 / -1' }}
+                  label={t('transactions.form.debtAmount', { currency: debtCurrency })}
+                  currency={debtCurrency}
+                  {...form.getInputProps('toAmount')}
+                />
+              )}
+            </>
           ) : (
-            <Autocomplete
-              label={t('transactions.form.payee')}
-              placeholder={t('transactions.form.payeePlaceholder')}
-              data={[...new Set((payees.data ?? []).map((payee) => payee.name))]}
-              limit={8}
-              {...form.getInputProps('payee')}
-            />
+            <>
+              <Select
+                label={t('transactions.form.account')}
+                searchable
+                data={accountData}
+                {...form.getInputProps('accountId')}
+              />
+              <Autocomplete
+                label={t('transactions.form.payee')}
+                placeholder={t('transactions.form.payeePlaceholder')}
+                data={[...new Set((payees.data ?? []).map((payee) => payee.name))]}
+                limit={8}
+                {...form.getInputProps('payee')}
+              />
+            </>
           )}
           {values.type === 'TRANSFER' && (
             <MoneyInput
@@ -278,7 +370,7 @@ function TransactionForm({ transaction, defaultAccountId, defaults, onClose }: P
           )}
         </SimpleGrid>
 
-        {values.type !== 'TRANSFER' && (
+        {categorized(values.type) && (
           <Stack gap="xs">
             <Group justify="space-between">
               <Text size="sm" fw={500}>
@@ -318,7 +410,7 @@ function TransactionForm({ transaction, defaultAccountId, defaults, onClose }: P
           minRows={2}
           {...form.getInputProps('comment')}
         />
-        {values.type !== 'TRANSFER' && <ForeignAmount form={form} />}
+        {categorized(values.type) && <ForeignAmount form={form} />}
         {editing && transaction.type === 'INCOME' && <FopIncomeSwitch transactionId={transaction.id} />}
 
         {mismatch && (

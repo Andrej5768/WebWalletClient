@@ -33,7 +33,7 @@ export interface paths {
         };
         /**
          * Totals of the accounts in the base currency
-         * @description Accounts that are not archived, at today's NBU rates; balances in a currency without a rate are left out and listed in unconvertedCurrencies. readyToAssign is that of the budget of the current month.
+         * @description Accounts that are not archived, at today's NBU rates; balances in a currency without a rate are left out and listed in unconvertedCurrencies. readyToAssign is the free money of the current month, as in its budget: inflow minus plan.
          */
         get: operations["summary"];
         put?: never;
@@ -51,12 +51,12 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["get_3"];
+        get: operations["get_4"];
         /**
          * Update an account; the currency cannot be changed
          * @description Omitted optional fields keep their values; a credit limit or interest rate of 0 removes it
          */
-        put: operations["update_6"];
+        put: operations["update_7"];
         post?: never;
         /** Delete an account without transactions; accounts with history should be archived */
         delete: operations["delete_8"];
@@ -165,6 +165,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/app/config": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Versions and features for the native apps
+         * @description Public. The app refuses to run below minSupportedVersionCode and hides features that are off on this server.
+         */
+        get: operations["config"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/auth/forgot-password": {
         parameters: {
             query?: never;
@@ -213,7 +233,7 @@ export interface paths {
         put?: never;
         /**
          * Finish signing in with Google
-         * @description Exchanges the ticket of the callback for a session, like /login: the access token, or twoFactorChallenge when two-factor authentication is on. The ticket works once and briefly.
+         * @description Exchanges the ticket of the callback for a session, like /login: the access token, or twoFactorChallenge when two-factor authentication is on. The ticket works once and briefly. Native apps (header X-WebWallet-Client) get the refresh token in refreshToken instead of the cookie and send trustedDeviceToken in the body.
          */
         post: operations["complete"];
         delete?: never;
@@ -253,7 +273,7 @@ export interface paths {
         put?: never;
         /**
          * Sign in with email and password
-         * @description Returns the access token; the refresh token is set in an HttpOnly cookie that is sent only to /api/v1/auth. With two-factor authentication on, unless the browser is trusted, returns twoFactorChallenge instead, to exchange with a code at /api/v1/auth/login/two-factor.
+         * @description Returns the access token; the refresh token is set in an HttpOnly cookie that is sent only to /api/v1/auth. With two-factor authentication on, unless the device is trusted, returns twoFactorChallenge instead, to exchange with a code at /api/v1/auth/login/two-factor. Native apps (header X-WebWallet-Client) get the refresh token in refreshToken instead of the cookie and send it in the body. Native apps send trustedDeviceToken in the body.
          */
         post: operations["login"];
         delete?: never;
@@ -273,7 +293,7 @@ export interface paths {
         put?: never;
         /**
          * Finish signing in with a two-factor code
-         * @description Exchanges the challenge of the login response and a code of the authenticator app or a recovery code for a session. A wrong code keeps the challenge until it expires; an expired one fails with TWO_FACTOR_EXPIRED. With trustDevice the browser gets a cookie that skips the code for a while.
+         * @description Exchanges the challenge of the login response and a code of the authenticator app or a recovery code for a session. A wrong code keeps the challenge until it expires; an expired one fails with TWO_FACTOR_EXPIRED. With trustDevice the browser gets a cookie that skips the code for a while. Native apps (header X-WebWallet-Client) get the refresh token in refreshToken instead of the cookie and send it in the body. Native apps get the trusted device as trustedDeviceToken in the body.
          */
         post: operations["loginTwoFactor"];
         delete?: never;
@@ -292,8 +312,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * End the session of the refresh token cookie and delete the cookie
-         * @description Succeeds without the cookie or with an unknown token as well
+         * End the session of the refresh token and delete the cookie
+         * @description Succeeds without a token or with an unknown one as well. Native apps (header X-WebWallet-Client) get the refresh token in refreshToken instead of the cookie and send it in the body.
          */
         post: operations["logout"];
         delete?: never;
@@ -329,8 +349,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Exchange the refresh token cookie for a new access token
-         * @description The refresh token is rotated: the response sets a new cookie and the presented token stops working. Presenting an already rotated token ends the whole session.
+         * Exchange the refresh token for a new access token
+         * @description The refresh token is rotated: the response sets a new cookie and the presented token stops working. Presenting an already rotated token ends the whole session. Native apps (header X-WebWallet-Client) get the refresh token in refreshToken instead of the cookie and send it in the body.
          */
         post: operations["refresh"];
         delete?: never;
@@ -609,7 +629,7 @@ export interface paths {
          * Update a category
          * @description The parent is always applied (null makes a top-level category); other omitted optional fields keep their values. icon, color and necessity sent as null are removed. A necessity is allowed only on expense categories; it is removed when the category becomes income.
          */
-        put: operations["update_5"];
+        put: operations["update_6"];
         post?: never;
         /** Delete an unused category without subcategories; others should be archived */
         delete: operations["delete_7"];
@@ -660,9 +680,29 @@ export interface paths {
             cookie?: never;
         };
         get?: never;
-        put: operations["update_4"];
+        put: operations["update_5"];
         post?: never;
         delete: operations["delete_6"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/debts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Debts with people
+         * @description Everyone with a debt operation and their balance in the base currency: a transfer to a debt account is money given to its payee, a transfer from one is money received. Positive means the person owes the user. Operations in a currency without a rate are left out and the currency is listed in unconvertedCurrencies.
+         */
+        get: operations["debts"];
+        put?: never;
+        post?: never;
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -712,12 +752,12 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["get_2"];
+        get: operations["get_3"];
         /**
          * Replace a goal
          * @description Omitted achieved and sortOrder keep their values. Moved to another account, the pace starts again from its balance.
          */
-        put: operations["update_3"];
+        put: operations["update_4"];
         post?: never;
         delete: operations["delete_5"];
         options?: never;
@@ -790,7 +830,7 @@ export interface paths {
             cookie?: never;
         };
         /** A page of the operations of an import preview, newest first; 404 when it expired */
-        get: operations["get_4"];
+        get: operations["get_5"];
         put?: never;
         post?: never;
         /** Discard an import preview */
@@ -1099,7 +1139,7 @@ export interface paths {
             cookie?: never;
         };
         get: operations["operation"];
-        put: operations["update_2"];
+        put: operations["update_3"];
         post?: never;
         /** Delete an operation; deleting a purchase whose units were sold later is rejected */
         delete: operations["delete_4"];
@@ -1214,9 +1254,9 @@ export interface paths {
         put?: never;
         /**
          * Start linking a Google account
-         * @description Returns the Google page to send the browser to and sets the cookie that binds the link to this browser; Google then redirects to the security settings
+         * @description Returns the Google page to send the browser to and sets the cookie that binds the link to this browser; Google then redirects to the security settings. Needs the current password, or for an account without one a two-factor code when it is on.
          */
-        post: operations["link_2"];
+        post: operations["link_3"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1254,7 +1294,7 @@ export interface paths {
         put?: never;
         /**
          * Change the password
-         * @description All sessions are ended, including the current one; a new session is started: the response contains a new access token and sets a new refresh token cookie
+         * @description All sessions are ended, including the current one; a new session is started: the response contains a new access token and sets a new refresh token cookie. Native apps (header X-WebWallet-Client) get the refresh token in refreshToken instead of the cookie.
          */
         post: operations["changePassword"];
         delete?: never;
@@ -1354,9 +1394,64 @@ export interface paths {
         put?: never;
         /**
          * Start turning on two-factor authentication
-         * @description Returns a new secret for the authenticator app; it becomes active once /enable gets a code of it. Fails with CONFLICT when two-factor authentication is already on.
+         * @description Returns a new secret for the authenticator app; it becomes active once /enable gets a code of it. Needs the current password when the account has one (INVALID_CURRENT_PASSWORD). Fails with CONFLICT when two-factor authentication is already on.
          */
         post: operations["setup"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/notifications/resubscribe": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Subscribe to the email digest again, by the link of a digest email */
+        post: operations["resubscribe"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/notifications/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** What the user is notified about in Telegram, and at which hour */
+        get: operations["get_2"];
+        put: operations["update_2"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/notifications/unsubscribe": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Open the unsubscribe page of the web client */
+        get: operations["page"];
+        put?: never;
+        /**
+         * Unsubscribe from the email digest
+         * @description By the signed link of a digest email; also the one-click unsubscribe of the mail client. NOT_FOUND for a link that is not valid.
+         */
+        post: operations["unsubscribe"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1527,7 +1622,7 @@ export interface paths {
          * Mark an occurrence as paid by an existing transaction
          * @description The transaction must not pay another occurrence.
          */
-        post: operations["link_1"];
+        post: operations["link_2"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1821,7 +1916,7 @@ export interface paths {
          */
         get: operations["settings"];
         /** Replace the user's own tax values of a year; null takes the default */
-        put: operations["updateSettings"];
+        put: operations["updateSettings_1"];
         post?: never;
         delete?: never;
         options?: never;
@@ -1840,6 +1935,64 @@ export interface paths {
         get: operations["transaction"];
         /** Add a transaction to the income of the sole proprietor, take it out, or forget the mark (null) */
         put: operations["mark"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/telegram": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Whether the bot is available and the Telegram chat of the user, if connected */
+        get: operations["status_1"];
+        put?: never;
+        post?: never;
+        /** Disconnect the Telegram chat */
+        delete: operations["unlink_1"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/telegram/link": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create a one-time link that connects a Telegram chat
+         * @description The link opens the bot; pressing Start there connects the chat. It works once, for 15 minutes; a new link replaces the previous one. Needs the current password, or for an account without one a two-factor code when it is on. NOT_FOUND when the bot is not configured.
+         */
+        post: operations["link_1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/telegram/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Settings of the connected chat
+         * @description NOT_FOUND when no chat is connected
+         */
+        put: operations["updateSettings"];
         post?: never;
         delete?: never;
         options?: never;
@@ -2008,11 +2161,28 @@ export interface components {
             share: number;
             value: number;
         };
+        AndroidVersions: {
+            /** Format: int32 */
+            latestVersionCode: number;
+            /** Format: int32 */
+            minSupportedVersionCode: number;
+            storeUrl: string;
+        };
         Anomaly: {
             amount: number;
             average: number;
             month: string;
             ratio: number;
+        };
+        AppConfigResponse: {
+            android: components["schemas"]["AndroidVersions"];
+            features: components["schemas"]["AppFeatures"];
+        };
+        AppFeatures: {
+            googleSignIn: boolean;
+            marketSearch: boolean;
+            push: boolean;
+            telegram: boolean;
         };
         ApplyResponse: {
             /** Format: int32 */
@@ -2138,6 +2308,7 @@ export interface components {
         };
         CategoryRequest: {
             archived?: boolean;
+            carryOver?: boolean;
             /** @enum {string|null} */
             color?: "blue" | "green" | "orange" | "violet" | "teal" | "pink" | "amber" | "slate" | "red" | "indigo" | "cyan" | "lime" | null;
             icon?: string | null;
@@ -2153,6 +2324,7 @@ export interface components {
         };
         CategoryResponse: {
             archived: boolean;
+            carryOver: boolean;
             children: components["schemas"]["CategoryResponse"][];
             /** @enum {string|null} */
             color: "blue" | "green" | "orange" | "violet" | "teal" | "pink" | "amber" | "slate" | "red" | "indigo" | "cyan" | "lime" | null;
@@ -2229,6 +2401,10 @@ export interface components {
             totalB: number;
             unconvertedCurrencies: string[];
         };
+        ConfirmIdentityRequest: {
+            code?: string | null;
+            password?: string | null;
+        };
         ConfirmRequest: {
             operations?: components["schemas"]["OperationEdit"][];
         };
@@ -2285,6 +2461,13 @@ export interface components {
         };
         ContributionRequest: {
             amount: number;
+        };
+        DebtsResponse: {
+            /** Format: int64 */
+            accountId: number | null;
+            currency: string;
+            people: components["schemas"]["Person"][];
+            unconvertedCurrencies: string[];
         };
         DeleteAccountRequest: {
             code?: string | null;
@@ -2471,6 +2654,7 @@ export interface components {
         };
         GoogleTicketRequest: {
             ticket: string;
+            trustedDeviceToken?: string;
         };
         HistoryPoint: {
             benchmark: number | null;
@@ -2647,11 +2831,13 @@ export interface components {
         LoginRequest: {
             email: string;
             password: string;
+            trustedDeviceToken?: string;
         };
         LoginResponse: {
             accessToken: string | null;
             /** Format: int64 */
             expiresIn: number | null;
+            refreshToken: string | null;
             tokenType: string | null;
             twoFactorChallenge: string | null;
         };
@@ -2695,6 +2881,7 @@ export interface components {
             available: number;
             categories: components["schemas"]["CategoryRow"][];
             currency: string;
+            inflow: number;
             month: string;
             readyToAssign: number;
             unconvertedCurrencies: string[];
@@ -2742,6 +2929,20 @@ export interface components {
             currency: string;
             months: components["schemas"]["MonthNetWorth"][];
             unconvertedCurrencies: string[];
+        };
+        NotificationSettingsDto: {
+            banks?: boolean;
+            budgets?: boolean;
+            emailMonthly?: boolean;
+            emailWeekly?: boolean;
+            forecast?: boolean;
+            goals?: boolean;
+            /** Format: int32 */
+            hour?: number;
+            monthly?: boolean;
+            recurring?: boolean;
+            taxes?: boolean;
+            weekly?: boolean;
         };
         OccurrenceConfirmRequest: {
             amount?: number;
@@ -2945,6 +3146,16 @@ export interface components {
             to: string;
             unconvertedCurrencies: string[];
         };
+        Person: {
+            balance: number;
+            /** Format: date */
+            lastDate: string;
+            name: string | null;
+            /** Format: int32 */
+            operations: number;
+            /** Format: int64 */
+            payeeId: number | null;
+        };
         PlanResponse: {
             actual: number;
             categories: components["schemas"]["PlanRow"][];
@@ -3111,6 +3322,9 @@ export interface components {
         };
         RedirectResponse: {
             url: string;
+        };
+        RefreshTokenRequest: {
+            refreshToken?: string;
         };
         RegisterRequest: {
             /** Format: email */
@@ -3340,6 +3554,26 @@ export interface components {
             /** Format: int32 */
             year: number;
         };
+        TelegramLinkResponse: {
+            /** Format: date-time */
+            expiresAt: string;
+            url: string;
+        };
+        TelegramSettingsRequest: {
+            /** Format: int64 */
+            quickEntryAccountId?: number;
+        };
+        TelegramStatus: {
+            botUsername: string | null;
+            enabled: boolean;
+            firstName: string | null;
+            linked: boolean;
+            /** Format: date-time */
+            linkedAt: string | null;
+            /** Format: int64 */
+            quickEntryAccountId: number | null;
+            username: string | null;
+        };
         TickerChoice: {
             /** Format: int64 */
             instrumentId?: number;
@@ -3362,7 +3596,9 @@ export interface components {
             accessToken: string;
             /** Format: int64 */
             expiresIn: number;
+            refreshToken: string | null;
             tokenType: string;
+            trustedDeviceToken: string | null;
         };
         TransactionMarkRequest: {
             included?: boolean;
@@ -3575,7 +3811,7 @@ export interface operations {
             };
         };
     };
-    get_3: {
+    get_4: {
         parameters: {
             query?: never;
             header?: never;
@@ -3597,7 +3833,7 @@ export interface operations {
             };
         };
     };
-    update_6: {
+    update_7: {
         parameters: {
             query?: never;
             header?: never;
@@ -3766,6 +4002,26 @@ export interface operations {
             };
         };
     };
+    config: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AppConfigResponse"];
+                };
+            };
+        };
+    };
     forgotPassword: {
         parameters: {
             query?: never;
@@ -3919,7 +4175,11 @@ export interface operations {
                 refresh_token?: string;
             };
         };
-        requestBody?: never;
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["RefreshTokenRequest"];
+            };
+        };
         responses: {
             /** @description No Content */
             204: {
@@ -3960,7 +4220,11 @@ export interface operations {
                 refresh_token?: string;
             };
         };
-        requestBody?: never;
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["RefreshTokenRequest"];
+            };
+        };
         responses: {
             /** @description OK */
             200: {
@@ -4363,7 +4627,7 @@ export interface operations {
             };
         };
     };
-    update_5: {
+    update_6: {
         parameters: {
             query?: never;
             header?: never;
@@ -4473,7 +4737,7 @@ export interface operations {
             };
         };
     };
-    update_4: {
+    update_5: {
         parameters: {
             query?: never;
             header?: never;
@@ -4516,6 +4780,26 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    debts: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DebtsResponse"];
+                };
             };
         };
     };
@@ -4585,7 +4869,7 @@ export interface operations {
             };
         };
     };
-    get_2: {
+    get_3: {
         parameters: {
             query?: never;
             header?: never;
@@ -4607,7 +4891,7 @@ export interface operations {
             };
         };
     };
-    update_3: {
+    update_4: {
         parameters: {
             query?: never;
             header?: never;
@@ -4733,7 +5017,7 @@ export interface operations {
             };
         };
     };
-    get_4: {
+    get_5: {
         parameters: {
             query?: {
                 page?: number;
@@ -5270,7 +5554,7 @@ export interface operations {
             };
         };
     };
-    update_2: {
+    update_3: {
         parameters: {
             query?: never;
             header?: never;
@@ -5450,14 +5734,18 @@ export interface operations {
             };
         };
     };
-    link_2: {
+    link_3: {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConfirmIdentityRequest"];
+            };
+        };
         responses: {
             /** @description OK */
             200: {
@@ -5611,7 +5899,11 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConfirmIdentityRequest"];
+            };
+        };
         responses: {
             /** @description OK */
             200: {
@@ -5621,6 +5913,113 @@ export interface operations {
                 content: {
                     "*/*": components["schemas"]["TwoFactorSetupResponse"];
                 };
+            };
+        };
+    };
+    resubscribe: {
+        parameters: {
+            query: {
+                user: number;
+                token: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    get_2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["NotificationSettingsDto"];
+                };
+            };
+        };
+    };
+    update_2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NotificationSettingsDto"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["NotificationSettingsDto"];
+                };
+            };
+        };
+    };
+    page: {
+        parameters: {
+            query: {
+                user: number;
+                token: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    unsubscribe: {
+        parameters: {
+            query: {
+                user: number;
+                token: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -5922,7 +6321,7 @@ export interface operations {
             };
         };
     };
-    link_1: {
+    link_2: {
         parameters: {
             query?: never;
             header?: never;
@@ -6383,7 +6782,7 @@ export interface operations {
             };
         };
     };
-    updateSettings: {
+    updateSettings_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -6452,6 +6851,92 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    status_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TelegramStatus"];
+                };
+            };
+        };
+    };
+    unlink_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    link_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConfirmIdentityRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TelegramLinkResponse"];
+                };
+            };
+        };
+    };
+    updateSettings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TelegramSettingsRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TelegramStatus"];
+                };
             };
         };
     };

@@ -1,25 +1,15 @@
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {
-  accountOf,
-  instrumentOf,
+  brokerOf,
   investmentOperationOf,
   portfolioOf,
   positionDetailOf,
+  tradedOf as traded,
 } from '../../test/fixtures';
 import { bodyOf, json, mockApi, plain, renderApp, signedInApi } from '../../test/render';
 
-/** AAPL with a price, as the operations and the instrument page see it. */
-const traded = (overrides: Parameters<typeof instrumentOf>[0] = {}) =>
-  instrumentOf({ id: 7, price: 220, priceDate: '2026-10-15', ...overrides });
-
-const broker = accountOf({
-  id: 3,
-  name: 'Interactive Brokers',
-  type: 'INVESTMENT',
-  currency: 'USD',
-  inBudget: false,
-});
+const broker = brokerOf();
 
 const detail = positionDetailOf({
   quantity: 15,

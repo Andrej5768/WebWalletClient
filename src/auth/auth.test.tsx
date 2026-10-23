@@ -35,7 +35,10 @@ describe('session', () => {
     expect(await screen.findByRole('heading', { name: 'Огляд' })).toBeInTheDocument();
   });
 
-  it('signs out', async () => {
+  it('signs out and forgets the financial inputs kept in the browser', async () => {
+    localStorage.setItem('ww-fire', '{"withdrawalRate":5}');
+    localStorage.setItem('ww-forecast-minimum', '50000');
+    localStorage.setItem('ww-language', 'uk');
     mockApi({
       ...signedInApi,
       'POST /api/v1/auth/logout': () => new Response(null, { status: 204 }),
@@ -48,6 +51,9 @@ describe('session', () => {
     expect(
       await screen.findByRole('heading', { level: 1, name: 'Гроші, інвестиції та податки — в одному місці' }),
     ).toBeInTheDocument();
+    expect(localStorage.getItem('ww-fire')).toBeNull();
+    expect(localStorage.getItem('ww-forecast-minimum')).toBeNull();
+    expect(localStorage.getItem('ww-language')).toBe('uk');
   });
 });
 

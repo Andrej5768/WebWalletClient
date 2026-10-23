@@ -110,3 +110,52 @@ describe('Google in the settings', () => {
     expect(within(document.body).getByRole('button', { name: 'Підключити' })).toBeInTheDocument();
   });
 });
+
+describe('linking Google in the settings', () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it('asks for the password and sends it with the link request', async () => {
+    const assign = vi.fn();
+    vi.stubGlobal('location', { ...window.location, assign });
+    const requests = mockApi({
+      ...signedInApi,
+      'GET /api/v1/auth/options': () => json({ googleSignIn: true }),
+      'GET /api/v1/me': () => json({ ...user, hasPassword: true, googleEmail: null }),
+      'POST /api/v1/me/google/link': () =>
+        json({ url: 'https://accounts.google.com/o/oauth2/v2/auth?state=s' }),
+    });
+    renderApp('/settings?tab=security');
+
+    await userEvent.click(await screen.findByRole('button', { name: 'Підключити' }));
+    const dialog = await screen.findByRole('dialog', { name: 'Підтвердіть, що це ви' });
+    await userEvent.type(within(dialog).getByLabelText('Поточний пароль'), 'secret-password');
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Продовжити' }));
+
+    await waitFor(() =>
+      expect(assign).toHaveBeenCalledWith('https://accounts.google.com/o/oauth2/v2/auth?state=s'),
+    );
+    expect(await bodyOf(requests, 'POST', '/api/v1/me/google/link')).toEqual({ password: 'secret-password' });
+  });
+
+  it('asks an account without a password for the code of two-factor authentication', async () => {
+    const requests = mockApi({
+      ...signedInApi,
+      'GET /api/v1/auth/options': () => json({ googleSignIn: true }),
+      'GET /api/v1/me': () =>
+        json({ ...user, hasPassword: false, twoFactorEnabled: true, googleEmail: null }),
+      'POST /api/v1/me/google/link': () =>
+        json({ code: 'INVALID_TWO_FACTOR_CODE', detail: 'Код неправильний або вже використаний' }, 400),
+    });
+    renderApp('/settings?tab=security');
+
+    await userEvent.click(await screen.findByRole('button', { name: 'Підключити' }));
+    const dialog = await screen.findByRole('dialog', { name: 'Підтвердіть, що це ви' });
+    expect(within(dialog).queryByLabelText('Поточний пароль')).not.toBeInTheDocument();
+    await userEvent.type(within(dialog).getByLabelText('Код із застосунку або резервний код'), '482913');
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Продовжити' }));
+
+    expect(await within(dialog).findByText('Код неправильний або вже використаний')).toBeInTheDocument();
+    expect(await bodyOf(requests, 'POST', '/api/v1/me/google/link')).toEqual({ code: '482913' });
+    expect(within(dialog).queryByRole('alert')).not.toBeInTheDocument();
+  });
+});

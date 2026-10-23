@@ -28,3 +28,20 @@ export function accountColor(type: AccountType | undefined): string {
 export function inBudgetByDefault(type: AccountType): boolean {
   return type === 'CASH' || type === 'CARD' || type === 'CREDIT_CARD' || type === 'FOP';
 }
+
+/**
+ * The balances summed in the base currency. An account without an exchange rate is left out and makes the sum
+ * incomplete, which the caller should tell. `part` keeps the share of a balance that counts, e.g. only a debt.
+ */
+export function sumInBase(
+  accounts: { balanceInBase?: number | null }[],
+  part: (balance: number) => number = (balance) => balance,
+): { total: number; incomplete: boolean } {
+  let total = 0;
+  let incomplete = false;
+  accounts.forEach((account) => {
+    if (account.balanceInBase == null) incomplete = true;
+    else total += part(account.balanceInBase);
+  });
+  return { total, incomplete };
+}

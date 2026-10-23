@@ -21,9 +21,12 @@ export function toProblem(error: unknown): ApiProblem {
   return { code: 'NETWORK', detail: i18n.t('errors.network') };
 }
 
-/** Field validation messages keyed by field name, for form `setErrors`. */
-export function fieldErrors(problem: ApiProblem): Record<string, string> {
-  return Object.fromEntries((problem.errors ?? []).map(({ field, message }) => [field, message]));
+/** Field validation messages keyed by field name, for form `setErrors`; `path` turns a field into the form's path. */
+export function fieldErrors(
+  problem: ApiProblem,
+  path: (field: string) => string = (field) => field,
+): Record<string, string> {
+  return Object.fromEntries((problem.errors ?? []).map(({ field, message }) => [path(field), message]));
 }
 
 export function problemMessage(problem: ApiProblem): string {

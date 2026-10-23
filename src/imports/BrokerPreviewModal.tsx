@@ -1,14 +1,12 @@
 import {
   Alert,
   Badge,
-  Button,
   Checkbox,
   Group,
   Modal,
   ScrollArea,
   SegmentedControl,
   Select,
-  SimpleGrid,
   Stack,
   Table,
   Text,
@@ -18,7 +16,6 @@ import type { TFunction } from 'i18next';
 import { Info, TriangleAlert } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router';
 import { invalidateLedger } from '../api/queries';
 import { FormFooter } from '../components/FormFooter';
 import { ProblemAlert } from '../components/feedback';
@@ -47,6 +44,7 @@ import {
   type Choice,
   type Filter,
 } from './broker';
+import { ImportResultView } from './ImportResultView';
 
 /** The reports of a broker before the import: what each ticker becomes and every row of the reports. */
 export function BrokerPreviewModal({ preview, onClose }: { preview: BrokerPreview; onClose(): void }) {
@@ -85,6 +83,8 @@ export function BrokerPreviewModal({ preview, onClose }: { preview: BrokerPrevie
   });
 
   const cancel = () => {
+    // Closing is blocked while the import runs, so it never discards a preview being confirmed.
+    if (confirm.isPending) return;
     if (!result) discardPreview(preview.id).catch(() => undefined);
     onClose();
   };
@@ -107,6 +107,9 @@ export function BrokerPreviewModal({ preview, onClose }: { preview: BrokerPrevie
     <Modal
       opened
       onClose={cancel}
+      closeOnEscape={!confirm.isPending}
+      closeOnClickOutside={!confirm.isPending}
+      closeButtonProps={{ disabled: confirm.isPending }}
       size={1100}
       title={
         <Stack gap={0}>
@@ -126,7 +129,21 @@ export function BrokerPreviewModal({ preview, onClose }: { preview: BrokerPrevie
       }
     >
       {result ? (
-        <ResultView result={result} onClose={onClose} />
+        <ImportResultView
+          stats={(
+            [
+              ['operationsImported', result.operationsImported],
+              ['duplicates', result.duplicates],
+              ['instrumentsCreated', result.instrumentsCreated],
+              ['accountsCreated', result.accountCreated ? 1 : 0],
+            ] as const
+          ).map(([key, value]) => ({ key, label: t(`imports.broker.result.${key}`), value }))}
+          link={{
+            to: `/investments?accountId=${result.accountId}`,
+            label: t('imports.broker.result.toInvestments'),
+          }}
+          onClose={onClose}
+        />
       ) : (
         <Stack gap="md">
           <Group gap={6} wrap="wrap">
@@ -537,39 +554,5 @@ function OperationRow({
         </Badge>
       </Table.Td>
     </Table.Tr>
-  );
-}
-
-function ResultView({ result, onClose }: { result: BrokerImportResult; onClose(): void }) {
-  const { t } = useTranslation();
-  const stats = [
-    ['operationsImported', result.operationsImported],
-    ['duplicates', result.duplicates],
-    ['instrumentsCreated', result.instrumentsCreated],
-    ['accountsCreated', result.accountCreated ? 1 : 0],
-  ] as const;
-  return (
-    <Stack gap="md">
-      <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="sm">
-        {stats.map(([key, value]) => (
-          <Stack key={key} gap={2} p="sm" style={{ border: '1px solid var(--ww-border)', borderRadius: 8 }}>
-            <Text className="num" fz={22} fw={600}>
-              {value}
-            </Text>
-            <Text size="xs" c="dimmed">
-              {t(`imports.broker.result.${key}`)}
-            </Text>
-          </Stack>
-        ))}
-      </SimpleGrid>
-      <Group justify="flex-end" gap="xs">
-        <Button variant="default" onClick={onClose}>
-          {t('imports.result.close')}
-        </Button>
-        <Button component={Link} to={`/investments?accountId=${result.accountId}`} onClick={onClose}>
-          {t('imports.broker.result.toInvestments')}
-        </Button>
-      </Group>
-    </Stack>
   );
 }

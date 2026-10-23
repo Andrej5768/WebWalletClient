@@ -190,6 +190,27 @@
         ],
         "type": "object"
       },
+      "AndroidVersions": {
+        "properties": {
+          "latestVersionCode": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "minSupportedVersionCode": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "storeUrl": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "latestVersionCode",
+          "minSupportedVersionCode",
+          "storeUrl"
+        ],
+        "type": "object"
+      },
       "Anomaly": {
         "properties": {
           "amount": {
@@ -210,6 +231,44 @@
           "average",
           "month",
           "ratio"
+        ],
+        "type": "object"
+      },
+      "AppConfigResponse": {
+        "properties": {
+          "android": {
+            "$ref": "#/components/schemas/AndroidVersions"
+          },
+          "features": {
+            "$ref": "#/components/schemas/AppFeatures"
+          }
+        },
+        "required": [
+          "android",
+          "features"
+        ],
+        "type": "object"
+      },
+      "AppFeatures": {
+        "properties": {
+          "googleSignIn": {
+            "type": "boolean"
+          },
+          "marketSearch": {
+            "type": "boolean"
+          },
+          "push": {
+            "type": "boolean"
+          },
+          "telegram": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "googleSignIn",
+          "marketSearch",
+          "push",
+          "telegram"
         ],
         "type": "object"
       },
@@ -700,6 +759,9 @@
           "archived": {
             "type": "boolean"
           },
+          "carryOver": {
+            "type": "boolean"
+          },
           "color": {
             "enum": [
               "blue",
@@ -774,6 +836,9 @@
           "archived": {
             "type": "boolean"
           },
+          "carryOver": {
+            "type": "boolean"
+          },
           "children": {
             "items": {
               "$ref": "#/components/schemas/CategoryResponse"
@@ -846,6 +911,7 @@
         },
         "required": [
           "archived",
+          "carryOver",
           "children",
           "color",
           "icon",
@@ -1107,6 +1173,27 @@
         ],
         "type": "object"
       },
+      "ConfirmIdentityRequest": {
+        "properties": {
+          "code": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "password": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "type": "object"
+      },
       "ConfirmRequest": {
         "properties": {
           "operations": {
@@ -1243,6 +1330,39 @@
         },
         "required": [
           "amount"
+        ],
+        "type": "object"
+      },
+      "DebtsResponse": {
+        "properties": {
+          "accountId": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "currency": {
+            "type": "string"
+          },
+          "people": {
+            "items": {
+              "$ref": "#/components/schemas/Person"
+            },
+            "type": "array"
+          },
+          "unconvertedCurrencies": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "accountId",
+          "currency",
+          "people",
+          "unconvertedCurrencies"
         ],
         "type": "object"
       },
@@ -1994,6 +2114,11 @@
             "maxLength": 128,
             "minLength": 0,
             "type": "string"
+          },
+          "trustedDeviceToken": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string"
           }
         },
         "required": [
@@ -2735,6 +2860,11 @@
             "maxLength": 128,
             "minLength": 0,
             "type": "string"
+          },
+          "trustedDeviceToken": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string"
           }
         },
         "required": [
@@ -2758,6 +2888,12 @@
               "null"
             ]
           },
+          "refreshToken": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "tokenType": {
             "type": [
               "string",
@@ -2774,6 +2910,7 @@
         "required": [
           "accessToken",
           "expiresIn",
+          "refreshToken",
           "tokenType",
           "twoFactorChallenge"
         ],
@@ -2933,6 +3070,9 @@
           "currency": {
             "type": "string"
           },
+          "inflow": {
+            "type": "number"
+          },
           "month": {
             "type": "string"
           },
@@ -2952,6 +3092,7 @@
           "available",
           "categories",
           "currency",
+          "inflow",
           "month",
           "readyToAssign",
           "unconvertedCurrencies"
@@ -3127,6 +3268,47 @@
           "months",
           "unconvertedCurrencies"
         ],
+        "type": "object"
+      },
+      "NotificationSettingsDto": {
+        "properties": {
+          "banks": {
+            "type": "boolean"
+          },
+          "budgets": {
+            "type": "boolean"
+          },
+          "emailMonthly": {
+            "type": "boolean"
+          },
+          "emailWeekly": {
+            "type": "boolean"
+          },
+          "forecast": {
+            "type": "boolean"
+          },
+          "goals": {
+            "type": "boolean"
+          },
+          "hour": {
+            "format": "int32",
+            "maximum": 23,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "monthly": {
+            "type": "boolean"
+          },
+          "recurring": {
+            "type": "boolean"
+          },
+          "taxes": {
+            "type": "boolean"
+          },
+          "weekly": {
+            "type": "boolean"
+          }
+        },
         "type": "object"
       },
       "OccurrenceConfirmRequest": {
@@ -3934,6 +4116,42 @@
         ],
         "type": "object"
       },
+      "Person": {
+        "properties": {
+          "balance": {
+            "type": "number"
+          },
+          "lastDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "operations": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "payeeId": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "balance",
+          "lastDate",
+          "name",
+          "operations",
+          "payeeId"
+        ],
+        "type": "object"
+      },
       "PlanResponse": {
         "properties": {
           "actual": {
@@ -4610,6 +4828,16 @@
         "required": [
           "url"
         ],
+        "type": "object"
+      },
+      "RefreshTokenRequest": {
+        "properties": {
+          "refreshToken": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string"
+          }
+        },
         "type": "object"
       },
       "RegisterRequest": {
@@ -5546,6 +5774,83 @@
         ],
         "type": "object"
       },
+      "TelegramLinkResponse": {
+        "properties": {
+          "expiresAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "expiresAt",
+          "url"
+        ],
+        "type": "object"
+      },
+      "TelegramSettingsRequest": {
+        "properties": {
+          "quickEntryAccountId": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "TelegramStatus": {
+        "properties": {
+          "botUsername": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "firstName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "linked": {
+            "type": "boolean"
+          },
+          "linkedAt": {
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "quickEntryAccountId": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "username": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "botUsername",
+          "enabled",
+          "firstName",
+          "linked",
+          "linkedAt",
+          "quickEntryAccountId",
+          "username"
+        ],
+        "type": "object"
+      },
       "TickerChoice": {
         "properties": {
           "instrumentId": {
@@ -5625,14 +5930,28 @@
             "format": "int64",
             "type": "integer"
           },
+          "refreshToken": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "tokenType": {
             "type": "string"
+          },
+          "trustedDeviceToken": {
+            "type": [
+              "string",
+              "null"
+            ]
           }
         },
         "required": [
           "accessToken",
           "expiresIn",
-          "tokenType"
+          "refreshToken",
+          "tokenType",
+          "trustedDeviceToken"
         ],
         "type": "object"
       },
@@ -6295,7 +6614,7 @@
     },
     "/api/v1/accounts/summary": {
       "get": {
-        "description": "Accounts that are not archived, at today's NBU rates; balances in a currency without a rate are left out and listed in unconvertedCurrencies. readyToAssign is that of the budget of the current month.",
+        "description": "Accounts that are not archived, at today's NBU rates; balances in a currency without a rate are left out and listed in unconvertedCurrencies. readyToAssign is the free money of the current month, as in its budget: inflow minus plan.",
         "operationId": "summary",
         "responses": {
           "200": {
@@ -6350,7 +6669,7 @@
         ]
       },
       "get": {
-        "operationId": "get_3",
+        "operationId": "get_4",
         "parameters": [
           {
             "in": "path",
@@ -6385,7 +6704,7 @@
       },
       "put": {
         "description": "Omitted optional fields keep their values; a credit limit or interest rate of 0 removes it",
-        "operationId": "update_6",
+        "operationId": "update_7",
         "parameters": [
           {
             "in": "path",
@@ -6686,6 +7005,28 @@
         ]
       }
     },
+    "/api/v1/app/config": {
+      "get": {
+        "description": "Public. The app refuses to run below minSupportedVersionCode and hides features that are off on this server.",
+        "operationId": "config",
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppConfigResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Versions and features for the native apps",
+        "tags": [
+          "App"
+        ]
+      }
+    },
     "/api/v1/auth/forgot-password": {
       "post": {
         "operationId": "forgotPassword",
@@ -6762,7 +7103,7 @@
     },
     "/api/v1/auth/google/complete": {
       "post": {
-        "description": "Exchanges the ticket of the callback for a session, like /login: the access token, or twoFactorChallenge when two-factor authentication is on. The ticket works once and briefly.",
+        "description": "Exchanges the ticket of the callback for a session, like /login: the access token, or twoFactorChallenge when two-factor authentication is on. The ticket works once and briefly. Native apps (header X-WebWallet-Client) get the refresh token in refreshToken instead of the cookie and send trustedDeviceToken in the body.",
         "operationId": "complete",
         "parameters": [
           {
@@ -6820,7 +7161,7 @@
     },
     "/api/v1/auth/login": {
       "post": {
-        "description": "Returns the access token; the refresh token is set in an HttpOnly cookie that is sent only to /api/v1/auth. With two-factor authentication on, unless the browser is trusted, returns twoFactorChallenge instead, to exchange with a code at /api/v1/auth/login/two-factor.",
+        "description": "Returns the access token; the refresh token is set in an HttpOnly cookie that is sent only to /api/v1/auth. With two-factor authentication on, unless the device is trusted, returns twoFactorChallenge instead, to exchange with a code at /api/v1/auth/login/two-factor. Native apps (header X-WebWallet-Client) get the refresh token in refreshToken instead of the cookie and send it in the body. Native apps send trustedDeviceToken in the body.",
         "operationId": "login",
         "parameters": [
           {
@@ -6863,7 +7204,7 @@
     },
     "/api/v1/auth/login/two-factor": {
       "post": {
-        "description": "Exchanges the challenge of the login response and a code of the authenticator app or a recovery code for a session. A wrong code keeps the challenge until it expires; an expired one fails with TWO_FACTOR_EXPIRED. With trustDevice the browser gets a cookie that skips the code for a while.",
+        "description": "Exchanges the challenge of the login response and a code of the authenticator app or a recovery code for a session. A wrong code keeps the challenge until it expires; an expired one fails with TWO_FACTOR_EXPIRED. With trustDevice the browser gets a cookie that skips the code for a while. Native apps (header X-WebWallet-Client) get the refresh token in refreshToken instead of the cookie and send it in the body. Native apps get the trusted device as trustedDeviceToken in the body.",
         "operationId": "loginTwoFactor",
         "requestBody": {
           "content": {
@@ -6895,7 +7236,7 @@
     },
     "/api/v1/auth/logout": {
       "post": {
-        "description": "Succeeds without the cookie or with an unknown token as well",
+        "description": "Succeeds without a token or with an unknown one as well. Native apps (header X-WebWallet-Client) get the refresh token in refreshToken instead of the cookie and send it in the body.",
         "operationId": "logout",
         "parameters": [
           {
@@ -6908,12 +7249,21 @@
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshTokenRequest"
+              }
+            }
+          }
+        },
         "responses": {
           "204": {
             "description": "No Content"
           }
         },
-        "summary": "End the session of the refresh token cookie and delete the cookie",
+        "summary": "End the session of the refresh token and delete the cookie",
         "tags": [
           "Authentication"
         ]
@@ -6942,7 +7292,7 @@
     },
     "/api/v1/auth/refresh": {
       "post": {
-        "description": "The refresh token is rotated: the response sets a new cookie and the presented token stops working. Presenting an already rotated token ends the whole session.",
+        "description": "The refresh token is rotated: the response sets a new cookie and the presented token stops working. Presenting an already rotated token ends the whole session. Native apps (header X-WebWallet-Client) get the refresh token in refreshToken instead of the cookie and send it in the body.",
         "operationId": "refresh",
         "parameters": [
           {
@@ -6955,6 +7305,15 @@
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshTokenRequest"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "content": {
@@ -6967,7 +7326,7 @@
             "description": "OK"
           }
         },
-        "summary": "Exchange the refresh token cookie for a new access token",
+        "summary": "Exchange the refresh token for a new access token",
         "tags": [
           "Authentication"
         ]
@@ -7575,7 +7934,7 @@
       },
       "put": {
         "description": "The parent is always applied (null makes a top-level category); other omitted optional fields keep their values. icon, color and necessity sent as null are removed. A necessity is allowed only on expense categories; it is removed when the category becomes income.",
-        "operationId": "update_5",
+        "operationId": "update_6",
         "parameters": [
           {
             "in": "path",
@@ -7737,7 +8096,7 @@
         ]
       },
       "put": {
-        "operationId": "update_4",
+        "operationId": "update_5",
         "parameters": [
           {
             "in": "path",
@@ -7778,6 +8137,33 @@
         ],
         "tags": [
           "Categorization rules"
+        ]
+      }
+    },
+    "/api/v1/debts": {
+      "get": {
+        "description": "Everyone with a debt operation and their balance in the base currency: a transfer to a debt account is money given to its payee, a transfer from one is money received. Positive means the person owes the user. Operations in a currency without a rate are left out and the currency is listed in unconvertedCurrencies.",
+        "operationId": "debts",
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DebtsResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Debts with people",
+        "tags": [
+          "Debts"
         ]
       }
     },
@@ -7907,7 +8293,7 @@
         ]
       },
       "get": {
-        "operationId": "get_2",
+        "operationId": "get_3",
         "parameters": [
           {
             "in": "path",
@@ -7942,7 +8328,7 @@
       },
       "put": {
         "description": "Omitted achieved and sortOrder keep their values. Moved to another account, the pace starts again from its balance.",
-        "operationId": "update_3",
+        "operationId": "update_4",
         "parameters": [
           {
             "in": "path",
@@ -8171,7 +8557,7 @@
         ]
       },
       "get": {
-        "operationId": "get_4",
+        "operationId": "get_5",
         "parameters": [
           {
             "in": "path",
@@ -9190,7 +9576,7 @@
         ]
       },
       "put": {
-        "operationId": "update_2",
+        "operationId": "update_3",
         "parameters": [
           {
             "in": "path",
@@ -9453,8 +9839,18 @@
     },
     "/api/v1/me/google/link": {
       "post": {
-        "description": "Returns the Google page to send the browser to and sets the cookie that binds the link to this browser; Google then redirects to the security settings",
-        "operationId": "link_2",
+        "description": "Returns the Google page to send the browser to and sets the cookie that binds the link to this browser; Google then redirects to the security settings. Needs the current password, or for an account without one a two-factor code when it is on.",
+        "operationId": "link_3",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfirmIdentityRequest"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "200": {
             "content": {
@@ -9500,7 +9896,7 @@
     },
     "/api/v1/me/password": {
       "post": {
-        "description": "All sessions are ended, including the current one; a new session is started: the response contains a new access token and sets a new refresh token cookie",
+        "description": "All sessions are ended, including the current one; a new session is started: the response contains a new access token and sets a new refresh token cookie. Native apps (header X-WebWallet-Client) get the refresh token in refreshToken instead of the cookie.",
         "operationId": "changePassword",
         "requestBody": {
           "content": {
@@ -9671,8 +10067,18 @@
     },
     "/api/v1/me/two-factor/setup": {
       "post": {
-        "description": "Returns a new secret for the authenticator app; it becomes active once /enable gets a code of it. Fails with CONFLICT when two-factor authentication is already on.",
+        "description": "Returns a new secret for the authenticator app; it becomes active once /enable gets a code of it. Needs the current password when the account has one (INVALID_CURRENT_PASSWORD). Fails with CONFLICT when two-factor authentication is already on.",
         "operationId": "setup",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfirmIdentityRequest"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "200": {
             "content": {
@@ -9693,6 +10099,163 @@
         "summary": "Start turning on two-factor authentication",
         "tags": [
           "Current user"
+        ]
+      }
+    },
+    "/api/v1/notifications/resubscribe": {
+      "post": {
+        "operationId": "resubscribe",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        },
+        "summary": "Subscribe to the email digest again, by the link of a digest email",
+        "tags": [
+          "Notifications"
+        ]
+      }
+    },
+    "/api/v1/notifications/settings": {
+      "get": {
+        "operationId": "get_2",
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationSettingsDto"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "What the user is notified about in Telegram, and at which hour",
+        "tags": [
+          "Notifications"
+        ]
+      },
+      "put": {
+        "operationId": "update_2",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NotificationSettingsDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationSettingsDto"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Notifications"
+        ]
+      }
+    },
+    "/api/v1/notifications/unsubscribe": {
+      "get": {
+        "operationId": "page",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "summary": "Open the unsubscribe page of the web client",
+        "tags": [
+          "Notifications"
+        ]
+      },
+      "post": {
+        "description": "By the signed link of a digest email; also the one-click unsubscribe of the mail client. NOT_FOUND for a link that is not valid.",
+        "operationId": "unsubscribe",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "user",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        },
+        "summary": "Unsubscribe from the email digest",
+        "tags": [
+          "Notifications"
         ]
       }
     },
@@ -10209,7 +10772,7 @@
     "/api/v1/recurring/{id}/occurrences/{date}/link": {
       "post": {
         "description": "The transaction must not pay another occurrence.",
-        "operationId": "link_1",
+        "operationId": "link_2",
         "parameters": [
           {
             "in": "path",
@@ -11049,7 +11612,7 @@
         ]
       },
       "put": {
-        "operationId": "updateSettings",
+        "operationId": "updateSettings_1",
         "parameters": [
           {
             "in": "path",
@@ -11168,6 +11731,123 @@
         "summary": "Add a transaction to the income of the sole proprietor, take it out, or forget the mark (null)",
         "tags": [
           "Taxes"
+        ]
+      }
+    },
+    "/api/v1/telegram": {
+      "delete": {
+        "operationId": "unlink_1",
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Disconnect the Telegram chat",
+        "tags": [
+          "Notifications"
+        ]
+      },
+      "get": {
+        "operationId": "status_1",
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TelegramStatus"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Whether the bot is available and the Telegram chat of the user, if connected",
+        "tags": [
+          "Notifications"
+        ]
+      }
+    },
+    "/api/v1/telegram/link": {
+      "post": {
+        "description": "The link opens the bot; pressing Start there connects the chat. It works once, for 15 minutes; a new link replaces the previous one. Needs the current password, or for an account without one a two-factor code when it is on. NOT_FOUND when the bot is not configured.",
+        "operationId": "link_1",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfirmIdentityRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TelegramLinkResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a one-time link that connects a Telegram chat",
+        "tags": [
+          "Notifications"
+        ]
+      }
+    },
+    "/api/v1/telegram/settings": {
+      "put": {
+        "description": "NOT_FOUND when no chat is connected",
+        "operationId": "updateSettings",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TelegramSettingsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TelegramStatus"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Settings of the connected chat",
+        "tags": [
+          "Notifications"
         ]
       }
     },

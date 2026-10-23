@@ -1,0 +1,10 @@
+# gitleaks: the default rules, minus the documentation TOTP secret used as a fixture in the tests.
+title = "WebWalletClient"
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "The example TOTP secret from the otpauth documentation, used in test fixtures"
+regexTarget = "match"
+regexes = ['''JBSWY3DPEHPK3PXP''']

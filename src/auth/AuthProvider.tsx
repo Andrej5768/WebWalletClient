@@ -5,6 +5,7 @@ import { api, refreshAccessToken, type Schemas } from '../api/client';
 import { toProblem, type ApiProblem } from '../api/errors';
 import { onAccessTokenChange, setAccessToken, shareAccessToken } from '../api/session';
 import i18n from '../i18n';
+import { clearDataKeys } from '../lib/storage';
 import { AuthContext, type AuthState, type SignInResult } from './context';
 
 type User = Schemas['UserResponse'];
@@ -69,8 +70,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, [finishSignIn]);
 
-  // Sign-out here, in another tab, or after a failed refresh clears everything this tab shows;
-  // a sign-in in another tab signs this tab in too.
+  // Sign-out here, in another tab, or after a failed refresh clears everything this tab shows and the financial
+  // inputs kept in the browser; a sign-in in another tab signs this tab in too.
   useEffect(
     () =>
       onAccessTokenChange((token, remote) => {
@@ -78,6 +79,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setUser(null);
           setStatus('signedOut');
           queryClient.clear();
+          clearDataKeys();
         } else if (remote && statusRef.current === 'signedOut') {
           void finishSignIn();
         }

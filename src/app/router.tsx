@@ -19,6 +19,7 @@ import { LoginPage } from '../auth/pages/LoginPage';
 import { RegisterPage } from '../auth/pages/RegisterPage';
 import { ResetPasswordPage } from '../auth/pages/ResetPasswordPage';
 import { RestoreAccountPage } from '../auth/pages/RestoreAccountPage';
+import { UnsubscribePage } from '../auth/pages/UnsubscribePage';
 import { VerifyEmailPage } from '../auth/pages/VerifyEmailPage';
 import { GuestOnly, RequireAuth } from '../auth/RequireAuth';
 import { LandingPage } from '../landing/LandingPage';
@@ -56,6 +57,7 @@ export const routes = [
       { path: '/reset-password', element: <ResetPasswordPage /> },
       { path: '/verify-email', element: <VerifyEmailPage /> },
       { path: '/restore-account', element: <RestoreAccountPage /> },
+      { path: '/unsubscribe', element: <UnsubscribePage /> },
       // Open to everyone, signed in or not
       { path: '/privacy', element: <LegalPage page="privacy" /> },
       { path: '/terms', element: <LegalPage page="terms" /> },

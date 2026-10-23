@@ -1,7 +1,7 @@
 {
   "imports": {
     "import": "Import",
-    "notStored": "The file is not stored — only the parsed operations, for an hour, to review them.",
+    "notStored": "The file is not stored.",
     "sources": {
       "monobank": "Monobank — connect",
       "privatbank": "PrivatBank — PDF statement",
@@ -21,18 +21,18 @@
       "tokenHint": "Get it in the Monobank app with the QR code at",
       "since": "Load history from",
       "sinceHint": "At most 3 years back",
-      "background": "The history loads in the background: the bank returns it in portions, so the first transactions appear within a few minutes.",
+      "background": "The history loads in the background: the first transactions appear within a few minutes.",
       "schedule": "Synchronization",
       "modes": {
         "INTERVAL": "Every 15 min",
         "DAILY": "Once a day",
-        "WEBHOOK": "Webhook (instant)"
+        "WEBHOOK": "Instantly"
       },
       "from": "From",
       "to": "To",
       "dailyAt": "At",
       "intervalHint": "Outside these hours — once at night.",
-      "webhookHint": "The bank sends every transaction right away. It loads the server more — turn it on only if you need instant sync.",
+      "webhookHint": "The bank sends every transaction right away.",
       "saveSchedule": "Save schedule",
       "nextSync": "Next sync: {{date}}",
       "connectedAt": "connected {{date}}",
@@ -69,7 +69,7 @@
       "tokenLabel": "Zen Money API token",
       "tokenHint": "The token is used once and not stored.",
       "fileLabel": "Zen Money export file (CSV)",
-      "fileHint": "The CSV export of transactions from Zen Money (\"dump of transactions\"), best for all time. A saved JSON of the sync API works too.",
+      "fileHint": "The export of transactions from Zen Money (\"dump of transactions\"), best for all time.",
       "submit": "Import from Zen Money"
     },
     "preview": {
@@ -142,7 +142,7 @@
       "subtitle": "Trades and cash flows from the Freedom24 cabinet",
       "trades": "Trades",
       "cashFlows": "Cash flows",
-      "filesHint": "Both reports are needed: only the cash flows give the currency of the fees. The files are not stored.",
+      "filesHint": "Both reports are needed. The files are not stored.",
       "account": "Brokerage account",
       "auto": "Account “Freedom Finance” — created when missing",
       "accountHint": "Importing again skips what is already there."
@@ -170,7 +170,7 @@
       "duplicates_other": "{{count}} imported before",
       "manualCount_one": "{{count}} instrument is created by hand",
       "manualCount_other": "{{count}} instruments are created by hand",
-      "providerUnavailable": "The price provider did not answer, so instruments not yet in the ledger will be created by hand. Try later or choose another instrument.",
+      "providerUnavailable": "Market data is unavailable right now, so instruments not yet in the ledger will be created by hand. Try later or choose another instrument.",
       "instruments": "Instruments",
       "rows": "Operations",
       "columns": {
@@ -188,7 +188,7 @@
       "state": {
         "found": "Found",
         "known": "Already in the ledger",
-        "manual": "Unknown to the provider",
+        "manual": "Not found",
         "shortfall": "Purchases missing"
       },
       "createManual": "Create by hand: {{symbol}} · {{currency}}",
@@ -225,7 +225,7 @@
       "include": "Import: {{what}}, {{date}}",
       "after": "After the import the account holds: {{positions}}; money: {{cash}}",
       "noPositions": "no positions",
-      "afterHint": "Compare with the broker cabinet. Trade fees come from the cash flows; blocking and unblocking rows of a withdrawal move no money and are skipped.",
+      "afterHint": "Compare with the broker cabinet.",
       "shortfall": "The reports sell more {{tickers}} than they buy before: such an import fails. Add the reports of an earlier period or leave these sales out.",
       "skipped_one": "{{count}} row skipped",
       "skipped_other": "{{count}} rows skipped",

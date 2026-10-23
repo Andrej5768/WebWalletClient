@@ -26,7 +26,7 @@ import { QueryError, UnconvertedAlert } from '../components/feedback';
 import { Figure, ShareBar } from '../components/Figure';
 import { formatDay, formatPercent } from '../lib/format';
 import { formatMoney } from '../lib/money';
-import { requestOf, useGoals, type Goal } from './api';
+import { requestOf, useDeleteGoal, useGoals, type Goal } from './api';
 import { ContributionModal } from './ContributionModal';
 import { GoalModal } from './GoalModal';
 import { useAverages } from './useAverages';
@@ -206,10 +206,7 @@ function GoalCard({
       ),
     onSuccess: done,
   });
-  const remove = useMutation({
-    mutationFn: () => check(api.DELETE('/api/v1/goals/{id}', { params: { path: { id: goal.id } } })),
-    onSuccess: done,
-  });
+  const remove = useDeleteGoal();
 
   // The deadline first: it matters most and must not be cut off
   const subtitle = [
@@ -255,7 +252,7 @@ function GoalCard({
                   confirmDelete({
                     title: t('goals.deleteTitle', { name: goal.name }),
                     text: t('goals.deleteText'),
-                    onConfirm: () => remove.mutate(),
+                    onConfirm: () => remove.mutate(goal.id),
                   })
                 }
               >

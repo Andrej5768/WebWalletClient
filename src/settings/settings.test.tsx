@@ -79,6 +79,7 @@ it('edits a category: icon, color and needs or wants', async () => {
     icon: 'coffee',
     color: 'pink',
     necessity: null,
+    carryOver: false,
     archived: false,
   });
 });

@@ -171,7 +171,7 @@
     "profile": {
       "button": "Taxpayer details",
       "title": "Taxpayer details for the declarations",
-      "subtitle": "Needed for the XML files uploaded to the tax service cabinet. Kept encrypted.",
+      "subtitle": "Needed for the declarations uploaded to the tax service cabinet.",
       "fields": {
         "tin": "Tax number (RNOKPP)",
         "name": "Full name",

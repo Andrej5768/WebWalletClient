@@ -1,4 +1,5 @@
-import { compound, fire, fym, loadStored, store, trackPosition } from './fire';
+import { loadStored, store } from '../lib/storage';
+import { compound, fire, fym, trackPosition } from './fire';
 
 it('finds the FIRE number and the years to it', () => {
   const plain = fire({

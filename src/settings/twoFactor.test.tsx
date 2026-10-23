@@ -15,11 +15,12 @@ const codes = [
   'X8VH-7CPL',
 ];
 
-it('turns on two-factor authentication and shows the recovery codes once', async () => {
+it('turns on two-factor authentication after the password and shows the recovery codes once', async () => {
   let enabled = false;
   const requests = mockApi({
     ...signedInApi,
-    'GET /api/v1/me': () => json({ ...user, twoFactorEnabled: enabled, recoveryCodesLeft: enabled ? 10 : 0 }),
+    'GET /api/v1/me': () =>
+      json({ ...user, hasPassword: true, twoFactorEnabled: enabled, recoveryCodesLeft: enabled ? 10 : 0 }),
     'POST /api/v1/me/two-factor/setup': () =>
       json({
         secret: 'JBSWY3DPEHPK3PXP7KQ4MZ2P',
@@ -34,7 +35,14 @@ it('turns on two-factor authentication and shows the recovery codes once', async
   renderApp('/settings?tab=security');
 
   await userEvent.click(await screen.findByRole('button', { name: 'Увімкнути' }));
-  const dialog = await screen.findByRole('dialog');
+  const confirm = await screen.findByRole('dialog', { name: 'Підтвердіть, що це ви' });
+  await userEvent.type(within(confirm).getByLabelText('Поточний пароль'), 'secret-password');
+  await userEvent.click(within(confirm).getByRole('button', { name: 'Продовжити' }));
+
+  const dialog = await screen.findByRole('dialog', { name: 'Увімкнення двофакторної автентифікації' });
+  expect(await bodyOf(requests, 'POST', '/api/v1/me/two-factor/setup')).toEqual({
+    password: 'secret-password',
+  });
   expect(await within(dialog).findByText('JBSW Y3DP EHPK 3PXP 7KQ4 MZ2P')).toBeInTheDocument();
   expect(await within(dialog).findByAltText('QR-код для застосунку-автентифікатора')).toBeInTheDocument();
 
@@ -51,6 +59,42 @@ it('turns on two-factor authentication and shows the recovery codes once', async
   await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
   expect(screen.getByText('Увімкнено')).toBeInTheDocument();
   expect(screen.getByText('Залишилось 10 резервних кодів')).toBeInTheDocument();
+});
+
+it('shows a wrong password at its field and keeps the dialog', async () => {
+  mockApi({
+    ...signedInApi,
+    'GET /api/v1/me': () => json({ ...user, hasPassword: true, twoFactorEnabled: false }),
+    'POST /api/v1/me/two-factor/setup': () =>
+      json({ code: 'INVALID_CURRENT_PASSWORD', detail: 'Поточний пароль неправильний' }, 400),
+  });
+  renderApp('/settings?tab=security');
+
+  await userEvent.click(await screen.findByRole('button', { name: 'Увімкнути' }));
+  const dialog = await screen.findByRole('dialog', { name: 'Підтвердіть, що це ви' });
+  await userEvent.type(within(dialog).getByLabelText('Поточний пароль'), 'wrong');
+  await userEvent.click(within(dialog).getByRole('button', { name: 'Продовжити' }));
+
+  expect(await within(dialog).findByText('Поточний пароль неправильний')).toBeInTheDocument();
+  expect(within(dialog).queryByRole('alert')).not.toBeInTheDocument();
+  expect(screen.queryByText('Увімкнення двофакторної автентифікації')).not.toBeInTheDocument();
+});
+
+it('shows too many attempts above the buttons', async () => {
+  mockApi({
+    ...signedInApi,
+    'GET /api/v1/me': () => json({ ...user, hasPassword: true, twoFactorEnabled: false }),
+    'POST /api/v1/me/two-factor/setup': () =>
+      json({ code: 'TOO_MANY_ATTEMPTS', detail: 'Забагато спроб. Спробуйте пізніше' }, 429),
+  });
+  renderApp('/settings?tab=security');
+
+  await userEvent.click(await screen.findByRole('button', { name: 'Увімкнути' }));
+  const dialog = await screen.findByRole('dialog', { name: 'Підтвердіть, що це ви' });
+  await userEvent.type(within(dialog).getByLabelText('Поточний пароль'), 'secret-password');
+  await userEvent.click(within(dialog).getByRole('button', { name: 'Продовжити' }));
+
+  expect(await within(dialog).findByRole('alert')).toHaveTextContent('Забагато спроб. Спробуйте пізніше');
 });
 
 it('turns off two-factor authentication with the password and a code', async () => {

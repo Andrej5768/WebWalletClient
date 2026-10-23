@@ -7,7 +7,7 @@
     "instrument": "Instrument",
     "searchPlaceholder": "Ticker, name or ISIN",
     "nothingFound": "Nothing found",
-    "providerDisabled": "Search of market instruments is off: no key of the market data provider is configured.",
+    "providerDisabled": "Search of market instruments is unavailable right now.",
     "addFailed": "The instrument could not be added",
     "addManual": "Add by hand — government bonds, deposit certificates…",
     "changeInstrument": "Choose another instrument",

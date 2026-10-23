@@ -2,7 +2,7 @@ import { Button, Card, Group, Stack, Text, ThemeIcon, Title, Tooltip } from '@ma
 import { notifications } from '@mantine/notifications';
 import { useMutation } from '@tanstack/react-query';
 import { KeyRound } from 'lucide-react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router';
 import { api } from '../api/client';
@@ -11,6 +11,8 @@ import { GoogleLogo } from '../auth/GoogleButton';
 import { useGoogleSignIn } from '../auth/useGoogleSignIn';
 import { useAuth } from '../auth/context';
 import { ProblemAlert } from '../components/feedback';
+import { ConfirmIdentityModal } from './ConfirmIdentityModal';
+import { identityMethod, type IdentityProof } from './identity';
 import { useReloadUser } from './useReloadUser';
 
 /** The linked Google account; linking goes through the Google page and comes back with the result in the fragment. */
@@ -19,6 +21,8 @@ export function GoogleCard() {
   const { user } = useAuth();
   const offered = useGoogleSignIn();
   const reloadUser = useReloadUser();
+  const [confirming, setConfirming] = useState(false);
+  const method = identityMethod(user);
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -40,8 +44,12 @@ export function GoogleCard() {
   }, [location.hash, location.pathname, location.search, navigate, t]);
 
   const link = useMutation({
-    mutationFn: () => unwrap(api.POST('/api/v1/me/google/link')),
-    onSuccess: (data) => window.location.assign(data.url),
+    mutationFn: (proof: IdentityProof) => unwrap(api.POST('/api/v1/me/google/link', { body: proof })),
+    onSuccess: (data) => {
+      setConfirming(false);
+      window.location.assign(data.url);
+    },
+    gcTime: 0,
     meta: { errorShown: true },
   });
   const unlink = useMutation({
@@ -98,7 +106,7 @@ export function GoogleCard() {
             <Button
               variant="default"
               loading={link.isPending}
-              onClick={() => link.mutate()}
+              onClick={() => (method ? setConfirming(true) : link.mutate({}))}
               style={{ flexShrink: 0 }}
             >
               {t('settings.google.link')}
@@ -111,8 +119,20 @@ export function GoogleCard() {
             </Tooltip>
           )}
         </Group>
-        <ProblemAlert error={link.error ?? unlink.error} />
+        <ProblemAlert error={(confirming ? null : link.error) ?? unlink.error} />
       </Stack>
+      {confirming && method && (
+        <ConfirmIdentityModal
+          method={method}
+          pending={link.isPending}
+          error={link.error}
+          onConfirm={(proof) => link.mutate(proof)}
+          onClose={() => {
+            setConfirming(false);
+            link.reset();
+          }}
+        />
+      )}
     </Card>
   );
 }

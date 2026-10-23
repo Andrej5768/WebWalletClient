@@ -21,6 +21,32 @@ export function accountOf(overrides: Partial<Schemas['AccountResponse']> = {}): 
   };
 }
 
+/** An investment account at a broker, in dollars and outside the budget. */
+export function brokerOf(overrides: Partial<Schemas['AccountResponse']> = {}): Schemas['AccountResponse'] {
+  return accountOf({
+    id: 3,
+    name: 'Interactive Brokers',
+    type: 'INVESTMENT',
+    currency: 'USD',
+    inBudget: false,
+    ...overrides,
+  });
+}
+
+export function accountsSummaryOf(
+  overrides: Partial<Schemas['AccountSummaryResponse']> = {},
+): Schemas['AccountSummaryResponse'] {
+  return {
+    currency: 'UAH',
+    netWorth: 0,
+    available: 0,
+    availableWithCredit: 0,
+    readyToAssign: 0,
+    unconvertedCurrencies: [],
+    ...overrides,
+  };
+}
+
 export function categoryOf(
   overrides: Partial<Schemas['CategoryResponse']> = {},
 ): Schemas['CategoryResponse'] {
@@ -32,6 +58,7 @@ export function categoryOf(
     icon: null,
     color: null,
     necessity: null,
+    carryOver: false,
     archived: false,
     sortOrder: 0,
     children: [],
@@ -253,6 +280,13 @@ export function instrumentOf(
     priceDate: null,
     ...overrides,
   };
+}
+
+/** AAPL with a price, as the operations and the instrument page see it. */
+export function tradedOf(
+  overrides: Partial<Schemas['InstrumentResponse']> = {},
+): Schemas['InstrumentResponse'] {
+  return instrumentOf({ id: 7, price: 220, priceDate: '2026-10-15', ...overrides });
 }
 
 export function positionOf(

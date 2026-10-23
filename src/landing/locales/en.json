@@ -71,7 +71,7 @@
       },
       "privacy": {
         "title": "Privacy",
-        "text": "Bank tokens are encrypted in the database. No ads, analytics or third-party scripts on the pages. Sign-in with Google is used only to identify you."
+        "text": "Bank tokens are stored encrypted. No ads, analytics or third-party scripts on the pages. Sign-in with Google is used only to identify you."
       }
     },
     "independence": {
@@ -113,7 +113,7 @@
     },
     "source": {
       "title": "Source code",
-      "text": "The code of the project is published: a Spring Boot server and a React web client. You can read it and check how your data is stored.",
+      "text": "The code of the project is published: you can read it and check how your data is stored.",
       "license": "All rights reserved. The code is published for reference only: running, copying, modifying or distributing it requires written permission from the author.",
       "server": "Server",
       "client": "Web client"

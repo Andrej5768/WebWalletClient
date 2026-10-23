@@ -59,6 +59,12 @@ export function currencySymbol(currency: string): string {
   );
 }
 
+/** The value rounded half up to the digits after the decimal point. */
+export function roundTo(value: number, digits: number): number {
+  const factor = 10 ** digits;
+  return Math.round(value * factor) / factor;
+}
+
 /** An amount that rounds to zero at the precision becomes a plain zero, so it is not shown as "−0,00". */
 function withoutNegativeZero(amount: number, decimals: number): number {
   return Math.abs(amount) < 0.5 * 10 ** -decimals ? 0 : amount;

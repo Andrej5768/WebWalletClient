@@ -37,6 +37,33 @@ it('shows loans with credit cards and debts to people apart', async () => {
   expect(plain(debts.textContent)).toContain('Вам винні 700');
 });
 
+it('lists the people with debts and opens their operations', async () => {
+  mockApi({
+    ...signedInApi,
+    'GET /api/v1/accounts': () => json(accounts),
+    'GET /api/v1/debts': () =>
+      json({
+        currency: 'UAH',
+        accountId: 4,
+        unconvertedCurrencies: [],
+        people: [
+          { payeeId: 7, name: 'Олег', balance: 700, lastDate: '2026-10-05', operations: 2 },
+          { payeeId: 8, name: 'Іра', balance: -500, lastDate: '2026-10-07', operations: 1 },
+        ],
+      }),
+  });
+  renderApp('/accounts');
+
+  const card = (await screen.findByText('Борги з людьми')).closest<HTMLElement>('.mantine-Card-root')!;
+  expect(within(card).getByText('Олег')).toBeInTheDocument();
+  expect(within(card).getByText('Вам винні')).toBeInTheDocument();
+  expect(within(card).getByText('Ви винні')).toBeInTheDocument();
+  expect(plain(within(card).getByText(/500,00/).textContent)).toBe('500,00 ₴');
+
+  await userEvent.click(within(card).getByText('Олег'));
+  expect((await screen.findAllByText('Операції')).length).toBeGreaterThan(0);
+});
+
 it('edits an account from its menu', async () => {
   mockApi({ ...signedInApi, 'GET /api/v1/accounts': () => json(accounts.slice(0, 1)) });
   renderApp('/accounts');
