@@ -244,7 +244,9 @@ function TransactionForm({ transaction, defaultAccountId, defaults, onClose }: P
                 size="input-sm"
                 aria-label={t('transactions.form.swapAccounts')}
                 title={t('transactions.form.swapAccounts')}
-                onClick={() => form.setValues(swapAccounts(values, account?.currency !== toAccount?.currency))}
+                onClick={() =>
+                  form.setValues(swapAccounts(values, account?.currency !== toAccount?.currency))
+                }
               >
                 <ArrowLeftRight size={16} />
               </ActionIcon>

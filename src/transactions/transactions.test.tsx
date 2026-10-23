@@ -163,7 +163,9 @@ it('swaps the accounts of a transfer together with the amounts', async () => {
   await userEvent.click(within(drawer).getByRole('button', { name: 'Поміняти рахунки місцями' }));
 
   expect(within(drawer).getByLabelText('З рахунку')).toHaveValue(`Біла картка · ${formatMoney(1240, 'USD')}`);
-  expect(within(drawer).getByLabelText('На рахунок')).toHaveValue(`Чорна картка · ${formatMoney(18452.37, 'UAH')}`);
+  expect(within(drawer).getByLabelText('На рахунок')).toHaveValue(
+    `Чорна картка · ${formatMoney(18452.37, 'UAH')}`,
+  );
   expect(within(drawer).getByLabelText('Сума')).toHaveValue('100');
   const received = within(drawer).getByLabelText('Зараховано') as HTMLInputElement;
   expect(received.value.replace(/\s/g, '')).toBe('4130');
@@ -179,7 +181,9 @@ it('moves the account of an income to the receiving side when it becomes a trans
   await userEvent.click(within(drawer).getByRole('radio', { name: 'Переказ' }));
 
   expect(within(drawer).getByLabelText('З рахунку')).toHaveValue('');
-  expect(within(drawer).getByLabelText('На рахунок')).toHaveValue(`Чорна картка · ${formatMoney(18452.37, 'UAH')}`);
+  expect(within(drawer).getByLabelText('На рахунок')).toHaveValue(
+    `Чорна картка · ${formatMoney(18452.37, 'UAH')}`,
+  );
 });
 
 it('offers the quick category picker only for a single uncategorized part', async () => {
