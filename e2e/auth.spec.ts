@@ -75,7 +75,7 @@ test('signs in and shows the app shell with the balance', async ({ page }) => {
   await expect(sidebar.getByText('181 493,12 ₴')).toBeVisible();
 
   await sidebar.getByText('Чистий капітал').click();
-  await page.getByRole('menuitem', { name: 'Вільно поза конвертами' }).click();
+  await page.getByRole('menuitem', { name: 'Вільно після плану' }).click();
   await expect(sidebar.getByText('4 250,00 ₴')).toBeVisible();
 
   await page.getByRole('button', { name: 'Згорнути або розгорнути меню' }).click();
