@@ -58,6 +58,7 @@ export function categoryOf(
     icon: null,
     color: null,
     necessity: null,
+    carryOver: false,
     archived: false,
     sortOrder: 0,
     children: [],

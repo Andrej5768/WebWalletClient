@@ -169,7 +169,10 @@
         "over": "{{name}} is over {{target}}.",
         "end": "{{name}} moved to the place of {{target}}.",
         "cancel": "Moving {{name}} cancelled."
-      }
+      },
+      "carryOverSwitch": "Carry the rest over",
+      "carryOverHelp": "What is not spent moves to the next month, and overspending is taken from the next month's free money. Without it the plan is for its month only.",
+      "carryOver": "Carry-over"
     },
     "rules": {
       "hint": "Rules categorize new transactions. When you change a category by hand, a rule for the payee is learned automatically.",

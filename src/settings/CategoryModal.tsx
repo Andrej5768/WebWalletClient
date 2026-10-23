@@ -35,7 +35,7 @@ export interface CategoryDraft {
 
 type Necessity = 'INHERIT' | 'NEEDS' | 'WANTS';
 
-/** Creates or edits a category: name, type, parent group, icon, color, needs or wants, archive. */
+/** Creates or edits a category: name, type, parent group, icon, color, needs or wants, carry-over, archive. */
 export function CategoryModal({
   draft,
   groups,
@@ -65,6 +65,7 @@ export function CategoryModal({
       // A subcategory without its own flag shows "same as group"; a new group starts as a need.
       necessity: (existing?.own.necessity ??
         (existing?.parentId || draft.parentId ? 'INHERIT' : 'NEEDS')) as Necessity,
+      carryOver: existing?.carryOver ?? false,
       archived: existing?.own.archived ?? false,
     },
     validate: { name: required },
@@ -86,6 +87,7 @@ export function CategoryModal({
           input.kind === 'INCOME' || input.necessity === 'INHERIT'
             ? (null as unknown as 'NEEDS')
             : input.necessity,
+        carryOver: input.kind === 'EXPENSE' && input.carryOver,
         archived: input.archived,
       };
       await check(
@@ -215,6 +217,13 @@ export function CategoryModal({
                 {t('settings.categories.necessityHelp')}
               </Text>
             </Stack>
+          )}
+          {values.kind === 'EXPENSE' && (
+            <Switch
+              label={t('settings.categories.carryOverSwitch')}
+              description={t('settings.categories.carryOverHelp')}
+              {...form.getInputProps('carryOver', { type: 'checkbox' })}
+            />
           )}
 
           <Switch

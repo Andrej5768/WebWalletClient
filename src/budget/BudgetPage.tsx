@@ -140,7 +140,8 @@ export function BudgetPage() {
         </Group>
       </Card>
 
-      <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="sm">
+      <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="sm">
+        <Figure label={t('budget.inflow')} value={money(budget.data?.inflow, currency)} />
         <Figure label={t('budget.assigned')} value={money(budget.data?.assigned, currency)} />
         <Figure
           label={t('budget.spent')}

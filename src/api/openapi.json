@@ -759,6 +759,9 @@
           "archived": {
             "type": "boolean"
           },
+          "carryOver": {
+            "type": "boolean"
+          },
           "color": {
             "enum": [
               "blue",
@@ -833,6 +836,9 @@
           "archived": {
             "type": "boolean"
           },
+          "carryOver": {
+            "type": "boolean"
+          },
           "children": {
             "items": {
               "$ref": "#/components/schemas/CategoryResponse"
@@ -905,6 +911,7 @@
         },
         "required": [
           "archived",
+          "carryOver",
           "children",
           "color",
           "icon",
@@ -3030,6 +3037,9 @@
           "currency": {
             "type": "string"
           },
+          "inflow": {
+            "type": "number"
+          },
           "month": {
             "type": "string"
           },
@@ -3049,6 +3059,7 @@
           "available",
           "categories",
           "currency",
+          "inflow",
           "month",
           "readyToAssign",
           "unconvertedCurrencies"
@@ -6534,7 +6545,7 @@
     },
     "/api/v1/accounts/summary": {
       "get": {
-        "description": "Accounts that are not archived, at today's NBU rates; balances in a currency without a rate are left out and listed in unconvertedCurrencies. readyToAssign is that of the budget of the current month.",
+        "description": "Accounts that are not archived, at today's NBU rates; balances in a currency without a rate are left out and listed in unconvertedCurrencies. readyToAssign is the free money of the current month, as in its budget: inflow minus plan.",
         "operationId": "summary",
         "responses": {
           "200": {

@@ -3,6 +3,7 @@ import { moveCategory, type OrderItem } from './categoryOrder';
 
 const item = (id: number, parentId: number | null): CategoryInfo => ({
   own: { icon: null, color: null, necessity: null, archived: false },
+  carryOver: false,
   id,
   name: String(id),
   path: String(id),

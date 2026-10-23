@@ -166,8 +166,8 @@
       "hint": "Cards and cash plus unused credit limits"
     },
     "readyToAssign": {
-      "label": "Free outside envelopes",
-      "hint": "Money not assigned to any envelope"
+      "label": "Free after the plan",
+      "hint": "Month's income minus the plan"
     },
     "savings": "Savings",
     "unconverted": "No rate: {{currencies}}"
@@ -359,27 +359,28 @@
     "previousMonth": "Previous month",
     "nextMonth": "Next month",
     "copyPrevious": "Same as last month",
-    "move": "Move money",
+    "move": "Move plan",
     "moveFrom": "From",
     "moveTo": "To",
     "moveSubmit": "Move",
-    "moveDifferent": "Choose another envelope",
-    "readyToAssign": "Ready to assign",
-    "readyPositive": "Put this money into envelopes: every hryvnia gets a job.",
-    "readyZero": "All money is assigned.",
-    "readyNegative": "More is assigned than you have. Lower some envelopes to get back to zero.",
-    "assigned": "Assigned",
+    "moveDifferent": "Choose another category",
+    "readyToAssign": "Free after the plan",
+    "readyPositive": "The month's income exceeds the plan: this money can still be planned or set aside.",
+    "readyZero": "The plan equals the month's income.",
+    "readyNegative": "The plan exceeds the month's income. Lower the plan or wait for income.",
+    "assigned": "Plan",
     "spent": "Spent",
-    "available": "Available",
+    "available": "Left",
     "unconverted": "No rate: {{currencies}} — these amounts are not counted.",
-    "overspent": "Overspent: {{names}}. Move money from another envelope.",
+    "overspent": "Overspent: {{names}}. Raise the plan or move some from another category.",
     "cover": "Cover",
     "columns": {
-      "category": "Envelope"
+      "category": "Category"
     },
     "ahead": "ahead of pace by {{percent}}%",
     "today": "Today's day of the month",
-    "assignTo": "Assigned: {{name}}"
+    "assignTo": "Plan: {{name}}",
+    "inflow": "Month's income"
   },
   "reports": {
     "tabs": {

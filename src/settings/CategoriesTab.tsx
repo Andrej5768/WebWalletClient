@@ -228,6 +228,11 @@ function CategoryRow({
           {t(`settings.categories.necessity.${category.necessity}`)}
         </Badge>
       )}
+      {category.kind === 'EXPENSE' && category.carryOver && (
+        <Badge variant="outline" color="gray" size="sm">
+          {t('settings.categories.carryOver')}
+        </Badge>
+      )}
       <Menu position="bottom-end" width={240} shadow="md">
         <Menu.Target>
           <ActionIcon

@@ -33,7 +33,7 @@ export interface paths {
         };
         /**
          * Totals of the accounts in the base currency
-         * @description Accounts that are not archived, at today's NBU rates; balances in a currency without a rate are left out and listed in unconvertedCurrencies. readyToAssign is that of the budget of the current month.
+         * @description Accounts that are not archived, at today's NBU rates; balances in a currency without a rate are left out and listed in unconvertedCurrencies. readyToAssign is the free money of the current month, as in its budget: inflow minus plan.
          */
         get: operations["summary"];
         put?: never;
@@ -2288,6 +2288,7 @@ export interface components {
         };
         CategoryRequest: {
             archived?: boolean;
+            carryOver?: boolean;
             /** @enum {string|null} */
             color?: "blue" | "green" | "orange" | "violet" | "teal" | "pink" | "amber" | "slate" | "red" | "indigo" | "cyan" | "lime" | null;
             icon?: string | null;
@@ -2303,6 +2304,7 @@ export interface components {
         };
         CategoryResponse: {
             archived: boolean;
+            carryOver: boolean;
             children: components["schemas"]["CategoryResponse"][];
             /** @enum {string|null} */
             color: "blue" | "green" | "orange" | "violet" | "teal" | "pink" | "amber" | "slate" | "red" | "indigo" | "cyan" | "lime" | null;
@@ -2852,6 +2854,7 @@ export interface components {
             available: number;
             categories: components["schemas"]["CategoryRow"][];
             currency: string;
+            inflow: number;
             month: string;
             readyToAssign: number;
             unconvertedCurrencies: string[];
