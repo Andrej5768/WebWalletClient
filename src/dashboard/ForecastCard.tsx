@@ -11,7 +11,7 @@ import { formatDayShort } from '../lib/format';
 import { formatMoney } from '../lib/money';
 import { useRecurringPayments, type Recurring } from '../recurring/api';
 import { useForecast } from './api';
-import { forecastChart, loadMinimum, plot, saveMinimum, type Forecast } from './forecast';
+import { expectedDate, forecastChart, loadMinimum, plot, saveMinimum, type Forecast } from './forecast';
 import classes from './dashboard.module.css';
 
 /** Money of cash and cards this month: actual up to today, then the forecast with planned payments. */
@@ -55,6 +55,7 @@ export function ForecastCard() {
 
 function ForecastChartView({ forecast, minimum }: { forecast: Forecast; minimum: number | null }) {
   const { t } = useTranslation();
+  const [hovered, setHovered] = useState<number | null>(null);
   const days = forecast.days;
   const first = days[0];
   const last = days[days.length - 1];
@@ -67,6 +68,8 @@ function ForecastChartView({ forecast, minimum }: { forecast: Forecast; minimum:
   const lowest = forecast.lowest;
   const dips = minimum != null && lowest != null && lowest.balance < minimum;
   const todayX = chart.x(chart.todayIndex);
+  const step = (plot.right - plot.left) / Math.max(1, days.length - 1);
+  const hoveredDay = hovered === null ? undefined : days[hovered];
 
   return (
     <Stack gap="sm">
@@ -88,73 +91,117 @@ function ForecastChartView({ forecast, minimum }: { forecast: Forecast; minimum:
           </Text>
         </Stack>
       </Group>
-      <svg
-        className={classes.chart}
-        viewBox={`0 0 ${plot.width} ${plot.height}`}
-        width="100%"
-        role="img"
-        aria-label={t('dashboard.forecast.aria', {
-          now: formatMoney(forecast.balance, currency),
-          date: formatDayShort(last.date),
-          end: formatMoney(last.balance, currency),
-        })}
-      >
-        {[chart.hi, mid, chart.lo].map((value) => (
-          <g key={value}>
+      <div className={classes.chartWrap}>
+        <svg
+          className={classes.chart}
+          viewBox={`0 0 ${plot.width} ${plot.height}`}
+          width="100%"
+          onMouseLeave={() => setHovered(null)}
+          role="img"
+          aria-label={t('dashboard.forecast.aria', {
+            now: formatMoney(forecast.balance, currency),
+            date: formatDayShort(last.date),
+            end: formatMoney(last.balance, currency),
+          })}
+        >
+          {[chart.hi, mid, chart.lo].map((value) => (
+            <g key={value}>
+              <line
+                x1={plot.left}
+                x2={plot.right}
+                y1={chart.y(value)}
+                y2={chart.y(value)}
+                className={classes.grid}
+              />
+              <text x={plot.left - 8} y={chart.y(value) + 3} textAnchor="end" className={classes.axis}>
+                {short.format(value)}
+              </text>
+            </g>
+          ))}
+          {minimum != null && (
+            <g>
+              <line
+                x1={plot.left}
+                x2={plot.right}
+                y1={chart.y(minimum)}
+                y2={chart.y(minimum)}
+                className={classes.minimum}
+              />
+              <text
+                x={plot.right - 2}
+                y={chart.y(minimum) - 4}
+                textAnchor="end"
+                className={classes.minimumLabel}
+              >
+                {t('dashboard.forecast.minimumLine', { amount: formatMoney(minimum, currency) })}
+              </text>
+            </g>
+          )}
+          <line x1={todayX} x2={todayX} y1={10} y2={plot.bottom} className={classes.todayLine} />
+          <text x={todayX} y={9} textAnchor="middle" className={classes.axis}>
+            {t('dashboard.forecast.today')}
+          </text>
+          <polyline points={chart.actual} className={classes.actual} />
+          {chart.forecast.includes(' ') && <polyline points={chart.forecast} className={classes.projected} />}
+          {hoveredDay && (
             <line
-              x1={plot.left}
-              x2={plot.right}
-              y1={chart.y(value)}
-              y2={chart.y(value)}
-              className={classes.grid}
+              x1={chart.x(hovered!)}
+              x2={chart.x(hovered!)}
+              y1={plot.top}
+              y2={plot.bottom}
+              className={classes.hoverLine}
             />
-            <text x={plot.left - 8} y={chart.y(value) + 3} textAnchor="end" className={classes.axis}>
-              {short.format(value)}
-            </text>
-          </g>
-        ))}
-        {minimum != null && (
-          <g>
-            <line
-              x1={plot.left}
-              x2={plot.right}
-              y1={chart.y(minimum)}
-              y2={chart.y(minimum)}
-              className={classes.minimum}
+          )}
+          {chart.dots.map((dot) => (
+            <circle
+              key={dot.index}
+              cx={dot.x}
+              cy={dot.y}
+              r={hovered === dot.index ? 4 : 2.5}
+              className={classes.dayDot}
             />
-            <text
-              x={plot.right - 2}
-              y={chart.y(minimum) - 4}
-              textAnchor="end"
-              className={classes.minimumLabel}
-            >
-              {t('dashboard.forecast.minimumLine', { amount: formatMoney(minimum, currency) })}
-            </text>
-          </g>
-        )}
-        <line x1={todayX} x2={todayX} y1={10} y2={plot.bottom} className={classes.todayLine} />
-        <text x={todayX} y={9} textAnchor="middle" className={classes.axis}>
-          {t('dashboard.forecast.today')}
-        </text>
-        <polyline points={chart.actual} className={classes.actual} />
-        {chart.forecast.includes(' ') && <polyline points={chart.forecast} className={classes.projected} />}
-        {chart.markers.map((marker, index) => (
-          <circle
-            key={index}
-            cx={marker.x}
-            cy={marker.y}
-            r={4}
-            className={marker.income ? classes.markerIn : classes.markerOut}
+          ))}
+          {chart.markers.map((marker, index) => (
+            <circle
+              key={index}
+              cx={marker.x}
+              cy={marker.y}
+              r={4}
+              className={marker.income ? classes.markerIn : classes.markerOut}
+            />
+          ))}
+          <circle cx={todayX} cy={chart.y(todayDay.balance)} r={4.5} className={classes.todayDot} />
+          {days.map((day, index) => (
+            <rect
+              key={day.date}
+              data-day={day.date}
+              x={chart.x(index) - step / 2}
+              y={plot.top}
+              width={step}
+              height={plot.bottom - plot.top}
+              className={classes.hit}
+              onMouseEnter={() => setHovered(index)}
+            />
+          ))}
+          <text x={plot.left} y={206} textAnchor="middle" className={classes.axis}>
+            {formatDayShort(first.date)}
+          </text>
+          <text x={plot.right} y={206} textAnchor="end" className={classes.axis}>
+            {formatDayShort(last.date)}
+          </text>
+        </svg>
+        {hoveredDay && (
+          <DayTooltip
+            day={hoveredDay}
+            events={forecast.events.filter(
+              (event) => expectedDate(event, forecast.today) === hoveredDay.date,
+            )}
+            currency={currency}
+            x={chart.x(hovered!)}
+            y={chart.y(hoveredDay.balance)}
           />
-        ))}
-        <circle cx={todayX} cy={chart.y(todayDay.balance)} r={4.5} className={classes.todayDot} />
-        <text x={plot.left} y={206} textAnchor="middle" className={classes.axis}>
-          {formatDayShort(first.date)}
-        </text>
-        <text x={plot.right} y={206} textAnchor="end" className={classes.axis}>
-          {formatDayShort(last.date)}
-        </text>
-      </svg>
+        )}
+      </div>
       {minimum != null && (
         <Badge
           variant="light"
@@ -177,6 +224,65 @@ function ForecastChartView({ forecast, minimum }: { forecast: Forecast; minimum:
         </Badge>
       )}
     </Stack>
+  );
+}
+
+/** What happened or is planned on a day of the chart: the balance, the operations and the expected payments. */
+function DayTooltip({
+  day,
+  events,
+  currency,
+  x,
+  y,
+}: {
+  day: Forecast['days'][number];
+  events: Forecast['events'];
+  currency: string;
+  x: number;
+  y: number;
+}) {
+  const { t } = useTranslation();
+  const left = (x / plot.width) * 100;
+  const amount = (value: number) => (
+    <Text size="xs" className={`num ${value < 0 ? 'expense' : 'income'}`} style={{ whiteSpace: 'nowrap' }}>
+      {formatMoney(value, currency, { signed: true })}
+    </Text>
+  );
+  return (
+    <div
+      className={classes.tooltip}
+      role="tooltip"
+      style={{
+        left: `${left}%`,
+        top: `${(y / plot.height) * 100}%`,
+        transform: `translate(${left > 60 ? '-100%' : '0'}, -100%) translateY(-8px)`,
+      }}
+    >
+      <Group justify="space-between" gap="md" wrap="nowrap">
+        <Text size="xs" fw={600}>
+          {formatDayShort(day.date)}
+        </Text>
+        <Text size="xs" className="num" fw={600}>
+          {formatMoney(day.balance, currency)}
+        </Text>
+      </Group>
+      {day.operations.map((operation) => (
+        <Group key={operation.id} justify="space-between" gap="md" wrap="nowrap">
+          <Text size="xs" c="dimmed" truncate>
+            {operation.name ?? t('transactions.noPayee')}
+          </Text>
+          {amount(operation.amount)}
+        </Group>
+      ))}
+      {events.map((event) => (
+        <Group key={`${event.recurringId}-${event.date}`} justify="space-between" gap="md" wrap="nowrap">
+          <Text size="xs" c="dimmed" truncate>
+            {t('dashboard.forecast.plannedItem', { name: event.name })}
+          </Text>
+          {amount(event.amount)}
+        </Group>
+      ))}
+    </div>
   );
 }
 

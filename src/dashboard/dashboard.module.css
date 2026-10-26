@@ -37,10 +37,41 @@
   }
 }
 
+.chartWrap {
+  position: relative;
+}
+
 .chart {
   display: block;
   height: auto;
   overflow: visible;
+}
+
+.hit {
+  fill: transparent;
+}
+
+.hoverLine {
+  stroke: var(--ww-border-strong);
+  pointer-events: none;
+}
+
+.dayDot {
+  fill: var(--ww-accent-text);
+  pointer-events: none;
+}
+
+.tooltip {
+  position: absolute;
+  z-index: 2;
+  min-width: 180px;
+  max-width: 260px;
+  padding: 8px 10px;
+  border: 1px solid var(--ww-border);
+  border-radius: 8px;
+  background: var(--ww-surface);
+  box-shadow: var(--mantine-shadow-md);
+  pointer-events: none;
 }
 
 .grid {

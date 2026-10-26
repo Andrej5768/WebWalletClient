@@ -1,10 +1,11 @@
-import { Card, Checkbox, Group, SegmentedControl, Skeleton, Stack, Text } from '@mantine/core';
+import { Anchor, Card, Checkbox, Group, SegmentedControl, Skeleton, Stack, Text } from '@mantine/core';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Schemas } from '../api/client';
 import { useAccounts } from '../api/queries';
 import { locale } from '../i18n';
 import { ShareBar } from '../components/Figure';
+import { MoneyInput } from '../components/MoneyInput';
 import { sumInBase } from '../lib/accounts';
 import { formatMoney } from '../lib/money';
 import { loadStored, store } from '../lib/storage';
@@ -24,6 +25,8 @@ interface Settings {
   /** Choices of the viewer by account id; other accounts follow their type. */
   accounts: Record<string, boolean>;
   target: number;
+  /** Monthly expenses the viewer typed instead of the average; an emptied field is ''. */
+  expenses?: number | '';
 }
 
 /** FYM — "freedom money": how many months the liquid money lasts at the usual expenses. */
@@ -50,7 +53,8 @@ export function FymTab() {
     settings.accounts[String(account.id)] ?? LIQUID_BY_DEFAULT.includes(account.type);
   // An account without an exchange rate is left out of the liquid money; the note says so
   const { total: liquid, incomplete } = sumInBase(list.filter(liquidOf), (balance) => Math.max(0, balance));
-  const expenses = averages.monthlyExpenses ?? 0;
+  const averageExpenses = Math.round(averages.monthlyExpenses ?? 0);
+  const expenses = typeof settings.expenses === 'number' ? settings.expenses : averageExpenses;
   const result = fym(liquid, expenses, settings.target, Math.max(0, averages.monthlySavings ?? 0));
   const months = result.months ?? 0;
   const oneDecimal = (value: number) =>
@@ -90,6 +94,28 @@ export function FymTab() {
               {t('goals.fym.subtitle')}
             </Text>
           </Stack>
+          <MoneyInput
+            label={t('goals.fym.expenses')}
+            description={
+              settings.expenses === undefined
+                ? t('goals.fym.expensesHint', { count: averages.months })
+                : undefined
+            }
+            inputWrapperOrder={['label', 'input', 'description']}
+            currency={currency}
+            value={settings.expenses === undefined ? averageExpenses : settings.expenses}
+            onChange={(value) => save({ ...settings, expenses: typeof value === 'number' ? value : '' })}
+          />
+          {settings.expenses !== undefined && (
+            <Anchor
+              component="button"
+              type="button"
+              size="xs"
+              onClick={() => save({ ...settings, expenses: undefined })}
+            >
+              {t('goals.fym.resetExpenses')}
+            </Anchor>
+          )}
           {result.months === null ? (
             <Text c="dimmed">{t('goals.fym.noExpenses')}</Text>
           ) : (

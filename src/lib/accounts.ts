@@ -24,6 +24,24 @@ export function accountColor(type: AccountType | undefined): string {
   return `var(--mantine-color-${accountColorName(type)}-filled)`;
 }
 
+/**
+ * Accounts for a selector: the most used first, by the number of their operations, then by name; archived ones are
+ * left out unless `keep` names them (the account of the thing being edited), and then come last.
+ */
+export function selectableAccounts<
+  T extends { id: number; name: string; archived: boolean; operations: number },
+>(accounts: T[], keep: (number | string | null | undefined)[] = []): T[] {
+  const kept = new Set(keep.filter((id) => id != null && id !== '').map(Number));
+  return accounts
+    .filter((account) => !account.archived || kept.has(account.id))
+    .sort(
+      (a, b) =>
+        Number(a.archived) - Number(b.archived) ||
+        b.operations - a.operations ||
+        a.name.localeCompare(b.name),
+    );
+}
+
 /** Everyday money is budgeted by default; savings, deposits, loans, debts and investments are not. */
 export function inBudgetByDefault(type: AccountType): boolean {
   return type === 'CASH' || type === 'CARD' || type === 'CREDIT_CARD' || type === 'FOP';

@@ -1,6 +1,18 @@
 import { BarChart } from '@mantine/charts';
 import { moneyAxis } from '../components/chartAxis';
-import { Card, Checkbox, NumberInput, SegmentedControl, SimpleGrid, Stack, Table, Text } from '@mantine/core';
+import {
+  Card,
+  Checkbox,
+  ColorSwatch,
+  Group,
+  NumberInput,
+  Paper,
+  SegmentedControl,
+  SimpleGrid,
+  Stack,
+  Table,
+  Text,
+} from '@mantine/core';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { formatMoney } from '../lib/money';
@@ -37,6 +49,54 @@ const DEFAULTS: Values = {
   inflation: 8,
   real: false,
 };
+
+interface TooltipItem {
+  name?: string;
+  value?: number;
+  color?: string;
+}
+
+/** A year of the chart: what was paid in, the interest earned and the total they make. */
+export function YearTooltip({
+  label,
+  payload,
+  money,
+  totalLabel,
+}: {
+  label: string;
+  payload?: TooltipItem[];
+  money: (amount: number) => string;
+  totalLabel: string;
+}) {
+  if (!payload?.length) return null;
+  const total = payload.reduce((sum, item) => sum + (item.value ?? 0), 0);
+  return (
+    <Paper withBorder shadow="md" radius="md" p="xs" miw={200}>
+      <Text size="sm" fw={600} mb={4}>
+        {label}
+      </Text>
+      {payload.map((item) => (
+        <Group key={item.name} justify="space-between" gap="lg" wrap="nowrap">
+          <Group gap={6} wrap="nowrap">
+            <ColorSwatch color={item.color ?? 'gray'} size={8} />
+            <Text size="xs">{item.name}</Text>
+          </Group>
+          <Text size="xs" className="num">
+            {money(item.value ?? 0)}
+          </Text>
+        </Group>
+      ))}
+      <Group justify="space-between" gap="lg" wrap="nowrap" mt={4}>
+        <Text size="xs" fw={600}>
+          {totalLabel}
+        </Text>
+        <Text size="xs" fw={600} className="num">
+          {money(total)}
+        </Text>
+      </Group>
+    </Paper>
+  );
+}
 
 /** Compound interest calculator: growth of an initial sum and monthly contributions. */
 export function CalculatorTab() {
@@ -172,6 +232,16 @@ export function CalculatorTab() {
             withLegend
             gridAxis="y"
             tickLine="none"
+            tooltipProps={{
+              content: ({ label, payload }) => (
+                <YearTooltip
+                  label={String(label ?? '')}
+                  payload={payload as unknown as TooltipItem[]}
+                  money={money}
+                  totalLabel={t('goals.calc.tooltipTotal')}
+                />
+              ),
+            }}
           />
         </Card>
         <Card withBorder radius="md" padding={0} style={{ overflowX: 'auto' }}>

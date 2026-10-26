@@ -17,7 +17,7 @@ const views = [
   { value: 'savings', icon: PiggyBank, element: <SavingsView /> },
 ] as const;
 
-/** The analytics tab of the reports: each section has its own period. */
+/** The views of the analytics section: each has its own period. */
 export function AnalyticsReport() {
   const { t } = useTranslation();
   const [params, setParams] = useSearchParams();

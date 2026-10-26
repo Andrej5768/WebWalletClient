@@ -49,6 +49,7 @@ import {
 } from './edits';
 import { ImportResultView } from './ImportResultView';
 import { PreviewRow } from './PreviewRow';
+import { selectableAccounts } from '../lib/accounts';
 
 type Filter = 'all' | 'uncategorized' | 'duplicates';
 
@@ -262,7 +263,7 @@ export function ImportPreviewModal({ preview, onClose }: { preview: Preview; onC
       return next;
     });
 
-  const ownAccounts = (accounts.data ?? []).filter((account) => !account.archived);
+  const ownAccounts = selectableAccounts(accounts.data ?? []);
   const tagNames = (tags.data ?? []).map((tag) => tag.name);
 
   return (

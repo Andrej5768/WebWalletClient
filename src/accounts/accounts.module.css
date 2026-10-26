@@ -21,6 +21,15 @@
   font-weight: 600;
 }
 
+.groupToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: inherit;
+  font-weight: inherit;
+  color: inherit;
+}
+
 .item {
   min-height: 56px;
   border-top: 1px solid var(--ww-border);

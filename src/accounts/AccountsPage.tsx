@@ -13,6 +13,7 @@ import {
   Text,
   ThemeIcon,
   Title,
+  UnstyledButton,
 } from '@mantine/core';
 import { useLocalStorage } from '@mantine/hooks';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -22,6 +23,8 @@ import {
   ArrowLeftRight,
   Banknote,
   BriefcaseBusiness,
+  ChevronDown,
+  ChevronRight,
   CircleCheck,
   CreditCard,
   EllipsisVertical,
@@ -30,6 +33,7 @@ import {
   Pencil,
   PiggyBank,
   Plus,
+  RefreshCw,
   TrendingUp,
   TriangleAlert,
   Users,
@@ -45,6 +49,8 @@ import { Figure } from '../components/Figure';
 import { formatDateTime } from '../lib/format';
 import { accountColorName, sumInBase, type AccountType } from '../lib/accounts';
 import { formatMoney } from '../lib/money';
+import { DifferenceActions } from '../imports/DifferenceActions';
+import { useSyncNow } from '../imports/sync';
 import { AccountFormModal } from './AccountFormModal';
 import { DebtsCard } from './DebtsCard';
 import { groupAccounts, type Account } from './groups';
@@ -75,6 +81,12 @@ export function AccountsPage() {
     key: 'ww-accounts-archived',
     defaultValue: false,
   });
+  const [collapsed, setCollapsed] = useLocalStorage<string[]>({
+    key: 'ww-accounts-collapsed',
+    defaultValue: [],
+  });
+  const toggleGroup = (key: string) =>
+    setCollapsed((keys) => (keys.includes(key) ? keys.filter((item) => item !== key) : [...keys, key]));
   const [editing, setEditing] = useState<Account | null | undefined>(undefined);
 
   // Omitted optional fields keep their values, so only the archive flag changes.
@@ -100,6 +112,7 @@ export function AccountsPage() {
       .map((link) => [link.accountId!, link]),
   );
   const groups = groupAccounts(accounts.data ?? [], showArchived);
+  const syncNow = useSyncNow(monobank.data);
   const count = (accounts.data ?? []).filter((account) => !account.archived).length;
   const currency = summary.data?.currency ?? 'UAH';
   const active = (accounts.data ?? []).filter((account) => !account.archived);
@@ -198,7 +211,20 @@ export function AccountsPage() {
           {groups.map((group) => (
             <div key={group.key}>
               <div className={`${classes.row} ${classes.group}`}>
-                <span>{t(`accounts.groups.${group.key}`)}</span>
+                <UnstyledButton
+                  className={classes.groupToggle}
+                  onClick={() => toggleGroup(group.key)}
+                  aria-expanded={!collapsed.includes(group.key)}
+                  aria-label={t(
+                    collapsed.includes(group.key) ? 'accounts.expandGroup' : 'accounts.collapseGroup',
+                  )}
+                >
+                  {collapsed.includes(group.key) ? <ChevronRight size={14} /> : <ChevronDown size={14} />}
+                  <span>{t(`accounts.groups.${group.key}`)}</span>
+                  <Text span size="xs" c="dimmed" fw={400}>
+                    {group.accounts.length}
+                  </Text>
+                </UnstyledButton>
                 <span />
                 <span />
                 <span className={`num ${classes.right}`}>
@@ -207,23 +233,26 @@ export function AccountsPage() {
                 <span />
                 <span />
               </div>
-              {group.accounts.map((account) => (
-                <AccountRow
-                  key={account.id}
-                  account={account}
-                  link={links.get(account.id!)}
-                  baseCurrency={currency}
-                  onEdit={() => setEditing(account)}
-                  onArchive={() => archive.mutate(account)}
-                  onTransactions={() => void navigate(`/transactions?accountId=${account.id}`)}
-                  onNewTransaction={() => void navigate(`/transactions?new=1&accountId=${account.id}`)}
-                  onPositions={
-                    account.type === 'INVESTMENT'
-                      ? () => void navigate(`/investments?tab=positions&accountId=${account.id}`)
-                      : undefined
-                  }
-                />
-              ))}
+              {collapsed.includes(group.key)
+                ? null
+                : group.accounts.map((account) => (
+                    <AccountRow
+                      key={account.id}
+                      account={account}
+                      link={links.get(account.id!)}
+                      baseCurrency={currency}
+                      onEdit={() => setEditing(account)}
+                      onArchive={() => archive.mutate(account)}
+                      onTransactions={() => void navigate(`/transactions?accountId=${account.id}`)}
+                      onNewTransaction={() => void navigate(`/transactions?new=1&accountId=${account.id}`)}
+                      sync={links.has(account.id!) ? syncNow : undefined}
+                      onPositions={
+                        account.type === 'INVESTMENT'
+                          ? () => void navigate(`/investments?tab=positions&accountId=${account.id}`)
+                          : undefined
+                      }
+                    />
+                  ))}
             </div>
           ))}
         </div>
@@ -246,6 +275,8 @@ interface RowProps {
   onNewTransaction(): void;
   /** A brokerage account opens its positions; its balance is mostly them. */
   onPositions?: () => void;
+  /** Of an account synchronized with Monobank: asks the bank for its operations now. */
+  sync?: ReturnType<typeof useSyncNow>;
 }
 
 function AccountRow({
@@ -257,6 +288,7 @@ function AccountRow({
   onTransactions,
   onNewTransaction,
   onPositions,
+  sync,
 }: RowProps) {
   const { t } = useTranslation();
   const balance = account.balance ?? 0;
@@ -313,6 +345,7 @@ function AccountRow({
             <Text size="xs" c="dimmed">
               {t(difference > 0 ? 'accounts.missingIncome' : 'accounts.missingExpenses')}
             </Text>
+            <DifferenceActions link={link} />
           </Stack>
         ) : link ? (
           <Group gap={6} wrap="nowrap">
@@ -352,6 +385,19 @@ function AccountRow({
           <Menu.Item leftSection={<Plus size={14} />} onClick={onNewTransaction}>
             {t('accounts.menu.newTransaction')}
           </Menu.Item>
+          {sync && (
+            <Menu.Item
+              leftSection={<RefreshCw size={14} />}
+              disabled={sync.waitSeconds > 0 || sync.inProgress}
+              onClick={sync.sync}
+            >
+              {sync.inProgress
+                ? t('imports.monobank.syncing')
+                : sync.waitSeconds > 0
+                  ? t('imports.monobank.syncIn', { seconds: sync.waitSeconds })
+                  : t('imports.monobank.syncNow')}
+            </Menu.Item>
+          )}
           <Menu.Divider />
           <Menu.Item
             leftSection={account.archived ? <ArchiveRestore size={14} /> : <Archive size={14} />}

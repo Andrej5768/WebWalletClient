@@ -18,6 +18,7 @@ import { formatMoney } from '../lib/money';
 import { mantineColor, type PaletteColor } from '../lib/palette';
 import { ColorSwatches } from '../settings/ColorSwatches';
 import { requestOf, useDeleteGoal, type Goal, type GoalRequest } from './api';
+import { selectableAccounts } from '../lib/accounts';
 
 /** Icons offered for goals: things people save for. */
 const GOAL_ICONS = [
@@ -65,12 +66,10 @@ export function GoalModal({
 
   const options = [
     { value: '', label: t('goals.form.noAccount') },
-    ...(accounts.data ?? [])
-      .filter((account) => !account.archived || String(account.id) === accountId)
-      .map((account) => ({
-        value: String(account.id),
-        label: `${account.name} · ${formatMoney(account.balance, account.currency)}`,
-      })),
+    ...selectableAccounts(accounts.data ?? [], [accountId]).map((account) => ({
+      value: String(account.id),
+      label: `${account.name} · ${formatMoney(account.balance, account.currency)}`,
+    })),
   ];
 
   const done = async () => {

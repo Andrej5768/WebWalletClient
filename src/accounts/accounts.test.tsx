@@ -1,4 +1,4 @@
-import { fireEvent, screen, waitFor, within } from '@testing-library/react';
+import { cleanup, fireEvent, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { json, mockApi, plain, renderApp, signedInApi } from '../test/render';
 
@@ -35,6 +35,10 @@ it('lists accounts by group with base amounts and the Monobank difference', asyn
     ...signedInApi,
     'GET /api/v1/accounts': () => json(accounts),
     'GET /api/v1/banks/monobank': () => json(monobank),
+    'GET /api/v1/categories': () => json([]),
+    'GET /api/v1/payees': () => json([]),
+    'GET /api/v1/tags': () => json([]),
+    'GET /api/v1/transactions': () => json({ items: [], page: 0, size: 50, totalItems: 0, totalPages: 1 }),
   });
   renderApp('/accounts');
 
@@ -48,6 +52,40 @@ it('lists accounts by group with base amounts and the Monobank difference', asyn
 
   await userEvent.click(screen.getByLabelText('Показати архівні'));
   expect(screen.getByText('Старий кредит')).toBeInTheDocument();
+
+  // The missing income is added with the form, the account and the amount filled in
+  await userEvent.click(screen.getByRole('button', { name: 'Додати дохід' }));
+  const dialog = await screen.findByRole('dialog');
+  expect(await within(dialog).findByLabelText('Сума')).toHaveValue('1 240');
+  expect(within(dialog).getByRole('radio', { name: 'Дохід' })).toBeChecked();
+});
+
+it('collapses a group and remembers it', async () => {
+  mockApi({
+    ...signedInApi,
+    'GET /api/v1/accounts': () => json(accounts),
+    'GET /api/v1/banks/monobank': () => json({ code: 'NOT_FOUND' }, 404),
+  });
+  renderApp('/accounts');
+
+  // The sidebar lists the accounts too, so the page is checked alone
+  let main = await screen.findByRole('main');
+  expect(await within(main).findByText('Чорна картка')).toBeInTheDocument();
+  await userEvent.click(within(main).getAllByRole('button', { name: 'Згорнути групу' })[0]!);
+  expect(within(main).queryByText('Чорна картка')).not.toBeInTheDocument();
+  expect(within(main).getByText('Кредитка')).toBeInTheDocument();
+  expect(within(main).getByRole('button', { name: 'Розгорнути групу' })).toHaveTextContent(
+    'Картки та рахунки',
+  );
+  expect(JSON.parse(localStorage.getItem('ww-accounts-collapsed') ?? '[]')).toEqual(['cards']);
+
+  cleanup();
+  renderApp('/accounts');
+  main = await screen.findByRole('main');
+  expect(await within(main).findByText('Кредитка')).toBeInTheDocument();
+  expect(within(main).queryByText('Чорна картка')).not.toBeInTheDocument();
+  await userEvent.click(within(main).getByRole('button', { name: 'Розгорнути групу' }));
+  expect(within(main).getByText('Чорна картка')).toBeInTheDocument();
 });
 
 it('opens the edit dialog on double click with the currency locked', async () => {

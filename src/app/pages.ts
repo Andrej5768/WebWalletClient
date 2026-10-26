@@ -20,6 +20,9 @@ export const BudgetPage = lazy(() => import('../budget/BudgetPage').then((m) => 
 export const ReportsPage = lazy(() =>
   import('../reports/ReportsPage').then((m) => ({ default: m.ReportsPage })),
 );
+export const AnalyticsPage = lazy(() =>
+  import('../analytics/AnalyticsPage').then((m) => ({ default: m.AnalyticsPage })),
+);
 export const GoalsPage = lazy(() => import('../goals/GoalsPage').then((m) => ({ default: m.GoalsPage })));
 export const InvestmentsPage = lazy(() =>
   import('../investments/InvestmentsPage').then((m) => ({ default: m.InvestmentsPage })),

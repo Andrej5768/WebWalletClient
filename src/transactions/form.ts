@@ -36,6 +36,8 @@ export interface TransactionValues {
   comment: string;
   originalAmount: number | string;
   originalCurrency: string | null;
+  /** A balance correction: no category, left out of the reports. Set by the Monobank difference, kept on edit. */
+  adjustment: boolean;
 }
 
 export const toNumber = (value: number | string): number => (value === '' ? 0 : Number(value));
@@ -78,6 +80,7 @@ export function initialTransactionValues(
     comment: transaction?.comment ?? '',
     originalAmount: transaction?.originalAmount ?? '',
     originalCurrency: transaction?.originalCurrency ?? null,
+    adjustment: transaction?.adjustment ?? false,
   };
 }
 
@@ -183,6 +186,7 @@ export function toTransactionBody(
     comment: values.comment.trim() || undefined,
     originalAmount: values.originalAmount === '' ? undefined : toNumber(values.originalAmount),
     originalCurrency: values.originalAmount === '' ? undefined : (values.originalCurrency ?? undefined),
+    adjustment: values.adjustment || undefined,
   };
 }
 

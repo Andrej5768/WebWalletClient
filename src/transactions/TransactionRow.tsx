@@ -50,22 +50,24 @@ export function TransactionRow({
       : 0;
   const subtitle = debt
     ? t(`transactions.debt.${debt}`)
-    : transfer
-      ? fee > 0
-        ? t('transactions.transferFee', { fee: formatMoney(fee, transaction.currency) })
-        : t('transactions.types.TRANSFER')
-      : isSplit(transaction)
-        ? t('transactions.split', {
-            names: transaction.splits
-              .map((split) =>
-                split.categoryId == null
-                  ? t('transactions.uncategorized')
-                  : categories.find((item) => item.id === split.categoryId)?.name,
-              )
-              .filter(Boolean)
-              .join(', '),
-          })
-        : (category?.path ?? t('transactions.uncategorized'));
+    : transaction.adjustment
+      ? t('transactions.adjustment')
+      : transfer
+        ? fee > 0
+          ? t('transactions.transferFee', { fee: formatMoney(fee, transaction.currency) })
+          : t('transactions.types.TRANSFER')
+        : isSplit(transaction)
+          ? t('transactions.split', {
+              names: transaction.splits
+                .map((split) =>
+                  split.categoryId == null
+                    ? t('transactions.uncategorized')
+                    : categories.find((item) => item.id === split.categoryId)?.name,
+                )
+                .filter(Boolean)
+                .join(', '),
+            })
+          : (category?.path ?? t('transactions.uncategorized'));
 
   return (
     // The row is clickable for the mouse; keyboard users open it with the title button.

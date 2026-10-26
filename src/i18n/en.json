@@ -141,8 +141,9 @@
     "dashboard": "Overview",
     "accounts": "Accounts",
     "transactions": "Transactions",
-    "budget": "Envelopes",
+    "budget": "Budget",
     "reports": "Reports",
+    "analytics": "Analytics",
     "goals": "Goals",
     "investments": "Investments",
     "imports": "Import",
@@ -176,6 +177,8 @@
     "subtitle_one": "{{count}} account · double-click a row to edit",
     "subtitle_other": "{{count}} accounts · double-click a row to edit",
     "showArchived": "Show archived",
+    "collapseGroup": "Collapse group",
+    "expandGroup": "Expand group",
     "add": "Add account",
     "monobankError": "Monobank: could not sync",
     "openImports": "Open import",
@@ -250,10 +253,13 @@
     },
     "withoutRate": "Some currencies have no exchange rate, so the total is incomplete.",
     "debts": {
-      "title": "Debts with people",
+      "title": "Debts",
       "hint": "A person is the payee of a Debt operation. A row opens the operations with them.",
       "owesYou": "Owes you",
       "youOwe": "You owe",
+      "settled": "Settled",
+      "showSettled": "Show settled ({{count}})",
+      "hideSettled": "Hide settled",
       "noName": "No name",
       "operations_one": "{{count}} operation",
       "operations_other": "{{count}} operations",
@@ -310,6 +316,19 @@
     },
     "shown": "Showing {{from}}–{{to}} of {{total}}",
     "noPayee": "No payee",
+    "bulk": {
+      "button": "Add several",
+      "title": "Several transactions",
+      "hint": "Date, type, amount and account are required; category and payee are optional. Empty rows are skipped; all transactions are saved together.",
+      "addRow": "Add row",
+      "removeRow": "Remove row",
+      "incomplete_one": "{{count}} row is not filled in",
+      "incomplete_other": "{{count}} rows are not filled in",
+      "save_zero": "Save",
+      "save_one": "Save {{count}} transaction",
+      "save_other": "Save {{count}} transactions"
+    },
+    "adjustment": "Balance correction",
     "split": "Split: {{names}}",
     "uncategorized": "Uncategorized",
     "chooseCategory": "Choose a category",
@@ -324,6 +343,8 @@
       },
       "amount": "Amount",
       "amountRequired": "Enter the amount",
+      "expressionIncomplete": "Finish the expression",
+      "adjustmentHint": "Balance correction: no category; reports, the budget and the forecast leave it out.",
       "date": "Date",
       "account": "Account",
       "fromAccount": "From account",
@@ -461,7 +482,8 @@
       "setMinimum": "Set a minimum balance",
       "minimumLabel": "Minimum balance",
       "minimumHint": "We will warn you when the forecast drops below it",
-      "clearMinimum": "Remove"
+      "clearMinimum": "Remove",
+      "plannedItem": "{{name}} (planned)"
     }
   }
 }
