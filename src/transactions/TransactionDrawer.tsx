@@ -39,9 +39,11 @@ import { ensureTagIds } from '../api/tags';
 import { confirmDelete } from '../components/confirm';
 import { ProblemAlert } from '../components/feedback';
 import { FormFooter } from '../components/FormFooter';
+import { AmountInput } from '../components/AmountInput';
 import { MoneyInput } from '../components/MoneyInput';
 import { categorySelectData } from '../lib/categories';
 import { currencyOptions } from '../lib/currencies';
+import { selectableAccounts } from '../lib/accounts';
 import { formatMoney } from '../lib/money';
 import {
   categorized,
@@ -160,10 +162,10 @@ function TransactionForm({ transaction, defaultAccountId, defaults, onClose }: P
   });
   const values = form.values;
 
-  const accountList = (accounts.data ?? []).filter(
-    (account) =>
-      !account.archived || account.id === transaction?.accountId || account.id === transaction?.toAccountId,
-  );
+  const accountList = selectableAccounts(accounts.data ?? [], [
+    transaction?.accountId,
+    transaction?.toAccountId,
+  ]);
   const account = accountList.find((item) => String(item.id) === values.accountId);
   const toAccount = accountList.find((item) => String(item.id) === values.toAccountId);
   const currency = account?.currency ?? 'UAH';
@@ -256,7 +258,7 @@ function TransactionForm({ transaction, defaultAccountId, defaults, onClose }: P
           }))}
         />
         <SimpleGrid cols={2} spacing="md">
-          <MoneyInput
+          <AmountInput
             label={t('transactions.form.amount')}
             size="md"
             data-autofocus

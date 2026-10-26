@@ -1,7 +1,7 @@
 import { Button, Card, Group, Pagination, Skeleton, Stack, Text, Title } from '@mantine/core';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import dayjs from 'dayjs';
-import { Repeat } from 'lucide-react';
+import { ListPlus, Repeat } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
@@ -30,6 +30,7 @@ import { PairHint } from './PairHint';
 import { TransactionDrawer } from './TransactionDrawer';
 import { TransactionFiltersBar } from './TransactionFiltersBar';
 import { debtAccountIds } from './debts';
+import { BulkDrawer } from './BulkDrawer';
 import { debtDirection, type TransactionValues } from './form';
 import { TransactionRow } from './TransactionRow';
 import classes from './transactions.module.css';
@@ -157,6 +158,13 @@ export function TransactionsPage() {
           <Button variant="default" leftSection={<Repeat size={16} />} onClick={() => openRecurring('list')}>
             {t('recurring.button')}
           </Button>
+          <Button
+            variant="default"
+            leftSection={<ListPlus size={16} />}
+            onClick={() => update({ bulk: '1', page: params.get('page') })}
+          >
+            {t('transactions.bulk.button')}
+          </Button>
         </Group>
       </Group>
 
@@ -265,6 +273,7 @@ export function TransactionsPage() {
           }
         />
       )}
+      {params.get('bulk') && <BulkDrawer onClose={() => update({ bulk: null, page: params.get('page') })} />}
       {recurringView !== null && (
         <RecurringDrawer view={recurringView} onView={openRecurring} onClose={() => openRecurring(null)} />
       )}

@@ -8,8 +8,15 @@ import { bodyOf, json, mockApi, plain, renderApp, signedInApi } from '../test/re
 const today = isoDate(kyivToday());
 
 const accounts = [
-  accountOf({ id: 1, name: 'Чорна картка', balance: 18452.37, balanceInBase: 18452.37 }),
-  accountOf({ id: 2, name: 'Біла картка', currency: 'USD', balance: 1240, balanceInBase: 51212 }),
+  accountOf({ id: 1, name: 'Чорна картка', balance: 18452.37, balanceInBase: 18452.37, operations: 340 }),
+  accountOf({
+    id: 2,
+    name: 'Біла картка',
+    currency: 'USD',
+    balance: 1240,
+    balanceInBase: 51212,
+    operations: 12,
+  }),
   accountOf({ id: 9, name: 'Борги', type: 'DEBT', balance: 700, balanceInBase: 700, inBudget: false }),
 ];
 
@@ -211,6 +218,56 @@ it('moves the account of an income to the receiving side when it becomes a trans
   expect(within(drawer).getByLabelText('На рахунок')).toHaveValue(
     `Чорна картка · ${formatMoney(18452.37, 'UAH')}`,
   );
+});
+
+it('computes arithmetic in the amount field and saves the result', async () => {
+  const requests = api({ 'POST /api/v1/transactions': () => json({ id: 202 }, 201) });
+  renderApp('/transactions?new=1&accountId=1');
+
+  const drawer = await screen.findByRole('dialog');
+  const amount = await within(drawer).findByLabelText('Сума');
+  await userEvent.type(amount, '1200*0.8');
+  expect(within(drawer).getByText('= 960')).toBeInTheDocument();
+  await userEvent.type(amount, '+');
+  expect(within(drawer).getByText('Допишіть вираз')).toBeInTheDocument();
+  await userEvent.type(amount, '15%{Enter}');
+  expect(amount).toHaveValue('1 104');
+  expect(screen.getByRole('dialog')).toBeInTheDocument();
+
+  await userEvent.click(within(drawer).getByRole('button', { name: 'Зберегти' }));
+  await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+  expect(await bodyOf(requests, 'POST', '/api/v1/transactions')).toMatchObject({ amount: 1104 });
+});
+
+it('adds several transactions at once', async () => {
+  const requests = api({ 'POST /api/v1/transactions/batch': () => json([{ id: 301 }, { id: 302 }], 201) });
+  renderApp('/transactions');
+
+  await userEvent.click(await screen.findByRole('button', { name: 'Додати кілька операцій' }));
+  const drawer = await screen.findByRole('dialog');
+  // Three rows to start with, the most used account chosen; empty rows are skipped
+  await within(drawer).findByLabelText('Сума 3');
+  expect(within(drawer).getByLabelText('Рахунок 1')).toHaveValue('Чорна картка');
+  expect(within(drawer).getByRole('button', { name: 'Зберегти' })).toBeDisabled();
+
+  await userEvent.type(within(drawer).getByLabelText('Сума 1'), '350+120');
+  await userEvent.type(within(drawer).getByLabelText('Отримувач 1'), 'Сільпо');
+  await userEvent.type(within(drawer).getByLabelText('Категорія 1'), 'Продукти');
+  await userEvent.keyboard('{ArrowDown}{Enter}');
+  await userEvent.click(within(drawer).getByLabelText('Тип операції 2'));
+  await userEvent.click(await screen.findByRole('option', { name: 'Дохід' }));
+  await userEvent.type(within(drawer).getByLabelText('Сума 2'), '20000');
+  await userEvent.click(within(drawer).getByLabelText('Прибрати рядок 3'));
+  expect(within(drawer).queryByLabelText('Сума 3')).not.toBeInTheDocument();
+
+  await userEvent.click(within(drawer).getByRole('button', { name: 'Зберегти 2 операції' }));
+  await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+  expect(await bodyOf(requests, 'POST', '/api/v1/transactions/batch')).toEqual({
+    transactions: [
+      { type: 'EXPENSE', date: today, accountId: 1, amount: 470, categoryId: 11, payeeName: 'Сільпо' },
+      { type: 'INCOME', date: today, accountId: 1, amount: 20000 },
+    ],
+  });
 });
 
 it('adds money given to a person as a transfer to the debt account', async () => {

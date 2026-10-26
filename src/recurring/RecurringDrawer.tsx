@@ -56,6 +56,7 @@ import {
 } from './api';
 import classes from './recurring.module.css';
 import { alignedStart, endDateForCount, nextDates, perMonth, scheduleText } from './schedule';
+import { selectableAccounts } from '../lib/accounts';
 
 const FREQUENCIES: Frequency[] = ['DAILY', 'WEEKLY', 'MONTHLY', 'YEARLY'];
 const TOLERANCES = [0, 10, 25];
@@ -386,9 +387,10 @@ function RecurringForm({ recurring, onDone }: { recurring: Recurring | null; onD
     meta: { errorShown: true },
   });
 
-  const accountData = (accounts.data ?? [])
-    .filter((account) => !account.archived || String(account.id) === values.accountId)
-    .map((account) => ({ value: String(account.id), label: account.name }));
+  const accountData = selectableAccounts(accounts.data ?? [], [values.accountId]).map((account) => ({
+    value: String(account.id),
+    label: account.name,
+  }));
   const account = accounts.data?.find((item) => String(item.id) === values.accountId);
   const toAccount = accounts.data?.find((item) => String(item.id) === values.toAccountId);
   const interval = Number(values.interval) || 1;

@@ -30,6 +30,7 @@ import { scheduleOf } from './schedule';
 import { ScheduleFields } from './ScheduleFields';
 import { useCountdown } from './sync';
 import { SyncNowButton } from './SyncNowButton';
+import { selectableAccounts } from '../lib/accounts';
 
 export function MonobankSection({
   connectOpen,
@@ -188,8 +189,8 @@ export function MonobankSection({
               <Table.Tbody>
                 {connection.accounts.map((link) => {
                   const difference = link.difference ?? 0;
-                  const options = (accounts.data ?? [])
-                    .filter((account) => !account.archived && account.currency === link.currency)
+                  const options = selectableAccounts(accounts.data ?? [])
+                    .filter((account) => account.currency === link.currency)
                     .map((account) => ({ value: String(account.id), label: account.name }));
                   return (
                     <Table.Tr key={link.id}>

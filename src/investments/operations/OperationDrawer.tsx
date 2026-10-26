@@ -53,6 +53,7 @@ import {
 } from './form';
 import { InstrumentPicker } from './InstrumentPicker';
 import classes from './operations.module.css';
+import { selectableAccounts } from '../../lib/accounts';
 
 /** The types by group, as the type select shows them. */
 const TYPE_GROUPS: { group: string; types: OperationType[] }[] = [
@@ -180,9 +181,7 @@ function OperationForm({
     values.type === 'SELL' ? instrumentNumber : undefined,
   );
 
-  const brokerage = (accounts.data ?? []).filter(
-    (account) => isBrokerage(account) && (!account.archived || account.id === operation?.accountId),
-  );
+  const brokerage = selectableAccounts(accounts.data ?? [], [operation?.accountId]).filter(isBrokerage);
   const cashLabel = (accountId: number) =>
     (portfolio.data?.cash ?? [])
       .filter((row) => row.accountId === accountId && row.amount !== 0)

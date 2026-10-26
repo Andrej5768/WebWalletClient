@@ -22,6 +22,7 @@ import { categorySelectData } from '../lib/categories';
 import { formatDate } from '../lib/format';
 import type { Preset } from '../lib/periods';
 import type { TransactionFilters } from './useTransactionFilters';
+import { selectableAccounts } from '../lib/accounts';
 
 const PRESETS: Preset[] = ['month', 'prevMonth', 'quarter', 'year', 'twelveMonths', 'all', 'custom'];
 const TYPES = ['', 'EXPENSE', 'INCOME', 'TRANSFER'] as const;
@@ -47,9 +48,10 @@ export function TransactionFiltersBar({ filters }: { filters: TransactionFilters
   // Built once per data change: there can be a thousand payees after an import
   const accountOptions = useMemo(
     () =>
-      (accounts.data ?? [])
-        .filter((account) => !account.archived)
-        .map((account) => ({ value: String(account.id), label: account.name })),
+      selectableAccounts(accounts.data ?? []).map((account) => ({
+        value: String(account.id),
+        label: account.name,
+      })),
     [accounts.data],
   );
   const categoryOptions = useMemo(() => categorySelectData(categories.data ?? []), [categories.data]);

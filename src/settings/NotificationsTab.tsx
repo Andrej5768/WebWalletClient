@@ -26,6 +26,7 @@ import { ProblemAlert } from '../components/feedback';
 import { formatDay } from '../lib/format';
 import { ConfirmIdentityModal } from './ConfirmIdentityModal';
 import { identityMethod, type IdentityProof } from './identity';
+import { selectableAccounts } from '../lib/accounts';
 
 type Settings = components['schemas']['NotificationSettingsDto'];
 type EmailKind = 'emailWeekly' | 'emailMonthly';
@@ -142,7 +143,7 @@ function TelegramCard() {
 
   if (!status.data) return null;
   const data = status.data;
-  const openAccounts = (accounts.data ?? []).filter((account) => !account.archived);
+  const openAccounts = selectableAccounts(accounts.data ?? []);
 
   return (
     <Card withBorder radius="md" padding="lg">
