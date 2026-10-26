@@ -4,6 +4,7 @@ import { LogOut, PanelLeftClose, PanelLeftOpen, Plus } from 'lucide-react';
 import { Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NavLink, Outlet, useNavigate } from 'react-router';
+import { DemoBanner } from '../auth/DemoBanner';
 import { useAuth } from '../auth/context';
 import { Logo } from '../components/Logo';
 import { ColorSchemeSwitch, LanguageSwitch } from '../components/PreferenceSwitches';
@@ -130,6 +131,7 @@ export function AppShell() {
       </aside>
 
       <div className={classes.main}>
+        <DemoBanner />
         <header className={classes.header}>
           <div style={{ flex: 1 }} />
           <LanguageSwitch />

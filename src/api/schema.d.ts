@@ -185,6 +185,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/auth/demo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Open a demo sandbox and sign in to it
+         * @description Public. Creates an account with example data in the language of Accept-Language and starts a session like /api/v1/auth/login; the account is deleted after a day unless it is claimed at /api/v1/me/demo/claim. Limited per client IP; 404 when the demo is off.
+         */
+        post: operations["startDemo"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/auth/forgot-password": {
         parameters: {
             query?: never;
@@ -1243,6 +1263,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/me/demo/claim": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Keep the demo sandbox as an account
+         * @description The signed-in demo account gets the email and password and stops expiring; its data stays. The email is verified through the usual message. Only a demo account can be claimed.
+         */
+        post: operations["claimDemo"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/me/export": {
         parameters: {
             query?: never;
@@ -2221,6 +2261,7 @@ export interface components {
             features: components["schemas"]["AppFeatures"];
         };
         AppFeatures: {
+            demo: boolean;
             googleSignIn: boolean;
             marketSearch: boolean;
             push: boolean;
@@ -2234,6 +2275,7 @@ export interface components {
             assigned: number;
         };
         AuthOptionsResponse: {
+            demo: boolean;
             googleSignIn: boolean;
         };
         BenchmarkInfo: {
@@ -2418,6 +2460,12 @@ export interface components {
         ChangePasswordRequest: {
             currentPassword: string;
             newPassword: string;
+        };
+        ClaimRequest: {
+            /** Format: email */
+            email: string;
+            firstName: string;
+            password: string;
         };
         CompareDay: {
             a: number | null;
@@ -3778,6 +3826,9 @@ export interface components {
             baseCurrency: string;
             /** Format: date-time */
             createdAt: string;
+            demo: boolean;
+            /** Format: date-time */
+            demoExpiresAt: string | null;
             email: string;
             emailVerified: boolean;
             firstName: string;
@@ -4076,6 +4127,26 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["AppConfigResponse"];
+                };
+            };
+        };
+    };
+    startDemo: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["LoginResponse"];
                 };
             };
         };
@@ -5789,6 +5860,28 @@ export interface operations {
                 content: {
                     "*/*": components["schemas"]["DeletionResponse"];
                 };
+            };
+        };
+    };
+    claimDemo: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ClaimRequest"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

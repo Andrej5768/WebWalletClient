@@ -53,7 +53,9 @@
       "forgot": "Forgot password?",
       "submit": "Sign in",
       "noAccount": "No account yet?",
-      "register": "Create one"
+      "register": "Create one",
+      "demo": "Try the demo",
+      "demoHint": "No sign-up: accounts, transactions and the budget are already filled with examples"
     },
     "deletion": {
       "title": "The account will be deleted on {{date}}",
@@ -135,6 +137,16 @@
       "backText": "The next email will arrive on Monday.",
       "settings": "Notification settings",
       "invalid": "The link is not valid"
+    },
+    "demo": {
+      "banner": "This is a demo: the data disappears on {{date}}. Want to keep it?",
+      "bannerNoDate": "This is a demo: the data disappears in a day. Want to keep it?",
+      "keep": "Keep the account",
+      "claimTitle": "Keep the account",
+      "claimText": "Everything you did in the demo stays. Enter your email and a password; we will send a confirmation email.",
+      "claimSubmit": "Keep",
+      "claimed": "Account kept. Check your email: the confirmation message is on its way.",
+      "restricted": "Not available in the demo. Keep the account to use it."
     }
   },
   "nav": {
