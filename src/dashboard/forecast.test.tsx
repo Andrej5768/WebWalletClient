@@ -5,12 +5,12 @@ import { json, mockApi, plain, renderApp, signedInApi } from '../test/render';
 import { expectedDate, forecastChart, loadMinimum } from './forecast';
 
 const days = [
-  { date: '2026-10-01', balance: 121400, actual: true },
-  { date: '2026-10-02', balance: 104300, actual: true },
-  { date: '2026-10-03', balance: 102913.4, actual: true },
-  { date: '2026-10-04', balance: 88913.4, actual: false },
-  { date: '2026-10-05', balance: 74913.4, actual: false },
-  { date: '2026-10-06', balance: 126913.4, actual: false },
+  { date: '2026-10-01', balance: 121400, actual: true, operations: [] },
+  { date: '2026-10-02', balance: 104300, actual: true, operations: [] },
+  { date: '2026-10-03', balance: 102913.4, actual: true, operations: [] },
+  { date: '2026-10-04', balance: 88913.4, actual: false, operations: [] },
+  { date: '2026-10-05', balance: 74913.4, actual: false, operations: [] },
+  { date: '2026-10-06', balance: 126913.4, actual: false, operations: [] },
 ];
 
 const forecast = forecastOf({
@@ -23,7 +23,7 @@ const forecast = forecastOf({
     { date: '2026-10-05', recurringId: 2, name: 'Оренда', amount: -14000, overdue: false, categoryId: null },
     { date: '2026-10-06', recurringId: 3, name: 'Зарплата', amount: 52000, overdue: false, categoryId: null },
   ],
-  lowest: { date: '2026-10-05', balance: 74913.4, actual: false },
+  lowest: { date: '2026-10-05', balance: 74913.4, actual: false, operations: [] },
 });
 
 beforeEach(() => localStorage.clear());

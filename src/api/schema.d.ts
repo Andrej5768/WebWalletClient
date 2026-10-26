@@ -496,10 +496,30 @@ export interface paths {
         get?: never;
         /**
          * Change when Monobank is synchronized
-         * @description INTERVAL: every 15 minutes from windowStart to windowEnd (Kyiv time) and once at night halfway between windowEnd and windowStart; DAILY: once a day at dailyAt; WEBHOOK: the bank pushes new operations (needs the public URL of the server) and the accounts are also checked once a day at dailyAt. Omitted times are kept.
+         * @description INTERVAL: every 15 minutes from windowStart to windowEnd (Kyiv time) and once at night halfway between windowEnd and windowStart; DAILY: once a day at dailyAt; WEBHOOK: the bank pushes new operations (needs the public URL of the server) and the accounts are also checked once a day at dailyAt; MANUAL: only on request. Omitted times are kept.
          */
         put: operations["schedule"];
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/banks/monobank/sync": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Synchronize now
+         * @description The accounts are requested in the background as soon as the bank allows the next request (one a minute), see nextRequestAt; in any mode.
+         */
+        post: operations["syncNow"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2020,6 +2040,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/transactions/batch": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create several transactions at once
+         * @description All of them are created, or none when one is invalid: the field of a violation is then transactions[i].field.
+         */
+        post: operations["createBatch"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/transactions/transfer-pairs": {
         parameters: {
             query?: never;
@@ -2143,6 +2183,8 @@ export interface components {
             interestRate: number | null;
             name: string;
             openingBalance: number;
+            /** Format: int64 */
+            operations: number;
             /** Format: int32 */
             sortOrder: number;
             /** @enum {string} */
@@ -2417,7 +2459,7 @@ export interface components {
             /** Format: date */
             since?: string;
             /** @enum {string} */
-            syncMode?: "INTERVAL" | "DAILY" | "WEBHOOK";
+            syncMode?: "INTERVAL" | "DAILY" | "WEBHOOK" | "MANUAL";
             token: string;
             /**
              * Format: time
@@ -2444,9 +2486,11 @@ export interface components {
             /** Format: date-time */
             lastRequestAt: string | null;
             /** Format: date-time */
-            nextSyncAt: string;
+            nextRequestAt: string | null;
+            /** Format: date-time */
+            nextSyncAt: string | null;
             /** @enum {string} */
-            syncMode: "INTERVAL" | "DAILY" | "WEBHOOK";
+            syncMode: "INTERVAL" | "DAILY" | "WEBHOOK" | "MANUAL";
             webhook: boolean;
             /**
              * Format: time
@@ -2575,6 +2619,7 @@ export interface components {
             balance: number;
             /** Format: date */
             date: string;
+            operations: components["schemas"]["ForecastOperation"][];
         };
         ForecastEvent: {
             amount: number;
@@ -2586,6 +2631,14 @@ export interface components {
             overdue: boolean;
             /** Format: int64 */
             recurringId: number;
+        };
+        ForecastOperation: {
+            amount: number;
+            /** Format: int64 */
+            categoryId: number | null;
+            /** Format: int64 */
+            id: number;
+            name: string | null;
         };
         ForecastResponse: {
             balance: number;
@@ -3427,7 +3480,7 @@ export interface components {
              */
             dailyAt?: string;
             /** @enum {string} */
-            syncMode: "INTERVAL" | "DAILY" | "WEBHOOK";
+            syncMode: "INTERVAL" | "DAILY" | "WEBHOOK" | "MANUAL";
             /**
              * Format: time
              * @example 23:00
@@ -3600,12 +3653,16 @@ export interface components {
             tokenType: string;
             trustedDeviceToken: string | null;
         };
+        TransactionBatchRequest: {
+            transactions: components["schemas"]["TransactionRequest"][];
+        };
         TransactionMarkRequest: {
             included?: boolean;
         };
         TransactionRequest: {
             /** Format: int64 */
             accountId: number;
+            adjustment?: boolean;
             amount: number;
             /** Format: int64 */
             categoryId?: number;
@@ -3628,6 +3685,7 @@ export interface components {
         TransactionResponse: {
             /** Format: int64 */
             accountId: number;
+            adjustment: boolean;
             amount: number;
             comment: string | null;
             /** Format: date-time */
@@ -4449,6 +4507,26 @@ export interface operations {
                 "application/json": components["schemas"]["ScheduleRequest"];
             };
         };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ConnectionResponse"];
+                };
+            };
+        };
+    };
+    syncNow: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
         responses: {
             /** @description OK */
             200: {
@@ -6991,6 +7069,30 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["TransactionResponse"];
+                };
+            };
+        };
+    };
+    createBatch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TransactionBatchRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TransactionResponse"][];
                 };
             };
         };

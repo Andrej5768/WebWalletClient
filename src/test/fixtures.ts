@@ -17,6 +17,7 @@ export function accountOf(overrides: Partial<Schemas['AccountResponse']> = {}): 
     inBudget: true,
     archived: false,
     sortOrder: 0,
+    operations: 0,
     ...overrides,
   };
 }
@@ -90,6 +91,7 @@ export function transactionOf(
     splits: [],
     tagIds: [],
     source: 'MANUAL',
+    adjustment: false,
     createdAt: '2026-10-15T10:00:00Z',
     recurring: null,
     ...overrides,
@@ -129,7 +131,7 @@ export function forecastOf(
     today,
     balance: 0,
     dailySpending: 0,
-    days: [{ date: today, balance: 0, actual: true }],
+    days: [{ date: today, balance: 0, actual: true, operations: [] }],
     events: [],
     lowest: null,
     unconvertedCurrencies: [],
