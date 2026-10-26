@@ -26,15 +26,24 @@
       "modes": {
         "INTERVAL": "Every 15 min",
         "DAILY": "Once a day",
-        "WEBHOOK": "Instantly"
+        "MANUAL": "By hand"
       },
       "from": "From",
       "to": "To",
       "dailyAt": "At",
       "intervalHint": "Outside these hours — once at night.",
-      "webhookHint": "The bank sends every transaction right away.",
+      "manualHint": "Operations arrive only with the “Sync now” button.",
       "saveSchedule": "Save schedule",
       "nextSync": "Next sync: {{date}}",
+      "syncNow": "Sync now",
+      "syncIn": "Sync in {{seconds}} s",
+      "syncing": "Syncing…",
+      "actions": {
+        "addIncome": "Add income",
+        "addExpense": "Add expense",
+        "adjust": "Balance correction",
+        "adjustHint": "One operation without a category for the difference, so that the ledger balance matches the bank. Reports, the budget and the forecast leave it out."
+      },
       "connectedAt": "connected {{date}}",
       "columns": {
         "card": "Card or jar",

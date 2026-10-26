@@ -1,10 +1,10 @@
-import { Alert, Group, SegmentedControl, Stack, Text } from '@mantine/core';
+import { Group, SegmentedControl, Stack, Text } from '@mantine/core';
 import { TimeInput } from '@mantine/dates';
-import { TriangleAlert } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { Schedule, SyncMode } from './api';
 
-const MODES: SyncMode[] = ['INTERVAL', 'DAILY', 'WEBHOOK'];
+/** The modes offered; the bank's push mode is not among them any more. */
+const MODES: SyncMode[] = ['INTERVAL', 'DAILY', 'MANUAL'];
 /** Choice of how often Monobank is synchronized, with the matching time fields. */
 export function ScheduleFields({
   value,
@@ -54,10 +54,10 @@ export function ScheduleFields({
           error={errors?.dailyAt}
         />
       )}
-      {value.syncMode === 'WEBHOOK' && (
-        <Alert color="yellow" variant="light" p="xs" icon={<TriangleAlert size={16} />}>
-          <Text size="sm">{t('imports.monobank.webhookHint')}</Text>
-        </Alert>
+      {value.syncMode === 'MANUAL' && (
+        <Text size="xs" c="dimmed" maw={360}>
+          {t('imports.monobank.manualHint')}
+        </Text>
       )}
       {errors?.syncMode && (
         <Text size="xs" c="red">

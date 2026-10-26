@@ -90,6 +90,32 @@ it('shows the feed by day with categories, tags and transfers', async () => {
   expect(screen.getByText('3 операції')).toBeInTheDocument();
 });
 
+it('shows a balance correction without a category picker', async () => {
+  api({
+    'GET /api/v1/transactions': () =>
+      json({
+        items: [
+          transactionOf({
+            id: 103,
+            date: today,
+            amount: 1240,
+            adjustment: true,
+            splits: [splitOf({ id: 3, amount: 1240 })],
+          }),
+        ],
+        page: 0,
+        size: 50,
+        totalItems: 1,
+        totalPages: 1,
+      }),
+  });
+  renderApp('/transactions');
+
+  const row = await screen.findByTestId('transaction-103');
+  expect(within(row).getByText('Коригування балансу')).toBeInTheDocument();
+  expect(within(row).queryByRole('textbox')).not.toBeInTheDocument();
+});
+
 it('sends the current month and the search query to the API', async () => {
   const requests = api();
   renderApp('/transactions');

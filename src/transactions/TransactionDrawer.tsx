@@ -370,7 +370,12 @@ function TransactionForm({ transaction, defaultAccountId, defaults, onClose }: P
           )}
         </SimpleGrid>
 
-        {categorized(values.type) && (
+        {values.adjustment && (
+          <Alert color="gray" variant="light" p="xs">
+            {t('transactions.form.adjustmentHint')}
+          </Alert>
+        )}
+        {categorized(values.type) && !values.adjustment && (
           <Stack gap="xs">
             <Group justify="space-between">
               <Text size="sm" fw={500}>

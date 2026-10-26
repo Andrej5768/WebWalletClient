@@ -25,7 +25,7 @@ export function isUncategorized(transaction: Transaction): boolean {
  * A split with an uncategorized part is fixed in the side panel, so its parts are not replaced.
  */
 export function canQuickCategorize(transaction: Transaction): boolean {
-  return isUncategorized(transaction) && !isSplit(transaction);
+  return isUncategorized(transaction) && !isSplit(transaction) && !transaction.adjustment;
 }
 
 /** Request that recreates the transaction as it is, with the given changes on top. */
@@ -54,6 +54,7 @@ export function toRequest(
     payeeId: transaction.payee?.id,
     comment: transaction.comment ?? undefined,
     tagIds: transaction.tagIds,
+    adjustment: transaction.adjustment || undefined,
     ...changes,
   };
 }

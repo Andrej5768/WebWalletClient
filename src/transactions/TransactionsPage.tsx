@@ -30,11 +30,22 @@ import { PairHint } from './PairHint';
 import { TransactionDrawer } from './TransactionDrawer';
 import { TransactionFiltersBar } from './TransactionFiltersBar';
 import { debtAccountIds } from './debts';
-import { debtDirection } from './form';
+import { debtDirection, type TransactionValues } from './form';
 import { TransactionRow } from './TransactionRow';
 import classes from './transactions.module.css';
 import { useTransferPairs } from './transferPairs';
 import { PAGE_SIZE, useTransactionFilters } from './useTransactionFilters';
+
+/** Values a link opens the new-transaction form with: a transfer to an account, or an income or expense of an amount. */
+function newDefaults(params: URLSearchParams): Partial<TransactionValues> | undefined {
+  const type = params.get('newType');
+  if (type === 'TRANSFER') return { type, toAccountId: params.get('toAccountId') };
+  if (type === 'INCOME' || type === 'EXPENSE') {
+    const amount = Number(params.get('amount'));
+    return { type, amount: amount > 0 ? amount : '' };
+  }
+  return undefined;
+}
 
 export function TransactionsPage() {
   const { t, i18n } = useTranslation();
@@ -241,13 +252,16 @@ export function TransactionsPage() {
           key={editing?.id ?? 'new'}
           transaction={params.get('new') ? null : editing}
           defaultAccountId={intParam(params, 'accountId')}
-          defaults={
-            params.get('newType') === 'TRANSFER'
-              ? { type: 'TRANSFER', toAccountId: params.get('toAccountId') }
-              : undefined
-          }
+          defaults={newDefaults(params)}
           onClose={() =>
-            update({ new: null, edit: null, newType: null, toAccountId: null, page: params.get('page') })
+            update({
+              new: null,
+              edit: null,
+              newType: null,
+              toAccountId: null,
+              amount: null,
+              page: params.get('page'),
+            })
           }
         />
       )}

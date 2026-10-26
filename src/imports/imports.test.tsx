@@ -21,7 +21,7 @@ const connection = {
   windowStart: '08:00',
   windowEnd: '23:00',
   dailyAt: '06:00',
-  nextSyncAt: '2026-10-15T11:45:00Z',
+  nextSyncAt: '2030-10-15T11:45:00Z',
   accounts: [
     {
       id: 7,
@@ -114,16 +114,29 @@ it('connects Monobank with a token and a daily schedule', async () => {
 });
 
 it('shows the difference, changes the schedule and stops syncing a card', async () => {
+  let current = connection;
   const requests = mockApi({
     ...base,
-    'GET /api/v1/banks/monobank': () => json(connection),
+    'GET /api/v1/banks/monobank': () => json(current),
     'PUT /api/v1/banks/monobank/schedule': () => json(connection),
     'PUT /api/v1/banks/monobank/accounts/7': () => json(connection),
+    'POST /api/v1/banks/monobank/sync': () => {
+      current = { ...connection, nextSyncAt: '2026-10-15T11:00:00Z' };
+      return json(current);
+    },
+    'POST /api/v1/transactions': () => json({}, 201),
   });
   renderPage();
 
   expect(await screen.findByText('Банк показує більше: бракує доходів?')).toBeInTheDocument();
+  expect(screen.getByText(/Наступна синхронізація/)).toBeInTheDocument();
 
+  // The modes offered are the window, once a day and by hand; the push mode is gone
+  expect(screen.queryByText('Миттєво')).not.toBeInTheDocument();
+  await userEvent.click(screen.getByText('Вручну'));
+  expect(
+    screen.getByText('Операції підтягуються лише за кнопкою «Синхронізувати зараз».'),
+  ).toBeInTheDocument();
   await userEvent.click(screen.getByText('Раз на день'));
   await userEvent.click(screen.getByRole('button', { name: 'Зберегти розклад' }));
   await waitFor(() => expect(requests.some((request) => request.url.endsWith('/schedule'))).toBe(true));
@@ -134,12 +147,38 @@ it('shows the difference, changes the schedule and stops syncing a card', async 
     dailyAt: '06:00',
   });
 
+  // A correction of the difference is one income without a category, dated today
+  await userEvent.click(screen.getByRole('button', { name: 'Операція коригування' }));
+  await waitFor(() => expect(requests.some((request) => request.url.endsWith('/transactions'))).toBe(true));
+  expect(await bodyOf(requests, 'POST', '/api/v1/transactions')).toEqual({
+    type: 'INCOME',
+    date: expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/) as string,
+    accountId: 1,
+    amount: 1240,
+    adjustment: true,
+  });
+
+  // Synchronizing now: once asked, the accounts are being requested
+  await userEvent.click(screen.getByRole('button', { name: 'Синхронізувати зараз' }));
+  await waitFor(() => expect(requests.some((request) => request.url.endsWith('/sync'))).toBe(true));
+  expect(await screen.findByRole('button', { name: 'Синхронізується…' })).toBeDisabled();
+  expect(screen.queryByText(/Наступна синхронізація/)).not.toBeInTheDocument();
+
   const link = screen.getAllByLabelText('Рахунок для Чорна').find((element) => element.tagName === 'INPUT')!;
   await userEvent.clear(link);
   await userEvent.type(link, 'Не синхр');
   await userEvent.keyboard('{ArrowDown}{Enter}');
   await waitFor(() => expect(requests.some((request) => request.url.endsWith('/accounts/7'))).toBe(true));
   expect(await bodyOf(requests, 'PUT', '/api/v1/banks/monobank/accounts/7')).toEqual({ accountId: null });
+});
+
+it('waits for the bank limit before the next request', async () => {
+  const soon = new Date(Date.now() + 40_000).toISOString();
+  mockApi({ ...base, 'GET /api/v1/banks/monobank': () => json({ ...connection, nextRequestAt: soon }) });
+  renderPage();
+
+  const button = await screen.findByRole('button', { name: /Синхронізувати через \d+ с/ });
+  expect(button).toBeDisabled();
 });
 
 it('reviews a PrivatBank statement before importing it', async () => {

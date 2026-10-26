@@ -35,6 +35,10 @@ it('lists accounts by group with base amounts and the Monobank difference', asyn
     ...signedInApi,
     'GET /api/v1/accounts': () => json(accounts),
     'GET /api/v1/banks/monobank': () => json(monobank),
+    'GET /api/v1/categories': () => json([]),
+    'GET /api/v1/payees': () => json([]),
+    'GET /api/v1/tags': () => json([]),
+    'GET /api/v1/transactions': () => json({ items: [], page: 0, size: 50, totalItems: 0, totalPages: 1 }),
   });
   renderApp('/accounts');
 
@@ -48,6 +52,12 @@ it('lists accounts by group with base amounts and the Monobank difference', asyn
 
   await userEvent.click(screen.getByLabelText('Показати архівні'));
   expect(screen.getByText('Старий кредит')).toBeInTheDocument();
+
+  // The missing income is added with the form, the account and the amount filled in
+  await userEvent.click(screen.getByRole('button', { name: 'Додати дохід' }));
+  const dialog = await screen.findByRole('dialog');
+  expect(await within(dialog).findByLabelText('Сума')).toHaveValue('1 240');
+  expect(within(dialog).getByRole('radio', { name: 'Дохід' })).toBeChecked();
 });
 
 it('collapses a group and remembers it', async () => {

@@ -25,8 +25,11 @@ import { formatDateTime } from '../lib/format';
 import { formatMoney } from '../lib/money';
 import type { Schedule } from './api';
 import { ConnectModal } from './ConnectModal';
+import { DifferenceActions } from './DifferenceActions';
 import { scheduleOf } from './schedule';
 import { ScheduleFields } from './ScheduleFields';
+import { useCountdown } from './sync';
+import { SyncNowButton } from './SyncNowButton';
 
 export function MonobankSection({
   connectOpen,
@@ -43,6 +46,8 @@ export function MonobankSection({
   const connection = status.data;
   const [schedule, setSchedule] = useState<Required<Schedule> | null>(null);
   const shown = schedule ?? scheduleOf(connection);
+  // A due moment in the past means the accounts are being requested now, not a next run to announce
+  const untilNextSync = useCountdown(connection?.nextSyncAt);
 
   // Linking, unlinking and disconnecting change which transactions arrive and the balances.
   const refresh = () => invalidateLedger(queryClient);
@@ -138,9 +143,14 @@ export function MonobankSection({
                 />
               </Stack>
               <Stack gap={6} align="flex-end">
-                <Badge variant="light" color="gray" leftSection={<RefreshCw size={12} />}>
-                  {t('imports.monobank.nextSync', { date: dateTime(connection.nextSyncAt) })}
-                </Badge>
+                <Group gap="xs">
+                  {untilNextSync > 0 && (
+                    <Badge variant="light" color="gray" leftSection={<RefreshCw size={12} />}>
+                      {t('imports.monobank.nextSync', { date: dateTime(connection.nextSyncAt) })}
+                    </Badge>
+                  )}
+                  <SyncNowButton connection={connection} />
+                </Group>
                 {schedule && (
                   <Group gap="xs">
                     <Button size="xs" variant="default" onClick={() => setSchedule(null)}>
@@ -235,6 +245,7 @@ export function MonobankSection({
                                   : 'imports.monobank.missingExpenses',
                               )}
                             </Text>
+                            <DifferenceActions link={link} />
                           </Stack>
                         ) : (
                           <Group gap={6} wrap="nowrap">
