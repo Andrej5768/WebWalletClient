@@ -1,4 +1,4 @@
-import { screen, within } from '@testing-library/react';
+import { fireEvent, screen, within } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { categoryOf, forecastOf, recurringOf } from '../test/fixtures';
 import { json, mockApi, plain, renderApp, signedInApi } from '../test/render';
@@ -6,7 +6,15 @@ import { expectedDate, forecastChart, loadMinimum } from './forecast';
 
 const days = [
   { date: '2026-10-01', balance: 121400, actual: true, operations: [] },
-  { date: '2026-10-02', balance: 104300, actual: true, operations: [] },
+  {
+    date: '2026-10-02',
+    balance: 104300,
+    actual: true,
+    operations: [
+      { id: 1, name: 'Сільпо', categoryId: 7, amount: -1100 },
+      { id: 2, name: null, categoryId: null, amount: -16000 },
+    ],
+  },
   { date: '2026-10-03', balance: 102913.4, actual: true, operations: [] },
   { date: '2026-10-04', balance: 88913.4, actual: false, operations: [] },
   { date: '2026-10-05', balance: 74913.4, actual: false, operations: [] },
@@ -61,6 +69,31 @@ it('shows the balance now, at the end and the planned payments', async () => {
   expect(within(card).queryByText(/нижче мінімуму/)).not.toBeInTheDocument();
 });
 
+it('lists the operations and the planned payments of a hovered day', async () => {
+  renderDashboard();
+
+  const card = (await screen.findByText('Гроші до кінця місяця')).closest(
+    '.mantine-Card-root',
+  ) as HTMLElement;
+  await within(card).findByText(/102\s913,40/);
+  expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
+
+  fireEvent.mouseEnter(card.querySelector('[data-day="2026-10-02"]')!);
+  const tooltip = await screen.findByRole('tooltip');
+  expect(within(tooltip).getByText('2 жовт.')).toBeInTheDocument();
+  expect(within(tooltip).getByText('Сільпо')).toBeInTheDocument();
+  expect(within(tooltip).getByText('Без отримувача')).toBeInTheDocument();
+  expect(plain(within(tooltip).getByText(/16\s000,00/).textContent)).toBe('-16 000,00 ₴');
+
+  // The overdue payment is expected tomorrow
+  fireEvent.mouseEnter(card.querySelector('[data-day="2026-10-04"]')!);
+  expect(
+    within(await screen.findByRole('tooltip')).getByText('Комунальні (заплановано)'),
+  ).toBeInTheDocument();
+  fireEvent.mouseLeave(card.querySelector('svg')!);
+  expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
+});
+
 it('warns when the forecast drops below the minimum the viewer set', async () => {
   renderDashboard();
   const user = userEvent.setup();
@@ -106,6 +139,8 @@ it('expects overdue payments tomorrow and scales the minimum into the chart', ()
   expect(chart.actual.split(' ')).toHaveLength(3);
   expect(chart.forecast.split(' ')).toHaveLength(4);
   expect(chart.markers.map((marker) => marker.income)).toEqual([false, false, true]);
+  // A dot where the day has operations
+  expect(chart.dots.map((dot) => dot.index)).toEqual([1]);
   // The lowest balance is lower on the chart than the start
   expect(chart.y(74913.4)).toBeGreaterThan(chart.y(121400));
 });

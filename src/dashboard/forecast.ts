@@ -21,6 +21,8 @@ export interface ForecastChart {
   todayIndex: number;
   /** Event markers on the day each is expected: an overdue one tomorrow. */
   markers: { x: number; y: number; income: boolean }[];
+  /** Dots on the days with operations, to hover for them. */
+  dots: { index: number; x: number; y: number }[];
 }
 
 /** The day an event changes the forecast: overdue and today's ones are expected tomorrow. */
@@ -50,6 +52,9 @@ export function forecastChart(forecast: Forecast, minimum: number | null): Forec
     const day = index === undefined ? undefined : days[index];
     return index === undefined || !day ? [] : [{ x: x(index), y: y(day.balance), income: event.amount > 0 }];
   });
+  const dots = days.flatMap((day, index) =>
+    day.operations.length > 0 ? [{ index, x: x(index), y: y(day.balance) }] : [],
+  );
   return {
     x,
     y,
@@ -59,6 +64,7 @@ export function forecastChart(forecast: Forecast, minimum: number | null): Forec
     forecast: points(todayIndex, days.length),
     todayIndex,
     markers,
+    dots,
   };
 }
 
