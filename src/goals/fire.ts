@@ -24,7 +24,7 @@ export interface FireResult {
   years: number | null;
   /** Capital at the end of each year from now (index 0 = today), at least 20 years and 3 past FIRE. */
   path: number[];
-  levels: { lean: number; regular: number; fat: number; coast: number };
+  levels: { lean: number; regular: number; fat: number; coast: number; barista: number };
 }
 
 /** FIRE number and the years to it: yearly compounding with the savings added once a year. */
@@ -52,6 +52,8 @@ export function fire(input: FireInput): FireResult {
       regular: target,
       fat: target * 1.5,
       coast: target / Math.pow(1 + input.realReturn, COAST_YEARS),
+      // Half of the expenses come from the capital, the other half from a part-time job
+      barista: target / 2,
     },
   };
 }

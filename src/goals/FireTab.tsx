@@ -31,7 +31,7 @@ const STORAGE_KEY = 'ww-fire';
 
 /** Values the viewer changed (an emptied field is ''); the rest follow the data. */
 interface Overrides {
-  expenses?: number | '';
+  monthlyExpenses?: number | '';
   withdrawalRate?: number | '';
   realReturn?: number | '';
   monthlySavings?: number | '';
@@ -67,12 +67,13 @@ export function FireTab() {
   const used = (value: number | '' | undefined, fallback: number) =>
     typeof value === 'number' ? value : fallback;
   const defaults = {
-    expenses: Math.round((averages.monthlyExpenses ?? 0) * 12),
+    monthlyExpenses: Math.round(averages.monthlyExpenses ?? 0),
     withdrawalRate: DEFAULT_RATE,
     realReturn: DEFAULT_RETURN,
     monthlySavings: Math.max(0, Math.round(averages.monthlySavings ?? 0)),
   };
-  const expenses = used(overrides.expenses, defaults.expenses);
+  // The calculation takes a year of expenses; the field shows a month, as the reports do
+  const expenses = used(overrides.monthlyExpenses, defaults.monthlyExpenses) * 12;
   const ratePercent = used(overrides.withdrawalRate, defaults.withdrawalRate);
   const returnPercent = used(overrides.realReturn, defaults.realReturn);
   const monthlySavings = used(overrides.monthlySavings, defaults.monthlySavings);
@@ -88,12 +89,19 @@ export function FireTab() {
   const progress = result.target > 0 ? capital / result.target : 0;
   const fireYear = result.years !== null ? thisYear + result.years : null;
   const levels = [
-    { key: 'lean', value: result.levels.lean },
-    { key: 'regular', value: result.levels.regular },
-    { key: 'fat', value: result.levels.fat },
-    { key: 'coast', value: result.levels.coast },
+    { key: 'lean', value: result.levels.lean, color: 'teal.6' },
+    { key: 'regular', value: result.levels.regular, color: 'orange.6' },
+    { key: 'fat', value: result.levels.fat, color: 'red.6' },
+    { key: 'coast', value: result.levels.coast, color: 'grape.6' },
+    { key: 'barista', value: result.levels.barista, color: 'cyan.6' },
   ] as const;
+  /** The year the projected capital reaches the amount; null beyond the projection. */
+  const reachedIn = (amount: number) => {
+    const index = result.path.findIndex((value) => value >= amount);
+    return index < 0 ? null : thisYear + index;
+  };
   const capitalLabel = t('goals.fire.capital');
+  const overspending = averages.savingsRate != null && averages.savingsRate < 0;
 
   return (
     <div className={classes.two}>
@@ -109,19 +117,16 @@ export function FireTab() {
           </Group>
           <ShortHistory months={averages.months} />
           <MoneyInput
-            label={t('goals.fire.expenses')}
+            label={t('goals.fire.monthlyExpenses')}
             description={
               averages.monthlyExpenses != null
-                ? t('goals.fire.expensesHint', {
-                    amount: money(averages.monthlyExpenses),
-                    count: averages.months,
-                  })
+                ? t('goals.fire.expensesHint', { count: averages.months })
                 : undefined
             }
             inputWrapperOrder={['label', 'input', 'description']}
             currency={currency}
-            value={shown(overrides.expenses, defaults.expenses)}
-            onChange={(value) => change('expenses', value)}
+            value={shown(overrides.monthlyExpenses, defaults.monthlyExpenses)}
+            onChange={(value) => change('monthlyExpenses', value)}
           />
           <NumberInput
             label={t('goals.fire.withdrawalRate')}
@@ -148,12 +153,17 @@ export function FireTab() {
           <MoneyInput
             label={t('goals.fire.monthlySavings')}
             description={
-              averages.monthlySavings != null
-                ? t('goals.fire.monthlySavingsHint', {
-                    rate: formatPercent(averages.savingsRate),
-                    count: averages.months,
-                  })
-                : undefined
+              averages.monthlySavings == null
+                ? undefined
+                : overspending
+                  ? t('goals.fire.overspendingHint', {
+                      rate: formatPercent(-averages.savingsRate!),
+                      count: averages.months,
+                    })
+                  : t('goals.fire.monthlySavingsHint', {
+                      rate: formatPercent(averages.savingsRate),
+                      count: averages.months,
+                    })
             }
             inputWrapperOrder={['label', 'input', 'description']}
             currency={currency}
@@ -168,7 +178,7 @@ export function FireTab() {
           <Figure
             label={t('goals.fire.number')}
             value={Number.isFinite(result.target) ? money(result.target) : '—'}
-            note={t('goals.fire.numberNote', { rate: `${ratePercent} %` })}
+            note={t('goals.fire.numberNote', { yearly: money(expenses), rate: `${ratePercent} %` })}
           />
           <Figure
             label={t('goals.fire.years')}
@@ -187,7 +197,7 @@ export function FireTab() {
             <ShareBar share={progress} />
           </Stack>
         </Card>
-        <SimpleGrid cols={{ base: 2, md: 4 }} spacing="md">
+        <SimpleGrid cols={{ base: 2, md: 3, lg: 5 }} spacing="md">
           {levels.map((level) => (
             <Card key={level.key} withBorder radius="md" padding="md">
               <Group gap={4} wrap="nowrap">
@@ -231,20 +241,24 @@ export function FireTab() {
             }))}
             dataKey="year"
             series={[{ name: capitalLabel, color: 'blue.6' }]}
-            referenceLines={[
-              ...(Number.isFinite(result.target)
-                ? [{ y: Math.round(result.target), color: 'orange.6', label: t('goals.fire.number') }]
-                : []),
-              ...(fireYear !== null
-                ? [
-                    {
-                      x: String(fireYear),
-                      color: 'gray.6',
-                      label: t('goals.fire.reachedIn', { year: fireYear }),
-                    },
-                  ]
-                : []),
-            ]}
+            referenceLines={levels.flatMap((level) => {
+              if (!Number.isFinite(level.value)) return [];
+              const name = t(`goals.fire.levels.${level.key}`);
+              const year = reachedIn(level.value);
+              return [
+                { y: Math.round(level.value), color: level.color, strokeDasharray: '4 4', label: name },
+                ...(year !== null
+                  ? [
+                      {
+                        x: String(year),
+                        color: level.color,
+                        strokeDasharray: '4 4',
+                        label: `${name} · ${year}`,
+                      },
+                    ]
+                  : []),
+              ];
+            })}
             valueFormatter={(value) => money(value)}
             yAxisProps={moneyAxis}
             withDots={false}

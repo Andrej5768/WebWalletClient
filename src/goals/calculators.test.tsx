@@ -2,7 +2,8 @@ import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { kyivToday } from '../lib/periods';
 import { accountOf, accountsSummaryOf } from '../test/fixtures';
-import { json, mockApi, plain, renderApp, signedInApi } from '../test/render';
+import { json, mockApi, plain, renderApp, renderWithProviders, signedInApi } from '../test/render';
+import { YearTooltip } from './CalculatorTab';
 
 /** Twelve months with 10 000 of expenses and 5 000 saved each. */
 const incomeExpense = {
@@ -42,10 +43,13 @@ it('counts FIRE from the expenses, savings and net worth, and keeps changed inpu
   api();
   renderApp('/goals?tab=fire');
 
-  // 120 000 a year at 4 %; 1 000 000 growing 5 % a year with 60 000 saved reaches it in 14 years
+  // 10 000 a month, 120 000 a year at 4 %; 1 000 000 growing 5 % a year with 60 000 saved reaches it in 14 years
   expect(await figure('Число FIRE')).toContain('3 000 000 ₴');
   expect(await figure('Років до FIRE')).toContain('14');
   expect(screen.getByText(/Капітал зараз 1 000 000 ₴/)).toBeInTheDocument();
+  expect(plain(screen.getByLabelText('Витрати на місяць').getAttribute('value'))).toBe('10 000');
+  expect(screen.getByText(/норма заощаджень 33,3%/)).toBeInTheDocument();
+  expect(screen.getByText('Barista FIRE')).toBeInTheDocument();
 
   const rate = screen.getByLabelText(/Ставка безпечного вилучення/);
   await userEvent.clear(rate);
@@ -55,6 +59,13 @@ it('counts FIRE from the expenses, savings and net worth, and keeps changed inpu
 
   await userEvent.click(screen.getByRole('button', { name: 'Повернути до даних' }));
   await waitFor(async () => expect(await figure('Років до FIRE')).toContain('14'));
+
+  // The expenses are typed per month and taken per year
+  const spent = screen.getByLabelText('Витрати на місяць');
+  await userEvent.clear(spent);
+  await userEvent.type(spent, '20000');
+  await waitFor(async () => expect(await figure('Число FIRE')).toContain('6 000 000 ₴'));
+  expect(JSON.parse(localStorage.getItem('ww-fire') ?? '{}')).toMatchObject({ monthlyExpenses: 20000 });
 });
 
 it('counts the months of freedom money from the chosen accounts', async () => {
@@ -76,6 +87,15 @@ it('counts the months of freedom money from the chosen accounts', async () => {
   await userEvent.click(screen.getByLabelText('Депозит'));
   expect(plain(screen.getByTestId('fym-months').textContent)).toBe('8,0');
   expect(JSON.parse(localStorage.getItem('ww-fym') ?? '{}')).toMatchObject({ accounts: { '2': true } });
+
+  // The expenses can be changed and brought back to the average
+  const expenses = screen.getByLabelText('Витрати на місяць');
+  expect(plain(expenses.getAttribute('value'))).toBe('10 000');
+  await userEvent.clear(expenses);
+  await userEvent.type(expenses, '20000');
+  await waitFor(() => expect(plain(screen.getByTestId('fym-months').textContent)).toBe('4,0'));
+  await userEvent.click(screen.getByRole('button', { name: 'Повернути середнє' }));
+  await waitFor(() => expect(plain(screen.getByTestId('fym-months').textContent)).toBe('8,0'));
 
   await userEvent.click(screen.getByRole('radio', { name: '6 місяців' }));
   expect(screen.getByText('Мету досягнуто')).toBeInTheDocument();
@@ -155,7 +175,40 @@ it('averages over the complete months with data and warns when there are few', a
 
   expect(await screen.findByText(/лише за 2 повні місяці/)).toBeInTheDocument();
   // 26 000 a month over the two complete months, not 55 000 / 12
-  expect(plain(screen.getByLabelText('Річні витрати').getAttribute('value'))).toBe('312 000');
+  expect(plain(screen.getByLabelText('Витрати на місяць').getAttribute('value'))).toBe('26 000');
+});
+
+it('says in words when the expenses exceed the income', async () => {
+  const months = incomeExpense.months.map((month) => ({
+    ...month,
+    income: 6000,
+    net: -4000,
+    savingsRate: null,
+  }));
+  api({ 'GET /api/v1/reports/income-expense': () => json({ ...incomeExpense, months }) });
+  renderApp('/goals?tab=fire');
+
+  expect(await screen.findByText(/витрати більші за доходи на 66,7%, заощаджень немає/)).toBeInTheDocument();
+  expect(plain(screen.getByLabelText('Щомісячні заощадження').getAttribute('value'))).toBe('0');
+});
+
+it('sums the contributions and the interest of a year in the chart tooltip', () => {
+  renderWithProviders(
+    <YearTooltip
+      label="2030"
+      payload={[
+        { name: 'Внесено', value: 220000, color: 'blue' },
+        { name: 'Відсотки', value: 35000, color: 'teal' },
+      ]}
+      money={(amount) => `${amount} ₴`}
+      totalLabel="Підсумок"
+    />,
+  );
+
+  expect(screen.getByText('2030')).toBeInTheDocument();
+  expect(screen.getByText('220000 ₴')).toBeInTheDocument();
+  expect(screen.getByText('35000 ₴')).toBeInTheDocument();
+  expect(screen.getByText('255000 ₴')).toBeInTheDocument();
 });
 
 it('explains each kind of FIRE', async () => {

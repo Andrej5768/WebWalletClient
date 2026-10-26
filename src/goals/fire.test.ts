@@ -27,6 +27,7 @@ it('finds the FIRE number and the years to it', () => {
   expect(growing.levels.lean).toBeCloseTo(700000);
   expect(growing.levels.fat).toBeCloseTo(1_500_000);
   expect(growing.levels.coast).toBeCloseTo(1_000_000 / Math.pow(1.1, 20));
+  expect(growing.levels.barista).toBeCloseTo(500_000);
 
   expect(
     fire({ expenses: 40000, withdrawalRate: 0.04, realReturn: 0, yearlySavings: 0, capital: 2_000_000 })
