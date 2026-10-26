@@ -1,6 +1,7 @@
 import {
   ArrowLeftRight,
   ChartColumn,
+  ChartLine,
   LayoutGrid,
   ReceiptText,
   SlidersHorizontal,
@@ -25,6 +26,7 @@ export const mainNav: NavItem[] = [
   { path: '/transactions', key: 'transactions', icon: ArrowLeftRight },
   { path: '/budget', key: 'budget', icon: DonutIcon },
   { path: '/reports', key: 'reports', icon: ChartColumn },
+  { path: '/analytics', key: 'analytics', icon: ChartLine },
   { path: '/goals', key: 'goals', icon: Target },
   { path: '/investments', key: 'investments', icon: TrendingUp },
   { path: '/taxes', key: 'taxes', icon: ReceiptText },

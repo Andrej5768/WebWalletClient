@@ -1,7 +1,7 @@
-import { Group, SegmentedControl, Skeleton, Stack, Tabs, Text, Title } from '@mantine/core';
+import { Group, SegmentedControl, Stack, Tabs, Text, Title } from '@mantine/core';
 import { DatePickerInput } from '@mantine/dates';
-import { lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Navigate } from 'react-router';
 import { formatDate } from '../lib/format';
 import { isPreset, kyivToday, periodOf, type Period, type Preset } from '../lib/periods';
 import { useUrlParams } from '../lib/useUrlParams';
@@ -10,12 +10,8 @@ import { NetWorthReport } from './NetWorthReport';
 import { PayeesReport } from './PayeesReport';
 import { SpendingReport } from './SpendingReport';
 
-// Charts of the analytics are only loaded when the tab is opened.
-const AnalyticsReport = lazy(() =>
-  import('./analytics/AnalyticsReport').then((module) => ({ default: module.AnalyticsReport })),
-);
-
-const tabs = ['spending', 'income', 'networth', 'payees', 'analytics'] as const;
+/** The facts of a period; the analytics live in their own section. */
+const tabs = ['spending', 'income', 'networth', 'payees'] as const;
 type Tab = (typeof tabs)[number];
 
 const PRESETS: Preset[] = ['month', 'prevMonth', 'quarter', 'year', 'twelveMonths', 'custom'];
@@ -25,7 +21,6 @@ const DEFAULT_PRESET: Record<Tab, Preset> = {
   income: 'twelveMonths',
   networth: 'twelveMonths',
   payees: 'month',
-  analytics: 'month',
 };
 
 export function ReportsPage() {
@@ -41,13 +36,19 @@ export function ReportsPage() {
     to: params.get('to') ?? undefined,
   });
 
+  // The analytics used to be a tab here; old links still work
+  if (params.get('tab') === 'analytics') {
+    const view = params.get('view');
+    return <Navigate to={view ? `/analytics?view=${view}` : '/analytics'} replace />;
+  }
+
   return (
     <Stack gap="lg" maw={1200}>
       <Group justify="space-between" align="flex-end" wrap="wrap">
         <Title order={1} size="h2">
           {t('nav.reports')}
         </Title>
-        <Group gap="sm" wrap="wrap" display={tab === 'analytics' ? 'none' : undefined}>
+        <Group gap="sm" wrap="wrap">
           <SegmentedControl
             aria-label={t('transactions.period')}
             value={preset}
@@ -78,7 +79,7 @@ export function ReportsPage() {
         <Tabs.List>
           {tabs.map((value) => (
             <Tabs.Tab key={value} value={value}>
-              {value === 'analytics' ? t('analytics.tab') : t(`reports.tabs.${value}`)}
+              {t(`reports.tabs.${value}`)}
             </Tabs.Tab>
           ))}
         </Tabs.List>
@@ -88,11 +89,6 @@ export function ReportsPage() {
       {tab === 'income' && <IncomeExpenseReport period={period} />}
       {tab === 'networth' && <NetWorthReport period={period} />}
       {tab === 'payees' && <PayeesReport period={period} />}
-      {tab === 'analytics' && (
-        <Suspense fallback={<Skeleton height={420} radius="md" />}>
-          <AnalyticsReport />
-        </Suspense>
-      )}
     </Stack>
   );
 }

@@ -40,7 +40,7 @@ it('compares the plan with the actual spending and warns about the forecast', as
         ],
       }),
   });
-  renderApp('/reports?tab=analytics');
+  renderApp('/analytics');
 
   expect(await screen.findByText('Розваги')).toBeInTheDocument();
   expect(texts()).toContain('7 750,00 ₴');
@@ -70,7 +70,7 @@ it('shows the cash flow of the last 12 months', async () => {
         ],
       }),
   });
-  renderApp('/reports?tab=analytics&view=cashflow');
+  renderApp('/analytics?view=cashflow');
 
   expect(await screen.findByText('Грошовий потік за місяцями')).toBeInTheDocument();
   expect(texts()).toContain('У середньому лишається 12 000,00 ₴ на місяць');
@@ -103,7 +103,7 @@ it('compares two periods up to the same day', async () => {
         ],
       }),
   });
-  renderApp('/reports?tab=analytics&view=compare');
+  renderApp('/analytics?view=compare');
 
   expect(await screen.findByText('Без категорії')).toBeInTheDocument();
   expect(texts()).toContain('Їжа +3 000,00 ₴ · Без категорії -1 000,00 ₴');
@@ -160,7 +160,7 @@ it('shows spending trends with anomalies and toggles the lines', async () => {
         ],
       }),
   });
-  renderApp('/reports?tab=analytics&view=trends');
+  renderApp('/analytics?view=trends');
 
   expect(await screen.findByText('Аномалії')).toBeInTheDocument();
   expect(texts()).toMatch(/Розваги, .+: 6 500,00 ₴ — у 6,5 раза більше за середнє 1 000,00 ₴/);
@@ -210,7 +210,7 @@ it('shows savings, 50/30/20 of the last complete month and where the money went'
         unclassified: { amount: 0, share: 0, target: null },
       }),
   });
-  renderApp('/reports?tab=analytics&view=savings');
+  renderApp('/analytics?view=savings');
 
   expect(await screen.findByText('Депозит')).toBeInTheDocument();
   expect(texts()).toContain('+20 000,00 ₴');
@@ -222,4 +222,13 @@ it('shows savings, 50/30/20 of the last complete month and where the money went'
   const needs = new URL(requests.find((request) => request.url.includes('/needs-wants'))!.url).searchParams;
   expect(needs.get('from')).toBe('2026-09-01');
   expect(needs.get('to')).toBe('2026-09-30');
+});
+
+it('sends old links of the analytics tab of the reports to the section', async () => {
+  api({ 'GET /api/v1/analytics/trends': () => json({ detail: 'later' }, 500) });
+  const router = renderApp('/reports?tab=analytics&view=trends');
+
+  await waitFor(() => expect(router.state.location.pathname).toBe('/analytics'));
+  expect(router.state.location.search).toBe('?view=trends');
+  expect(await screen.findByRole('heading', { name: 'Аналітика' })).toBeInTheDocument();
 });

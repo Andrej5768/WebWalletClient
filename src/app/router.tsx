@@ -1,6 +1,7 @@
 import { createBrowserRouter, Navigate, Outlet } from 'react-router';
 import {
   AccountsPage,
+  AnalyticsPage,
   BudgetPage,
   DashboardPage,
   GoalsPage,
@@ -73,6 +74,7 @@ export const routes = [
           { path: 'transactions', element: <TransactionsPage /> },
           { path: 'budget', element: <BudgetPage /> },
           { path: 'reports', element: <ReportsPage /> },
+          { path: 'analytics', element: <AnalyticsPage /> },
           { path: 'goals', element: <GoalsPage /> },
           { path: 'settings', element: <SettingsPage /> },
           { path: 'imports', element: <ImportsPage /> },
