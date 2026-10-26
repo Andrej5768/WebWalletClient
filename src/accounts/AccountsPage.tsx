@@ -13,6 +13,7 @@ import {
   Text,
   ThemeIcon,
   Title,
+  UnstyledButton,
 } from '@mantine/core';
 import { useLocalStorage } from '@mantine/hooks';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -22,6 +23,8 @@ import {
   ArrowLeftRight,
   Banknote,
   BriefcaseBusiness,
+  ChevronDown,
+  ChevronRight,
   CircleCheck,
   CreditCard,
   EllipsisVertical,
@@ -75,6 +78,12 @@ export function AccountsPage() {
     key: 'ww-accounts-archived',
     defaultValue: false,
   });
+  const [collapsed, setCollapsed] = useLocalStorage<string[]>({
+    key: 'ww-accounts-collapsed',
+    defaultValue: [],
+  });
+  const toggleGroup = (key: string) =>
+    setCollapsed((keys) => (keys.includes(key) ? keys.filter((item) => item !== key) : [...keys, key]));
   const [editing, setEditing] = useState<Account | null | undefined>(undefined);
 
   // Omitted optional fields keep their values, so only the archive flag changes.
@@ -198,7 +207,20 @@ export function AccountsPage() {
           {groups.map((group) => (
             <div key={group.key}>
               <div className={`${classes.row} ${classes.group}`}>
-                <span>{t(`accounts.groups.${group.key}`)}</span>
+                <UnstyledButton
+                  className={classes.groupToggle}
+                  onClick={() => toggleGroup(group.key)}
+                  aria-expanded={!collapsed.includes(group.key)}
+                  aria-label={t(
+                    collapsed.includes(group.key) ? 'accounts.expandGroup' : 'accounts.collapseGroup',
+                  )}
+                >
+                  {collapsed.includes(group.key) ? <ChevronRight size={14} /> : <ChevronDown size={14} />}
+                  <span>{t(`accounts.groups.${group.key}`)}</span>
+                  <Text span size="xs" c="dimmed" fw={400}>
+                    {group.accounts.length}
+                  </Text>
+                </UnstyledButton>
                 <span />
                 <span />
                 <span className={`num ${classes.right}`}>
@@ -207,23 +229,25 @@ export function AccountsPage() {
                 <span />
                 <span />
               </div>
-              {group.accounts.map((account) => (
-                <AccountRow
-                  key={account.id}
-                  account={account}
-                  link={links.get(account.id!)}
-                  baseCurrency={currency}
-                  onEdit={() => setEditing(account)}
-                  onArchive={() => archive.mutate(account)}
-                  onTransactions={() => void navigate(`/transactions?accountId=${account.id}`)}
-                  onNewTransaction={() => void navigate(`/transactions?new=1&accountId=${account.id}`)}
-                  onPositions={
-                    account.type === 'INVESTMENT'
-                      ? () => void navigate(`/investments?tab=positions&accountId=${account.id}`)
-                      : undefined
-                  }
-                />
-              ))}
+              {collapsed.includes(group.key)
+                ? null
+                : group.accounts.map((account) => (
+                    <AccountRow
+                      key={account.id}
+                      account={account}
+                      link={links.get(account.id!)}
+                      baseCurrency={currency}
+                      onEdit={() => setEditing(account)}
+                      onArchive={() => archive.mutate(account)}
+                      onTransactions={() => void navigate(`/transactions?accountId=${account.id}`)}
+                      onNewTransaction={() => void navigate(`/transactions?new=1&accountId=${account.id}`)}
+                      onPositions={
+                        account.type === 'INVESTMENT'
+                          ? () => void navigate(`/investments?tab=positions&accountId=${account.id}`)
+                          : undefined
+                      }
+                    />
+                  ))}
             </div>
           ))}
         </div>

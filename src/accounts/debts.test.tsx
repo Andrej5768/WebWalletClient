@@ -49,16 +49,32 @@ it('lists the people with debts and opens their operations', async () => {
         people: [
           { payeeId: 7, name: 'Олег', balance: 700, lastDate: '2026-10-05', operations: 2 },
           { payeeId: 8, name: 'Іра', balance: -500, lastDate: '2026-10-07', operations: 1 },
+          { payeeId: 9, name: 'Петро', balance: 0, lastDate: '2026-09-01', operations: 4 },
         ],
       }),
   });
   renderApp('/accounts');
 
-  const card = (await screen.findByText('Борги з людьми')).closest<HTMLElement>('.mantine-Card-root')!;
+  const card = (
+    await screen.findByText('Людина — це отримувач операції «Борг». Рядок відкриває операції з нею.')
+  ).closest<HTMLElement>('.mantine-Card-root')!;
+  expect(within(card).getByText('Борги')).toBeInTheDocument();
   expect(within(card).getByText('Олег')).toBeInTheDocument();
   expect(within(card).getByText('Вам винні')).toBeInTheDocument();
   expect(within(card).getByText('Ви винні')).toBeInTheDocument();
-  expect(plain(within(card).getByText(/500,00/).textContent)).toBe('500,00 ₴');
+  // What the user owes is negative and red; what others owe is plain
+  const owed = within(card).getByText(/500,00/);
+  expect(plain(owed.textContent)).toBe('-500,00 ₴');
+  expect(owed).toHaveClass('expense');
+  expect(within(card).getByText(/700,00/)).not.toHaveClass('expense');
+
+  // Settled people are hidden until asked for
+  expect(within(card).queryByText('Петро')).not.toBeInTheDocument();
+  await userEvent.click(within(card).getByRole('button', { name: 'Показати погашені (1)' }));
+  expect(within(card).getByText('Петро')).toBeInTheDocument();
+  expect(within(card).getByText('Погашено')).toBeInTheDocument();
+  await userEvent.click(within(card).getByRole('button', { name: 'Сховати погашені' }));
+  expect(within(card).queryByText('Петро')).not.toBeInTheDocument();
 
   await userEvent.click(within(card).getByText('Олег'));
   expect((await screen.findAllByText('Операції')).length).toBeGreaterThan(0);

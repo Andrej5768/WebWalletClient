@@ -1,4 +1,5 @@
-import { Card, Group, Stack, Text, UnstyledButton } from '@mantine/core';
+import { Button, Card, Group, Stack, Text, UnstyledButton } from '@mantine/core';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 import { UnconvertedAlert } from '../components/feedback';
@@ -9,15 +10,19 @@ import classes from './accounts.module.css';
 
 /**
  * Debts with people, as in Zen Money: one row per person with what they owe (positive) or what the user owes them
- * (negative). The person is the payee of the debt operations; a row opens them in the feed.
+ * (negative). The person is the payee of the debt operations; a row opens them in the feed. People whose debt is
+ * settled are hidden until asked for.
  */
 export function DebtsCard() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const debts = useDebts();
+  const [showSettled, setShowSettled] = useState(false);
   const people = debts.data?.people ?? [];
   if (people.length === 0) return null;
   const currency = debts.data?.currency ?? 'UAH';
+  const settled = people.filter((person) => person.balance === 0).length;
+  const shown = showSettled ? people : people.filter((person) => person.balance !== 0);
 
   return (
     <Card withBorder radius="md" padding="lg">
@@ -30,7 +35,7 @@ export function DebtsCard() {
         </div>
         <UnconvertedAlert currencies={debts.data?.unconvertedCurrencies} />
         <div>
-          {people.map((person) => (
+          {shown.map((person) => (
             <UnstyledButton
               key={person.payeeId ?? 'none'}
               className={classes.person}
@@ -53,17 +58,35 @@ export function DebtsCard() {
                   </Text>
                 </div>
                 <div style={{ textAlign: 'right' }}>
-                  <Text className={`num ${person.balance < 0 ? 'expense' : 'income'}`} fw={500}>
-                    {formatMoney(Math.abs(person.balance), currency)}
+                  {/* What the user owes is a red negative amount; what others owe them is plain and grey */}
+                  <Text
+                    className={`num ${person.balance < 0 ? 'expense' : ''}`}
+                    c={person.balance < 0 ? undefined : 'dimmed'}
+                    fw={500}
+                  >
+                    {formatMoney(person.balance, currency)}
                   </Text>
                   <Text size="xs" c="dimmed">
-                    {t(person.balance < 0 ? 'accounts.debts.youOwe' : 'accounts.debts.owesYou')}
+                    {t(
+                      person.balance < 0
+                        ? 'accounts.debts.youOwe'
+                        : person.balance > 0
+                          ? 'accounts.debts.owesYou'
+                          : 'accounts.debts.settled',
+                    )}
                   </Text>
                 </div>
               </Group>
             </UnstyledButton>
           ))}
         </div>
+        {settled > 0 && (
+          <Button variant="subtle" size="compact-sm" onClick={() => setShowSettled((value) => !value)}>
+            {showSettled
+              ? t('accounts.debts.hideSettled')
+              : t('accounts.debts.showSettled', { count: settled })}
+          </Button>
+        )}
       </Stack>
     </Card>
   );
