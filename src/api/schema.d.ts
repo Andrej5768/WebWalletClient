@@ -262,6 +262,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/auth/google/native": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Sign in with the Google ID token of a native app
+         * @description The app gets the ID token from Google itself (Credential Manager with the web client id of GET /auth/options as the server client). Like the browser flow: the account of the Google account, else the account with the same verified email, else a new account; a two-factor challenge when it is on. GOOGLE_EMAIL_UNVERIFIED and GOOGLE_EMAIL_TAKEN say why a sign-in is refused. Native apps get the refresh token in the body.
+         */
+        post: operations["nativeSignIn"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/auth/google/start": {
         parameters: {
             query?: never;
@@ -1323,6 +1343,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/me/google/link/native": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Link the Google account of a native app
+         * @description The ID token the app got from Google, after the same identity check as the browser link. GOOGLE_ACCOUNT_TAKEN when the Google account belongs to another user.
+         */
+        post: operations["linkNative"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/me/google/unlink": {
         parameters: {
             query?: never;
@@ -2277,6 +2317,7 @@ export interface components {
         AuthOptionsResponse: {
             demo: boolean;
             googleSignIn: boolean;
+            googleWebClientId: string | null;
         };
         BenchmarkInfo: {
             /** @enum {string} */
@@ -2752,6 +2793,15 @@ export interface components {
             saved: number;
             target: number;
             unconvertedCurrencies: string[];
+        };
+        GoogleIdTokenRequest: {
+            idToken: string;
+            trustedDeviceToken?: string;
+        };
+        GoogleLinkNativeRequest: {
+            code?: string;
+            idToken: string;
+            password?: string;
         };
         GoogleTicketRequest: {
             ticket: string;
@@ -4214,6 +4264,30 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["GoogleTicketRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["LoginResponse"];
+                };
+            };
+        };
+    };
+    nativeSignIn: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GoogleIdTokenRequest"];
             };
         };
         responses: {
@@ -5953,6 +6027,28 @@ export interface operations {
                 content: {
                     "*/*": components["schemas"]["RedirectResponse"];
                 };
+            };
+        };
+    };
+    linkNative: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GoogleLinkNativeRequest"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
