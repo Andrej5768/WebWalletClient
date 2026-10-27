@@ -36,7 +36,7 @@
     },
     "cashflow": {
       "title": "Cash flow by month",
-      "subtitle": "Income up, expenses down, the line is what is left · the current month is incomplete",
+      "subtitle": "Income and expenses side by side, the line is what is left · the current month is incomplete",
       "average": "On average {{amount}} is left per month",
       "averageNegative": "On average expenses exceed income by {{amount}} per month"
     },
