@@ -3879,7 +3879,10 @@ export interface operations {
     create_8: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description A UUID chosen by the client: the same request sent again within a day gets the first response back instead of creating a second resource */
+                "Idempotency-Key"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -4685,7 +4688,10 @@ export interface operations {
     move: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description A UUID chosen by the client: the same request sent again within a day gets the first response back instead of creating a second resource */
+                "Idempotency-Key"?: string;
+            };
             path: {
                 month: string;
             };
@@ -4731,7 +4737,10 @@ export interface operations {
     create_7: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description A UUID chosen by the client: the same request sent again within a day gets the first response back instead of creating a second resource */
+                "Idempotency-Key"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -4845,7 +4854,10 @@ export interface operations {
     create_6: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description A UUID chosen by the client: the same request sent again within a day gets the first response back instead of creating a second resource */
+                "Idempotency-Key"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -4997,7 +5009,10 @@ export interface operations {
     create_5: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description A UUID chosen by the client: the same request sent again within a day gets the first response back instead of creating a second resource */
+                "Idempotency-Key"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -5089,7 +5104,10 @@ export interface operations {
     contribute: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description A UUID chosen by the client: the same request sent again within a day gets the first response back instead of creating a second resource */
+                "Idempotency-Key"?: string;
+            };
             path: {
                 id: number;
             };
@@ -5143,7 +5161,10 @@ export interface operations {
     confirm_2: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description A UUID chosen by the client: the same request sent again within a day gets the first response back instead of creating a second resource */
+                "Idempotency-Key"?: string;
+            };
             path: {
                 id: string;
             };
@@ -5214,7 +5235,10 @@ export interface operations {
     confirm_1: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description A UUID chosen by the client: the same request sent again within a day gets the first response back instead of creating a second resource */
+                "Idempotency-Key"?: string;
+            };
             path: {
                 id: string;
             };
@@ -5660,7 +5684,10 @@ export interface operations {
     create_4: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description A UUID chosen by the client: the same request sent again within a day gets the first response back instead of creating a second resource */
+                "Idempotency-Key"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -6217,7 +6244,10 @@ export interface operations {
     create_3: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description A UUID chosen by the client: the same request sent again within a day gets the first response back instead of creating a second resource */
+                "Idempotency-Key"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -6307,7 +6337,10 @@ export interface operations {
     create_2: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description A UUID chosen by the client: the same request sent again within a day gets the first response back instead of creating a second resource */
+                "Idempotency-Key"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -6658,7 +6691,10 @@ export interface operations {
     create_1: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description A UUID chosen by the client: the same request sent again within a day gets the first response back instead of creating a second resource */
+                "Idempotency-Key"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -7145,7 +7181,10 @@ export interface operations {
     create: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description A UUID chosen by the client: the same request sent again within a day gets the first response back instead of creating a second resource */
+                "Idempotency-Key"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -7169,7 +7208,10 @@ export interface operations {
     createBatch: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description A UUID chosen by the client: the same request sent again within a day gets the first response back instead of creating a second resource */
+                "Idempotency-Key"?: string;
+            };
             path?: never;
             cookie?: never;
         };

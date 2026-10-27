@@ -6706,6 +6706,18 @@
       },
       "post": {
         "operationId": "create_8",
+        "parameters": [
+          {
+            "description": "A UUID chosen by the client: the same request sent again within a day gets the first response back instead of creating a second resource",
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -7938,6 +7950,16 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "description": "A UUID chosen by the client: the same request sent again within a day gets the first response back instead of creating a second resource",
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
           }
         ],
         "requestBody": {
@@ -8003,6 +8025,18 @@
       },
       "post": {
         "operationId": "create_7",
+        "parameters": [
+          {
+            "description": "A UUID chosen by the client: the same request sent again within a day gets the first response back instead of creating a second resource",
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -8184,6 +8218,18 @@
       },
       "post": {
         "operationId": "create_6",
+        "parameters": [
+          {
+            "description": "A UUID chosen by the client: the same request sent again within a day gets the first response back instead of creating a second resource",
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -8407,6 +8453,18 @@
       },
       "post": {
         "operationId": "create_5",
+        "parameters": [
+          {
+            "description": "A UUID chosen by the client: the same request sent again within a day gets the first response back instead of creating a second resource",
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -8560,6 +8618,16 @@
               "format": "int64",
               "type": "integer"
             }
+          },
+          {
+            "description": "A UUID chosen by the client: the same request sent again within a day gets the first response back instead of creating a second resource",
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
           }
         ],
         "requestBody": {
@@ -8663,6 +8731,16 @@
             "in": "path",
             "name": "id",
             "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "description": "A UUID chosen by the client: the same request sent again within a day gets the first response back instead of creating a second resource",
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
             "schema": {
               "format": "uuid",
               "type": "string"
@@ -8799,6 +8877,16 @@
             "in": "path",
             "name": "id",
             "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "description": "A UUID chosen by the client: the same request sent again within a day gets the first response back instead of creating a second resource",
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
             "schema": {
               "format": "uuid",
               "type": "string"
@@ -9654,6 +9742,18 @@
       "post": {
         "description": "A sale of more than is held on its date is rejected.",
         "operationId": "create_4",
+        "parameters": [
+          {
+            "description": "A UUID chosen by the client: the same request sent again within a day gets the first response back instead of creating a second resource",
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -10488,6 +10588,18 @@
       },
       "post": {
         "operationId": "create_3",
+        "parameters": [
+          {
+            "description": "A UUID chosen by the client: the same request sent again within a day gets the first response back instead of creating a second resource",
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -10624,6 +10736,18 @@
       },
       "post": {
         "operationId": "create_2",
+        "parameters": [
+          {
+            "description": "A UUID chosen by the client: the same request sent again within a day gets the first response back instead of creating a second resource",
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -11297,6 +11421,18 @@
       },
       "post": {
         "operationId": "create_1",
+        "parameters": [
+          {
+            "description": "A UUID chosen by the client: the same request sent again within a day gets the first response back instead of creating a second resource",
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -12181,6 +12317,18 @@
       },
       "post": {
         "operationId": "create",
+        "parameters": [
+          {
+            "description": "A UUID chosen by the client: the same request sent again within a day gets the first response back instead of creating a second resource",
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -12217,6 +12365,18 @@
       "post": {
         "description": "All of them are created, or none when one is invalid: the field of a violation is then transactions[i].field.",
         "operationId": "createBatch",
+        "parameters": [
+          {
+            "description": "A UUID chosen by the client: the same request sent again within a day gets the first response back instead of creating a second resource",
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
