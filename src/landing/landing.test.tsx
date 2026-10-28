@@ -1,5 +1,6 @@
-import { screen, within } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import i18n from '../i18n';
 import { json, mockApi, renderApp } from '../test/render';
 
 const signedOut = { 'POST /api/v1/auth/refresh': () => json({ code: 'INVALID_REFRESH_TOKEN' }, 401) };
@@ -39,5 +40,33 @@ describe('home page', () => {
 
     expect(await screen.findByRole('heading', { name: 'Вхід' })).toBeInTheDocument();
     expect(router.state.location.pathname).toBe('/login');
+  });
+});
+
+describe('Ukrainian public pages', () => {
+  it('shows /uk/ in Ukrainian without changing the language chosen before', async () => {
+    await i18n.changeLanguage('en');
+    mockApi(signedOut);
+    renderApp('/uk/');
+
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Гроші, інвестиції та податки — в одному місці' }),
+    ).toBeInTheDocument();
+    expect(document.documentElement.lang).toBe('uk');
+    expect(i18n.language).toBe('en');
+    expect(localStorage.getItem('ww-language')).toBe('en');
+    expect(screen.getByRole('link', { name: 'Конфіденційність' })).toHaveAttribute('href', '/uk/privacy');
+  });
+
+  it('opens the English pair when English is chosen on a Ukrainian page', async () => {
+    mockApi(signedOut);
+    const router = renderApp('/uk/terms');
+
+    expect(await screen.findByRole('heading', { level: 1, name: 'Умови використання' })).toBeInTheDocument();
+    await userEvent.click(screen.getByText('ENG'));
+
+    await waitFor(() => expect(router.state.location.pathname).toBe('/terms'));
+    expect(await screen.findByRole('heading', { level: 1, name: 'Terms of service' })).toBeInTheDocument();
+    expect(i18n.language).toBe('en');
   });
 });

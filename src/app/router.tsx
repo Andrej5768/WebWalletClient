@@ -24,6 +24,7 @@ import { UnsubscribePage } from '../auth/pages/UnsubscribePage';
 import { VerifyEmailPage } from '../auth/pages/VerifyEmailPage';
 import { GuestOnly, RequireAuth } from '../auth/RequireAuth';
 import { LandingPage } from '../landing/LandingPage';
+import { UkrainianPage } from '../landing/PublicLanguage';
 import { LegalPage } from '../legal/LegalPage';
 import { AppShell } from '../shell/AppShell';
 
@@ -62,6 +63,33 @@ export const routes = [
       // Open to everyone, signed in or not
       { path: '/privacy', element: <LegalPage page="privacy" /> },
       { path: '/terms', element: <LegalPage page="terms" /> },
+      // The same public pages in Ukrainian, for search engines and links; signed-in people go to the app
+      {
+        path: '/uk',
+        element: (
+          <GuestOnly>
+            <UkrainianPage>
+              <LandingPage />
+            </UkrainianPage>
+          </GuestOnly>
+        ),
+      },
+      {
+        path: '/uk/privacy',
+        element: (
+          <UkrainianPage>
+            <LegalPage page="privacy" />
+          </UkrainianPage>
+        ),
+      },
+      {
+        path: '/uk/terms',
+        element: (
+          <UkrainianPage>
+            <LegalPage page="terms" />
+          </UkrainianPage>
+        ),
+      },
       {
         element: (
           <RequireAuth home={<LandingPage />}>

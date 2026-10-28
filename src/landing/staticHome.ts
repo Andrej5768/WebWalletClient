@@ -1,13 +1,32 @@
+import { pagePath, type PublicLanguage } from './seo';
 import en from './locales/en.json';
+import uk from './locales/uk.json';
 
-// The home page as plain HTML inside index.html, in English: crawlers that run no JavaScript (the Google OAuth
-// verification among them) read what the app is about without signing in. The app replaces it when it starts;
-// /boot.js hides it right away for people who have signed in before, so they do not see it flash.
+// The home page as plain HTML inside index.html (English) and uk/index.html (Ukrainian): crawlers that run no
+// JavaScript (the Google OAuth verification among them) read what the app is about without signing in. The app
+// replaces it when it starts; /boot.js hides it right away for people who have signed in before, so they do not see
+// it flash.
 
 const escape = (text: string) =>
   text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
-const l = en.landing;
+/** What the landing texts do not hold: the summary for crawlers and the links of the footer. */
+const extra = {
+  en: {
+    about: (privacy: string, terms: string) =>
+      `WebWallet is a personal finance web app: you keep your accounts, transactions, budget, investments and Ukrainian taxes in one place and see reports and plans built from your own data. Signing in is needed only to work with your own data; this page and the <a href="${privacy}">privacy policy</a> and <a href="${terms}">terms of service</a> are open to everyone.`,
+    privacy: 'Privacy policy',
+    terms: 'Terms of service',
+    other: 'Українською',
+  },
+  uk: {
+    about: (privacy: string, terms: string) =>
+      `WebWallet — вебзастосунок для особистих фінансів: рахунки, операції, бюджет, інвестиції й українські податки в одному місці, а звіти й плани будуються з ваших власних даних. Вхід потрібен лише для роботи з вашими даними; ця сторінка, <a href="${privacy}">політика конфіденційності</a> та <a href="${terms}">умови використання</a> відкриті для всіх.`,
+    privacy: 'Політика конфіденційності',
+    terms: 'Умови використання',
+    other: 'English',
+  },
+} as const;
 
 const card = (title: string, text: string) => `<li><h3>${escape(title)}</h3><p>${escape(text)}</p></li>`;
 
@@ -30,7 +49,12 @@ html.ww-returning .ww-static { display: none; }
 </style>`;
 
 /** The markup to put inside the root element of index.html, and its style for the head. */
-export function staticHome(): { style: string; body: string } {
+export function staticHome(language: PublicLanguage = 'en'): { style: string; body: string } {
+  const l = (language === 'en' ? en : uk).landing;
+  const x = extra[language];
+  const privacy = pagePath('/privacy', language);
+  const terms = pagePath('/terms', language);
+  const other = pagePath('/', language === 'en' ? 'uk' : 'en');
   const features = [
     'sync',
     'categories',
@@ -43,12 +67,12 @@ export function staticHome(): { style: string; body: string } {
   ] as const;
   const audience = ['banks', 'investors', 'fop'] as const;
   const steps = ['tracking', 'fym', 'compound', 'fire'] as const;
-  const body = `<div class="ww-static" lang="en">
-<header><strong>WebWallet</strong><nav><a href="/login">${escape(l.signIn)}</a> · <a href="/register">${escape(l.register)}</a></nav></header>
+  const body = `<div class="ww-static" lang="${language}">
+<header><strong>WebWallet</strong><nav><a href="/login">${escape(l.signIn)}</a> · <a href="/register">${escape(l.register)}</a> · <a href="${other}" hreflang="${language === 'en' ? 'uk' : 'en'}">${x.other}</a></nav></header>
 <main>
 <h1>WebWallet — ${escape(l.hero.title)}</h1>
 <p class="lead">${escape(l.hero.text)}</p>
-<p>WebWallet is a personal finance web app: you keep your accounts, transactions, budget, investments and Ukrainian taxes in one place and see reports and plans built from your own data. Signing in is needed only to work with your own data; this page and the <a href="/privacy">privacy policy</a> and <a href="/terms">terms of service</a> are open to everyone.</p>
+<p>${x.about(privacy, terms)}</p>
 <h2>${escape(l.audience.title)}</h2>
 <p>${escape(l.audience.text)}</p>
 <ul class="cards">${audience.map((key) => card(l.audience[key].title, l.audience[key].text)).join('')}</ul>
@@ -65,7 +89,7 @@ export function staticHome(): { style: string; body: string } {
 <p>${escape(l.source.text)}</p>
 <p>${escape(l.source.license)}</p>
 </main>
-<footer><span>© 2026 WebWallet · ${escape(l.footer)}</span><nav><a href="/privacy">Privacy policy</a> · <a href="/terms">Terms of service</a> · <a href="mailto:support@andrew-dev.org">support@andrew-dev.org</a></nav></footer>
+<footer><span>© 2026 WebWallet · ${escape(l.footer)}</span><nav><a href="${privacy}">${x.privacy}</a> · <a href="${terms}">${x.terms}</a> · <a href="mailto:support@andrew-dev.org">support@andrew-dev.org</a></nav></footer>
 </div>`;
   return { style: STYLE, body };
 }
