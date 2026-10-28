@@ -13,10 +13,17 @@ function api(handlers: Parameters<typeof mockApi>[0] = {}) {
 const texts = () => plain(document.body.textContent);
 
 it('sends the old plan and actual view to the budget', async () => {
-  api({ 'GET /api/v1/categories': () => json([]) });
+  api({
+    'GET /api/v1/categories': () => json([]),
+    // The budget page loads its table right away
+    'GET /api/v1/budget': () =>
+      json({ ...base, months: [], averageMonths: [], income: [], expenses: [], totals: [] }),
+  });
   const router = renderApp('/analytics?view=plan');
 
   await waitFor(() => expect(router.state.location.pathname).toBe('/budget'));
+  // Waits for the table request, which a check run right after the redirect would miss
+  await waitFor(() => expect(screen.getByText('Доходи разом')).toBeInTheDocument());
 });
 
 it('shows the cash flow of the last 12 months', async () => {
