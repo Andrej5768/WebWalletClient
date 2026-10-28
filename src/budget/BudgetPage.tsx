@@ -1,41 +1,18 @@
-import {
-  ActionIcon,
-  Alert,
-  Badge,
-  Button,
-  Card,
-  Group,
-  SimpleGrid,
-  Skeleton,
-  Stack,
-  Text,
-  Title,
-} from '@mantine/core';
+import { ActionIcon, Alert, Button, Card, Group, SimpleGrid, Stack, Text, Title } from '@mantine/core';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeftRight, ChevronLeft, ChevronRight, CopyPlus, TriangleAlert } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router';
-import { useCategoriesById } from '../api/queries';
-import { CategoryIcon } from '../components/CategoryIcon';
 import { ProblemAlert, QueryError, UnconvertedAlert } from '../components/feedback';
-import { Figure, ShareBar } from '../components/Figure';
-import { MoneyInput } from '../components/MoneyInput';
-import type { CategoryInfo } from '../lib/categories';
+import { Figure } from '../components/Figure';
 import { formatMonthTitle } from '../lib/format';
 import { formatMoney } from '../lib/money';
 import { assign, budgetChanged, copyPreviousMonth, useBudget } from './api';
 import { MoveMoneyModal } from './MoveMoneyModal';
-import {
-  flatEnvelopes,
-  groupEnvelopes,
-  monthKey,
-  monthProgress,
-  parseMonth,
-  spentShare,
-  type Envelope,
-} from './model';
-import classes from './budget.module.css';
+import { flatEnvelopes, monthKey, parseMonth } from './model';
+import { assignMany, planRange, usePlan } from './plan';
+import { PlanTable } from './PlanTable';
 
 export function BudgetPage() {
   const { t } = useTranslation();
@@ -44,37 +21,44 @@ export function BudgetPage() {
   const month = parseMonth(params.get('month'));
   const key = monthKey(month);
   const budget = useBudget(key);
-  const categoriesById = useCategoriesById();
+  const range = planRange();
+  const plan = usePlan(range.from, range.to);
   const [moving, setMoving] = useState<{ from?: number; to?: number } | null>(null);
 
   const currency = budget.data?.currency ?? 'UAH';
-  const progress = monthProgress(month);
   const rows = budget.data?.categories ?? [];
-  const groups = groupEnvelopes(rows);
   const envelopes = flatEnvelopes(rows);
   const overspent = envelopes.filter((row) => row.available < 0);
   const ready = budget.data?.readyToAssign ?? 0;
 
   const update = useMutation({
-    mutationFn: ({ categoryId, assigned }: { categoryId: number; assigned: number }) =>
-      assign(key, categoryId, assigned),
+    mutationFn: ({ month, categoryId, assigned }: { month: string; categoryId: number; assigned: number }) =>
+      assign(month, categoryId, assigned),
+    onSuccess: (updated) => budgetChanged(queryClient, updated),
+    meta: { errorShown: true },
+  });
+  const updateMany = useMutation({
+    mutationFn: ({ month, plans }: { month: string; plans: { categoryId: number; assigned: number }[] }) =>
+      assignMany(month, plans),
     onSuccess: (updated) => budgetChanged(queryClient, updated),
     meta: { errorShown: true },
   });
   const copyPrevious = useMutation({
-    mutationFn: () => copyPreviousMonth(key),
+    mutationFn: (month: string) => copyPreviousMonth(month),
     onSuccess: (updated) => budgetChanged(queryClient, updated),
     meta: { errorShown: true },
   });
 
-  const go = (offset: number) => {
+  const select = (value: string) => {
     const next = new URLSearchParams(params);
-    next.set('month', monthKey(month.add(offset, 'month')));
+    if (value === range.current) next.delete('month');
+    else next.set('month', value);
     setParams(next, { replace: true });
   };
+  const go = (offset: number) => select(monthKey(month.add(offset, 'month')));
 
   return (
-    <Stack gap="lg" maw={1200}>
+    <Stack gap="lg">
       <Group justify="space-between" align="flex-end" wrap="wrap">
         <Group gap="xs">
           <Title order={1} size="h2">
@@ -100,6 +84,11 @@ export function BudgetPage() {
             >
               <ChevronRight size={18} />
             </ActionIcon>
+            {key !== range.current && (
+              <Button variant="subtle" size="xs" ml={4} onClick={() => select(range.current)}>
+                {t('budget.thisMonth')}
+              </Button>
+            )}
           </Group>
         </Group>
         <Group gap="sm">
@@ -108,7 +97,7 @@ export function BudgetPage() {
             leftSection={<CopyPlus size={16} />}
             disabled={!budget.isSuccess}
             loading={copyPrevious.isPending}
-            onClick={() => copyPrevious.mutate()}
+            onClick={() => copyPrevious.mutate(key)}
           >
             {t('budget.copyPrevious')}
           </Button>
@@ -141,7 +130,15 @@ export function BudgetPage() {
       </Card>
 
       <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="sm">
-        <Figure label={t('budget.inflow')} value={money(budget.data?.inflow, currency)} />
+        <Figure
+          label={t('budget.inflow')}
+          value={money(budget.data?.inflow, currency)}
+          note={
+            budget.data?.plannedIncome
+              ? t('budget.plannedIncome', { amount: formatMoney(budget.data.plannedIncome, currency) })
+              : undefined
+          }
+        />
         <Figure label={t('budget.assigned')} value={money(budget.data?.assigned, currency)} />
         <Figure
           label={t('budget.spent')}
@@ -167,41 +164,20 @@ export function BudgetPage() {
           </Group>
         </Alert>
       )}
-      <ProblemAlert error={update.error ?? copyPrevious.error} />
+      <ProblemAlert error={update.error ?? updateMany.error ?? copyPrevious.error ?? plan.error} />
 
-      <Card withBorder radius="md" p={0} style={{ overflowX: 'auto' }}>
-        <div style={{ minWidth: 820 }}>
-          <div className={`${classes.row} ${classes.head}`}>
-            <span>{t('budget.columns.category')}</span>
-            <span className={classes.right}>{t('budget.assigned')}</span>
-            <span className={classes.right}>{t('budget.spent')}</span>
-            <span className={classes.right}>{t('budget.available')}</span>
-          </div>
-          {budget.isLoading && <Skeleton height={240} m="md" />}
-          {groups.map((group) => (
-            <div key={group.categoryId}>
-              {!group.single && (
-                <div className={`${classes.row} ${classes.group}`}>
-                  <span>{group.name}</span>
-                  <span className={`num ${classes.right}`}>{formatMoney(group.assigned, currency)}</span>
-                  <span className={`num ${classes.right}`}>{formatMoney(group.spent, currency)}</span>
-                  <span className={`num ${classes.right}`}>{formatMoney(group.available, currency)}</span>
-                </div>
-              )}
-              {group.envelopes.map((row) => (
-                <EnvelopeRow
-                  key={row.categoryId}
-                  envelope={row}
-                  category={categoriesById.get(row.categoryId)}
-                  currency={currency}
-                  progress={progress}
-                  onAssign={(assigned) => update.mutate({ categoryId: row.categoryId, assigned })}
-                />
-              ))}
-            </div>
-          ))}
-        </div>
-      </Card>
+      <PlanTable
+        plan={plan.data}
+        loading={plan.isLoading}
+        current={range.current}
+        selected={key}
+        onSelect={select}
+        actions={{
+          assign: (month, categoryId, assigned) => update.mutate({ month, categoryId, assigned }),
+          assignMany: (month, plans) => updateMany.mutate({ month, plans }),
+          copyPrevious: (month) => copyPrevious.mutate(month),
+        }}
+      />
 
       {moving && (
         <MoveMoneyModal
@@ -218,88 +194,3 @@ export function BudgetPage() {
 
 const money = (value: number | undefined, currency: string) =>
   value === undefined ? '—' : formatMoney(value, currency);
-
-function EnvelopeRow({
-  envelope,
-  category,
-  currency,
-  progress,
-  onAssign,
-}: {
-  envelope: Envelope;
-  category?: CategoryInfo;
-  currency: string;
-  progress: number | null;
-  onAssign(assigned: number): void;
-}) {
-  const { t } = useTranslation();
-  // The typed value while editing; otherwise the field shows what the server has.
-  const [draft, setDraft] = useState<number | string | null>(null);
-  const share = spentShare(envelope);
-  const available = envelope.available;
-  const ahead = progress !== null && share > progress + 0.1 && available >= 0;
-
-  const commit = () => {
-    if (draft === null) return;
-    const value = draft === '' ? 0 : Number(draft);
-    setDraft(null);
-    if (value !== envelope.assigned) onAssign(value);
-  };
-
-  return (
-    <div className={`${classes.row} ${classes.item}`}>
-      <Group gap={12} wrap="nowrap">
-        <CategoryIcon icon={category?.icon} color={category?.color} size={28} />
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <Group gap={8} justify="space-between" wrap="nowrap">
-            <Text size="sm" fw={500} truncate>
-              {envelope.name}
-            </Text>
-            {ahead && (
-              <Text size="xs" c="dimmed">
-                {t('budget.ahead', { percent: Math.round((share - progress) * 100) })}
-              </Text>
-            )}
-          </Group>
-          <div className={classes.barSpace}>
-            <ShareBar
-              share={share}
-              color={available < 0 ? 'var(--ww-expense)' : undefined}
-              marker={progress}
-              markerTitle={t('budget.today')}
-            />
-          </div>
-        </div>
-      </Group>
-      <MoneyInput
-        size="xs"
-        min={undefined}
-        aria-label={t('budget.assignTo', { name: envelope.name })}
-        value={draft ?? envelope.assigned}
-        onChange={setDraft}
-        onBlur={commit}
-        onKeyDown={(event) => {
-          if (event.key === 'Enter') commit();
-          if (event.key === 'Escape') setDraft(null);
-        }}
-        hideControls
-        classNames={{ input: classes.amount }}
-      />
-      <Text size="sm" className={`num ${classes.right}`}>
-        {formatMoney(-envelope.activity, currency)}
-      </Text>
-      <div className={classes.right}>
-        <Badge
-          variant="light"
-          color={available > 0 ? 'green' : available < 0 ? 'red' : 'gray'}
-          className="num"
-          size="lg"
-          radius="sm"
-          fw={600}
-        >
-          {formatMoney(available, currency)}
-        </Badge>
-      </div>
-    </div>
-  );
-}

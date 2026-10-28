@@ -185,7 +185,7 @@ function CompareResult({
               </Table.Tr>
             ))}
             <Table.Tr fw={600} bg="var(--ww-subtle)">
-              <Table.Td>{t('analytics.plan.total')}</Table.Td>
+              <Table.Td>{t('analytics.compare.total')}</Table.Td>
               <Table.Td ta="right" className="num">
                 {money(data.totalA)}
               </Table.Td>

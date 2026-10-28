@@ -58,16 +58,6 @@ function daysBetween(from: string, to: string): number {
   return Math.round((Date.parse(`${to}T00:00:00Z`) - Date.parse(`${from}T00:00:00Z`)) / 86_400_000);
 }
 
-/** Where the today marker sits on a completion bar, 0..1, or null when the month is not the current one. */
-export function todayShare(
-  plan: Pick<Schemas['PlanResponse'], 'daysElapsed' | 'daysInMonth'>,
-): number | null {
-  const elapsed = plan.daysElapsed ?? 0;
-  const days = plan.daysInMonth ?? 0;
-  if (elapsed <= 0 || elapsed >= days) return null;
-  return elapsed / days;
-}
-
 /** The latest complete month of a savings range, for the 50/30/20 card and the destinations. */
 export function lastCompleteMonth(months: Schemas['MonthSavings'][]): Schemas['MonthSavings'] | undefined {
   return [...months].reverse().find((month) => month.complete);
