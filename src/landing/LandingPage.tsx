@@ -17,6 +17,7 @@ import {
 import type { ComponentType } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
+import { DemoButton } from '../auth/DemoButton';
 import { DonutIcon } from '../components/icons';
 import { Logo } from '../components/Logo';
 import { ColorSchemeSwitch, LanguageSwitch } from '../components/PreferenceSwitches';
@@ -79,6 +80,7 @@ function SignInButtons() {
       <Button component={Link} to="/login" variant="default">
         {t('landing.signIn')}
       </Button>
+      <DemoButton />
     </Group>
   );
 }

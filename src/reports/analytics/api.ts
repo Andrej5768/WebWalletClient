@@ -11,14 +11,6 @@ const options = { placeholderData: keepPreviousData };
 const analyticsKey = (name: string, params: object) =>
   [...queryKeys.reports, 'analytics', name, params] as const;
 
-export function usePlan(month: string) {
-  return useQuery({
-    queryKey: analyticsKey('plan', { month }),
-    queryFn: () => unwrap(api.GET('/api/v1/analytics/plan/{month}', { params: { path: { month } } })),
-    ...options,
-  });
-}
-
 export function useCompare(periods: ComparePeriods) {
   return useQuery({
     queryKey: analyticsKey('compare', periods),

@@ -2,41 +2,14 @@
   "analytics": {
     "nav": "Analytics sections",
     "views": {
-      "plan": "Plan and actual",
       "cashflow": "Income vs expenses",
       "compare": "Period comparison",
       "trends": "Spending trends",
       "savings": "Savings"
     },
-    "previousMonth": "Previous month",
-    "nextMonth": "Next month",
-    "plan": {
-      "title": "Plan and actual",
-      "subtitle": "Planned — the amounts assigned to the envelopes",
-      "planned": "Planned",
-      "actual": "Actual",
-      "plannedNote": "Envelopes for the month",
-      "actualNote": "{{percent}} of the plan",
-      "left": "Left",
-      "leftNote": "Still to spend",
-      "overspent": "Overspent",
-      "overspentNote": "More than planned",
-      "forecast": "End-of-month forecast",
-      "forecastOver": "over the plan by {{amount}}",
-      "forecastUnder": "within the plan, {{amount}} to spare",
-      "group": "Group",
-      "difference": "Difference",
-      "completion": "Completion",
-      "forecastRow": "forecast {{amount}}",
-      "plannedRemaining": "{{amount}} still planned",
-      "total": "Total",
-      "note": "The forecast continues the current pace of irregular spending to the end of the month and adds the planned recurring payments. The mark on the bars is today's day of the month ({{day}} of {{days}}).",
-      "notePast": "The month is over: the forecast equals the actual spending.",
-      "empty": "No envelopes and no spending this month"
-    },
     "cashflow": {
       "title": "Cash flow by month",
-      "subtitle": "Income up, expenses down, the line is what is left · the current month is incomplete",
+      "subtitle": "Income and expenses side by side, the line is what is left · the current month is incomplete",
       "average": "On average {{amount}} is left per month",
       "averageNegative": "On average expenses exceed income by {{amount}} per month"
     },
@@ -54,7 +27,8 @@
       "category": "Category",
       "change": "Change",
       "legend": "Spending growth is red, decrease is green. Rows are sorted by the size of the change.",
-      "uncategorized": "Uncategorized"
+      "uncategorized": "Uncategorized",
+      "total": "Total"
     },
     "trends": {
       "title": "Spending by category",

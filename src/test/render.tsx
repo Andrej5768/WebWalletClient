@@ -77,6 +77,10 @@ const emptyBudget = {
   assigned: 0,
   activity: 0,
   available: 0,
+  plannedIncome: 0,
+  income: 0,
+  uncategorizedIncome: 0,
+  incomeCategories: [],
   unconvertedCurrencies: [],
 };
 

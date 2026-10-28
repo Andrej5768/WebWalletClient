@@ -32,42 +32,10 @@ function ownEnvelope(row: BudgetRow): Envelope {
   };
 }
 
-export interface EnvelopeGroup {
-  categoryId: number;
-  name: string;
-  /** Totals of the group: its own envelope and its subcategories together. */
-  assigned: number;
-  spent: number;
-  available: number;
-  /** The envelopes shown: the subcategories, and the group's own one when it has money or no subcategories. */
-  envelopes: Envelope[];
-  /** A category without subcategories: one row, without a group heading repeating it. */
-  single: boolean;
-}
-
-/** The top-level rows with their envelopes; the server already sums the subcategories into the group. */
-export function groupEnvelopes(rows: BudgetRow[]): EnvelopeGroup[] {
-  return rows.map((head) => {
-    const own = ownEnvelope(head);
-    const children = head.children.map(ownEnvelope);
-    return {
-      categoryId: head.categoryId,
-      name: head.name,
-      assigned: head.assigned,
-      spent: -head.activity,
-      available: head.available,
-      envelopes: children.length === 0 || hasMoney(own) ? [own, ...children] : children,
-      single: children.length === 0,
-    };
-  });
-}
-
 /** Every own envelope in display order, groups included. */
 export function flatEnvelopes(rows: BudgetRow[]): Envelope[] {
   return rows.flatMap((row) => [ownEnvelope(row), ...row.children.map(ownEnvelope)]);
 }
-
-const hasMoney = (envelope: Envelope) => !!envelope.assigned || !!envelope.activity || !!envelope.available;
 
 /** Share of the month that has passed, 0..1, for the "today" marker; null for other months. */
 export function monthProgress(month: dayjs.Dayjs, today: dayjs.Dayjs = kyivToday()): number | null {

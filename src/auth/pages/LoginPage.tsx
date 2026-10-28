@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useNavigate } from 'react-router';
 import { problemMessage, type ApiProblem } from '../../api/errors';
 import { AuthLayout } from '../AuthLayout';
+import { DemoButton } from '../DemoButton';
 import { GoogleSignIn } from '../GoogleButton';
 import { useAuth } from '../context';
 import { required, requiredEmail } from '../../lib/validation';
@@ -125,6 +126,7 @@ export function LoginPage() {
               {t('auth.login.submit')}
             </Button>
           </Stack>
+          <DemoButton hint />
           <Text c="dimmed" ta="center">
             {t('auth.login.noAccount')}{' '}
             <Anchor component={Link} to="/register" fw={500}>

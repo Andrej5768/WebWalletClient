@@ -116,7 +116,7 @@ export interface paths {
          * Plan vs actual per envelope with a forecast for the end of the month
          * @description The plan is the money assigned to the envelopes, the actual value the spending in them. For the current month the forecast continues the spending at its pace so far to the end of the month and adds the planned payments still due.
          */
-        get: operations["plan"];
+        get: operations["plan_1"];
         put?: never;
         post?: never;
         delete?: never;
@@ -185,6 +185,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/auth/demo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Open a demo sandbox and sign in to it
+         * @description Public. Creates an account with example data in the language of Accept-Language and starts a session like /api/v1/auth/login; the account is deleted after a day unless it is claimed at /api/v1/me/demo/claim. Limited per client IP; 404 when the demo is off.
+         */
+        post: operations["startDemo"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/auth/forgot-password": {
         parameters: {
             query?: never;
@@ -236,6 +256,26 @@ export interface paths {
          * @description Exchanges the ticket of the callback for a session, like /login: the access token, or twoFactorChallenge when two-factor authentication is on. The ticket works once and briefly. Native apps (header X-WebWallet-Client) get the refresh token in refreshToken instead of the cookie and send trustedDeviceToken in the body.
          */
         post: operations["complete"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/google/native": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Sign in with the Google ID token of a native app
+         * @description The app gets the ID token from Google itself (Credential Manager with the web client id of GET /auth/options as the server client). Like the browser flow: the account of the Google account, else the account with the same verified email, else a new account; a two-factor challenge when it is on. GOOGLE_EMAIL_UNVERIFIED and GOOGLE_EMAIL_TAKEN say why a sign-in is refused. Native apps get the refresh token in the body.
+         */
+        post: operations["nativeSignIn"];
         delete?: never;
         options?: never;
         head?: never;
@@ -526,6 +566,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/budget": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Plan and actual income and spending per category for a range of months
+         * @description At most 36 months. Each row also carries the average actual value of the three full months before the current one.
+         */
+        get: operations["plan"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/budget/{month}": {
         parameters: {
             query?: never;
@@ -533,9 +593,29 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Envelopes of the month: assigned, activity and available per expense category, and the money ready to assign */
+        /** Envelopes of the month: assigned, activity and available per expense category, the money ready to assign, and the planned and received income per income category */
         get: operations["month"];
         put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/budget/{month}/categories": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Set the plans of several categories of the month at once
+         * @description All plans are saved or none. Returns the month like GET.
+         */
+        put: operations["assignMany"];
         post?: never;
         delete?: never;
         options?: never;
@@ -551,7 +631,10 @@ export interface paths {
             cookie?: never;
         };
         get?: never;
-        /** Set the money assigned to an expense category for the month; 0 removes it */
+        /**
+         * Set the plan of a category for the month; 0 removes it
+         * @description For an expense category the money of its envelope, for an income category the income expected.
+         */
         put: operations["assign"];
         post?: never;
         delete?: never;
@@ -570,8 +653,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Copy the assignments of the previous month to the envelopes without one this month
-         * @description Every expense category whose own assignment this month is zero gets its own assignment of the previous month; envelopes already assigned and archived categories are left as they are. Returns the month like GET.
+         * Copy the plans of the previous month to the categories without one this month
+         * @description Every expense or income category whose own plan this month is zero gets its own plan of the previous month; categories already planned and archived categories are left as they are. Returns the month like GET.
          */
         post: operations["copyPrevious"];
         delete?: never;
@@ -1243,6 +1326,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/me/demo/claim": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Keep the demo sandbox as an account
+         * @description The signed-in demo account gets the email and password and stops expiring; its data stays. The email is verified through the usual message. Only a demo account can be claimed.
+         */
+        post: operations["claimDemo"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/me/export": {
         parameters: {
             query?: never;
@@ -1277,6 +1380,26 @@ export interface paths {
          * @description Returns the Google page to send the browser to and sets the cookie that binds the link to this browser; Google then redirects to the security settings. Needs the current password, or for an account without one a two-factor code when it is on.
          */
         post: operations["link_3"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/google/link/native": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Link the Google account of a native app
+         * @description The ID token the app got from Google, after the same identity check as the browser link. GOOGLE_ACCOUNT_TAKEN when the Google account belongs to another user.
+         */
+        post: operations["linkNative"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2221,6 +2344,7 @@ export interface components {
             features: components["schemas"]["AppFeatures"];
         };
         AppFeatures: {
+            demo: boolean;
             googleSignIn: boolean;
             marketSearch: boolean;
             push: boolean;
@@ -2230,11 +2354,16 @@ export interface components {
             /** Format: int32 */
             categorized: number;
         };
+        AssignManyRequest: {
+            plans: components["schemas"]["PlanEntry"][];
+        };
         AssignRequest: {
             assigned: number;
         };
         AuthOptionsResponse: {
+            demo: boolean;
             googleSignIn: boolean;
+            googleWebClientId: string | null;
         };
         BenchmarkInfo: {
             /** @enum {string} */
@@ -2277,6 +2406,44 @@ export interface components {
             source: "PRIVATBANK" | "ZENMONEY" | "FREEDOM";
             /** Format: date */
             to: string | null;
+        };
+        BudgetPlanCell: {
+            actual: number;
+            month: string;
+            ownActual: number;
+            ownPlan: number;
+            plan: number;
+        };
+        BudgetPlanResponse: {
+            averageMonths: string[];
+            currency: string;
+            expenses: components["schemas"]["BudgetPlanRow"][];
+            income: components["schemas"]["BudgetPlanRow"][];
+            months: string[];
+            totals: components["schemas"]["BudgetPlanTotals"][];
+            unconvertedCurrencies: string[];
+        };
+        BudgetPlanRow: {
+            archived: boolean;
+            average: number;
+            carryOver: boolean;
+            /** Format: int64 */
+            categoryId: number;
+            children: components["schemas"]["BudgetPlanRow"][];
+            months: components["schemas"]["BudgetPlanCell"][];
+            name: string;
+            ownAverage: number;
+            /** Format: int64 */
+            parentId: number | null;
+        };
+        BudgetPlanTotals: {
+            expenses: number;
+            income: number;
+            month: string;
+            plannedExpenses: number;
+            plannedIncome: number;
+            uncategorizedExpenses: number;
+            uncategorizedIncome: number;
         };
         CalendarEvent: {
             /** Format: int64 */
@@ -2418,6 +2585,12 @@ export interface components {
         ChangePasswordRequest: {
             currentPassword: string;
             newPassword: string;
+        };
+        ClaimRequest: {
+            /** Format: email */
+            email: string;
+            firstName: string;
+            password: string;
         };
         CompareDay: {
             a: number | null;
@@ -2705,6 +2878,15 @@ export interface components {
             target: number;
             unconvertedCurrencies: string[];
         };
+        GoogleIdTokenRequest: {
+            idToken: string;
+            trustedDeviceToken?: string;
+        };
+        GoogleLinkNativeRequest: {
+            code?: string;
+            idToken: string;
+            password?: string;
+        };
         GoogleTicketRequest: {
             ticket: string;
             trustedDeviceToken?: string;
@@ -2799,6 +2981,19 @@ export interface components {
             /** Format: date */
             to: string;
             unconvertedCurrencies: string[];
+        };
+        IncomeRow: {
+            archived: boolean;
+            /** Format: int64 */
+            categoryId: number;
+            children: components["schemas"]["IncomeRow"][];
+            name: string;
+            ownPlanned: number;
+            ownReceived: number;
+            /** Format: int64 */
+            parentId: number | null;
+            planned: number;
+            received: number;
         };
         InstrumentChoice: {
             currency: string;
@@ -2934,9 +3129,13 @@ export interface components {
             available: number;
             categories: components["schemas"]["CategoryRow"][];
             currency: string;
+            income: number;
+            incomeCategories: components["schemas"]["IncomeRow"][];
             inflow: number;
             month: string;
+            plannedIncome: number;
             readyToAssign: number;
+            uncategorizedIncome: number;
             unconvertedCurrencies: string[];
         };
         MonthSavings: {
@@ -3208,6 +3407,11 @@ export interface components {
             operations: number;
             /** Format: int64 */
             payeeId: number | null;
+        };
+        PlanEntry: {
+            assigned: number;
+            /** Format: int64 */
+            categoryId: number;
         };
         PlanResponse: {
             actual: number;
@@ -3778,6 +3982,9 @@ export interface components {
             baseCurrency: string;
             /** Format: date-time */
             createdAt: string;
+            demo: boolean;
+            /** Format: date-time */
+            demoExpiresAt: string | null;
             email: string;
             emailVerified: boolean;
             firstName: string;
@@ -3828,7 +4035,10 @@ export interface operations {
     create_8: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description A UUID chosen by the client: the same request sent again within a day gets the first response back instead of creating a second resource */
+                "Idempotency-Key"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -3985,7 +4195,7 @@ export interface operations {
             };
         };
     };
-    plan: {
+    plan_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -4080,6 +4290,26 @@ export interface operations {
             };
         };
     };
+    startDemo: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["LoginResponse"];
+                };
+            };
+        };
+    };
     forgotPassword: {
         parameters: {
             query?: never;
@@ -4140,6 +4370,30 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["GoogleTicketRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["LoginResponse"];
+                };
+            };
+        };
+    };
+    nativeSignIn: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GoogleIdTokenRequest"];
             };
         };
         responses: {
@@ -4539,6 +4793,31 @@ export interface operations {
             };
         };
     };
+    plan: {
+        parameters: {
+            query: {
+                /** @example 2025-10 */
+                from: string;
+                /** @example 2027-10 */
+                to: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["BudgetPlanResponse"];
+                };
+            };
+        };
+    };
     month: {
         parameters: {
             query?: never;
@@ -4550,6 +4829,32 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["MonthResponse"];
+                };
+            };
+        };
+    };
+    assignMany: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                month: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AssignManyRequest"];
+            };
+        };
         responses: {
             /** @description OK */
             200: {
@@ -4614,7 +4919,10 @@ export interface operations {
     move: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description A UUID chosen by the client: the same request sent again within a day gets the first response back instead of creating a second resource */
+                "Idempotency-Key"?: string;
+            };
             path: {
                 month: string;
             };
@@ -4660,7 +4968,10 @@ export interface operations {
     create_7: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description A UUID chosen by the client: the same request sent again within a day gets the first response back instead of creating a second resource */
+                "Idempotency-Key"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -4774,7 +5085,10 @@ export interface operations {
     create_6: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description A UUID chosen by the client: the same request sent again within a day gets the first response back instead of creating a second resource */
+                "Idempotency-Key"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -4926,7 +5240,10 @@ export interface operations {
     create_5: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description A UUID chosen by the client: the same request sent again within a day gets the first response back instead of creating a second resource */
+                "Idempotency-Key"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -5018,7 +5335,10 @@ export interface operations {
     contribute: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description A UUID chosen by the client: the same request sent again within a day gets the first response back instead of creating a second resource */
+                "Idempotency-Key"?: string;
+            };
             path: {
                 id: number;
             };
@@ -5072,7 +5392,10 @@ export interface operations {
     confirm_2: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description A UUID chosen by the client: the same request sent again within a day gets the first response back instead of creating a second resource */
+                "Idempotency-Key"?: string;
+            };
             path: {
                 id: string;
             };
@@ -5143,7 +5466,10 @@ export interface operations {
     confirm_1: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description A UUID chosen by the client: the same request sent again within a day gets the first response back instead of creating a second resource */
+                "Idempotency-Key"?: string;
+            };
             path: {
                 id: string;
             };
@@ -5589,7 +5915,10 @@ export interface operations {
     create_4: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description A UUID chosen by the client: the same request sent again within a day gets the first response back instead of creating a second resource */
+                "Idempotency-Key"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -5792,6 +6121,28 @@ export interface operations {
             };
         };
     };
+    claimDemo: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ClaimRequest"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     export: {
         parameters: {
             query?: never;
@@ -5833,6 +6184,28 @@ export interface operations {
                 content: {
                     "*/*": components["schemas"]["RedirectResponse"];
                 };
+            };
+        };
+    };
+    linkNative: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GoogleLinkNativeRequest"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -6124,7 +6497,10 @@ export interface operations {
     create_3: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description A UUID chosen by the client: the same request sent again within a day gets the first response back instead of creating a second resource */
+                "Idempotency-Key"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -6214,7 +6590,10 @@ export interface operations {
     create_2: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description A UUID chosen by the client: the same request sent again within a day gets the first response back instead of creating a second resource */
+                "Idempotency-Key"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -6565,7 +6944,10 @@ export interface operations {
     create_1: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description A UUID chosen by the client: the same request sent again within a day gets the first response back instead of creating a second resource */
+                "Idempotency-Key"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -7052,7 +7434,10 @@ export interface operations {
     create: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description A UUID chosen by the client: the same request sent again within a day gets the first response back instead of creating a second resource */
+                "Idempotency-Key"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -7076,7 +7461,10 @@ export interface operations {
     createBatch: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description A UUID chosen by the client: the same request sent again within a day gets the first response back instead of creating a second resource */
+                "Idempotency-Key"?: string;
+            };
             path?: never;
             cookie?: never;
         };

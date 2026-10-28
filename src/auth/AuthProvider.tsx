@@ -111,6 +111,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [loginResult],
   );
 
+  const signInDemo = useCallback(() => loginResult(api.POST('/api/v1/auth/demo')), [loginResult]);
+
   const completeGoogle = useCallback(
     (ticket: string) => loginResult(api.POST('/api/v1/auth/google/complete', { body: { ticket } })),
     [loginResult],
@@ -168,6 +170,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       status,
       user,
       signIn,
+      signInDemo,
       completeGoogle,
       completeTwoFactor,
       restoreAccount,
@@ -180,6 +183,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       status,
       user,
       signIn,
+      signInDemo,
       completeGoogle,
       completeTwoFactor,
       restoreAccount,

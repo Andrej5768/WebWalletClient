@@ -1,8 +1,8 @@
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { kyivToday } from '../../lib/periods';
-import { monthSavingsOf, planRowOf } from '../../test/fixtures';
-import { currentMonth, json, mockApi, plain, renderApp, signedInApi } from '../../test/render';
+import { monthSavingsOf } from '../../test/fixtures';
+import { json, mockApi, plain, renderApp, signedInApi } from '../../test/render';
 
 const base = { currency: 'UAH', unconvertedCurrencies: [] };
 
@@ -12,47 +12,11 @@ function api(handlers: Parameters<typeof mockApi>[0] = {}) {
 
 const texts = () => plain(document.body.textContent);
 
-it('compares the plan with the actual spending and warns about the forecast', async () => {
-  api({
-    [`GET /api/v1/analytics/plan/${currentMonth}`]: () =>
-      json({
-        ...base,
-        month: currentMonth,
-        daysElapsed: 10,
-        daysInMonth: 31,
-        planned: 4000,
-        actual: 2500,
-        difference: 1500,
-        forecast: 7750,
-        categories: [
-          planRowOf({
-            categoryId: 1,
-            name: 'Їжа',
-            planned: 3000,
-            actual: 2000,
-            difference: 1000,
-            completion: 0.6667,
-            plannedRemaining: 300,
-            forecast: 6500,
-            children: [planRowOf({ categoryId: 2, name: 'Продукти', planned: 3000, actual: 2000 })],
-          }),
-          planRowOf({ categoryId: 3, name: 'Розваги', planned: 1000, actual: 500, difference: 500 }),
-        ],
-      }),
-  });
-  renderApp('/analytics');
+it('sends the old plan and actual view to the budget', async () => {
+  api({ 'GET /api/v1/categories': () => json([]) });
+  const router = renderApp('/analytics?view=plan');
 
-  expect(await screen.findByText('Розваги')).toBeInTheDocument();
-  expect(texts()).toContain('7 750,00 ₴');
-  expect(texts()).toContain('перевищення на 3 750,00 ₴');
-  expect(texts()).toContain('ще заплановано 300,00 ₴');
-  expect(texts()).toContain('62,5% плану');
-  expect(texts()).toContain('прогноз 6 500,00 ₴');
-  expect(texts()).toContain('(10 з 31)');
-
-  expect(screen.queryByText('Продукти')).not.toBeInTheDocument();
-  await userEvent.click(screen.getByRole('button', { name: 'Показати підкатегорії Їжа' }));
-  expect(screen.getByText('Продукти')).toBeInTheDocument();
+  await waitFor(() => expect(router.state.location.pathname).toBe('/budget'));
 });
 
 it('shows the cash flow of the last 12 months', async () => {

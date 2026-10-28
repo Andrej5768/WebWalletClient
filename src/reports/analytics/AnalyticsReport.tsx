@@ -1,16 +1,14 @@
 import { NavLink } from '@mantine/core';
-import { ArrowLeftRight, ChartLine, ClipboardCheck, GitCompare, PiggyBank } from 'lucide-react';
+import { ArrowLeftRight, ChartLine, GitCompare, PiggyBank } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { useSearchParams } from 'react-router';
+import { Navigate, useSearchParams } from 'react-router';
 import classes from './analytics.module.css';
 import { CashFlowView } from './CashFlowView';
 import { CompareView } from './CompareView';
-import { PlanView } from './PlanView';
 import { SavingsView } from './SavingsView';
 import { TrendsView } from './TrendsView';
 
 const views = [
-  { value: 'plan', icon: ClipboardCheck, element: <PlanView /> },
   { value: 'cashflow', icon: ArrowLeftRight, element: <CashFlowView /> },
   { value: 'compare', icon: GitCompare, element: <CompareView /> },
   { value: 'trends', icon: ChartLine, element: <TrendsView /> },
@@ -22,6 +20,9 @@ export function AnalyticsReport() {
   const { t } = useTranslation();
   const [params, setParams] = useSearchParams();
   const current = views.find((view) => view.value === params.get('view')) ?? views[0];
+
+  // Plan and actual moved to the budget, which shows them for many months
+  if (params.get('view') === 'plan') return <Navigate to="/budget" replace />;
 
   const select = (value: string) => {
     const next = new URLSearchParams(params);

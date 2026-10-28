@@ -122,6 +122,7 @@
     "cta": {
       "title": "Try WebWallet",
       "text": "All it takes is a name, an email and a password."
-    }
+    },
+    "demo": "Try the demo"
   }
 }

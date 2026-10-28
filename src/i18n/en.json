@@ -53,7 +53,9 @@
       "forgot": "Forgot password?",
       "submit": "Sign in",
       "noAccount": "No account yet?",
-      "register": "Create one"
+      "register": "Create one",
+      "demo": "Try the demo",
+      "demoHint": "No sign-up: accounts, transactions and the budget are already filled with examples"
     },
     "deletion": {
       "title": "The account will be deleted on {{date}}",
@@ -135,6 +137,16 @@
       "backText": "The next email will arrive on Monday.",
       "settings": "Notification settings",
       "invalid": "The link is not valid"
+    },
+    "demo": {
+      "banner": "This is a demo: the data disappears on {{date}}. Want to keep it?",
+      "bannerNoDate": "This is a demo: the data disappears in a day. Want to keep it?",
+      "keep": "Keep the account",
+      "claimTitle": "Keep the account",
+      "claimText": "Everything you did in the demo stays. Enter your email and a password; we will send a confirmation email.",
+      "claimSubmit": "Keep",
+      "claimed": "Account kept. Check your email: the confirmation message is on its way.",
+      "restricted": "Not available in the demo. Keep the account to use it."
     }
   },
   "nav": {
@@ -423,10 +435,35 @@
     "columns": {
       "category": "Category"
     },
-    "ahead": "ahead of pace by {{percent}}%",
-    "today": "Today's day of the month",
-    "assignTo": "Plan: {{name}}",
-    "inflow": "Month's income"
+    "inflow": "Month's income",
+    "thisMonth": "This month",
+    "plannedIncome": "plan {{amount}}",
+    "plan": {
+      "average": "Average of 3 months",
+      "averageOf": "Average actual of {{months}}",
+      "takeAverage": "→ to {{month}} plan",
+      "plan": "plan",
+      "actual": "actual",
+      "income": "Income",
+      "expenses": "Expenses",
+      "incomeTotal": "Total income",
+      "expensesTotal": "Total expenses",
+      "net": "Income minus expenses",
+      "uncategorized": "No category",
+      "deviation": "Difference from the plan",
+      "carryOver": "What is left moves to the next month",
+      "planOf": "Plan: {{name}}, {{month}}",
+      "select": "Show this month's figures above",
+      "monthActions": "Actions for {{month}}",
+      "fillAverage": "Fill empty plans with the average",
+      "clear": "Clear the month's plan",
+      "clearTitle": "Clear the plan of {{month}}?",
+      "clearText": "The plans of all categories of this month will be removed. Transactions stay as they are.",
+      "clearConfirm": "Clear",
+      "unlock": "Change the plan of a past month",
+      "lock": "Finish editing",
+      "locked": "The plan of a past month is read-only"
+    }
   },
   "reports": {
     "tabs": {

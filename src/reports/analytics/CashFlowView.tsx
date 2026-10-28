@@ -8,7 +8,7 @@ import { formatMoney } from '../../lib/money';
 import { kyivToday, periodOf } from '../../lib/periods';
 import { useIncomeExpense } from '../api';
 
-/** Income up, expenses down and what was left, for the last 12 months. */
+/** Income and expenses side by side with what was left, for the last 12 months. */
 export function CashFlowView() {
   const { t } = useTranslation();
   const report = useIncomeExpense(periodOf('twelveMonths', kyivToday()));
@@ -22,7 +22,7 @@ export function CashFlowView() {
   const chart = data.months.map((month) => ({
     month: formatMonthShort(month.month),
     [income]: month.income,
-    [expense]: -month.expense,
+    [expense]: month.expense,
     [net]: month.net,
   }));
   const average = data.months.length ? data.net / data.months.length : 0;
@@ -49,7 +49,6 @@ export function CashFlowView() {
             { name: net, color: 'dark.4', type: 'line' },
           ]}
           withLegend
-          referenceLines={[{ y: 0, color: 'gray.5' }]}
           valueFormatter={(value) => formatMoney(value, currency)}
           yAxisProps={moneyAxis}
           gridAxis="y"
