@@ -1,3 +1,4 @@
+import { firstSentence, pagePath, seoHead, type PublicLanguage } from '../landing/seo';
 import { privacy, terms, type LegalDocument } from './content';
 
 // The legal pages are also built as plain HTML, so that they read without JavaScript: Google and other crawlers check
@@ -6,6 +7,8 @@ import { privacy, terms, type LegalDocument } from './content';
 
 const escape = (text: string) =>
   text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+const label: Record<PublicLanguage, string> = { en: 'English', uk: 'Українська' };
 
 function section(document: LegalDocument, lang: string, id: string): string {
   const parts = document.sections.map((part) => {
@@ -20,21 +23,28 @@ function section(document: LegalDocument, lang: string, id: string): string {
   )}</p><p>${escape(document.intro)}</p>${parts.join('')}</article>`;
 }
 
-/** A complete page with the English text first and the Ukrainian one below. */
-export function legalPage(page: 'privacy' | 'terms'): string {
+/**
+ * A complete page with both texts: at /privacy and /terms the English one first (these addresses are registered with
+ * Google and keep their content), at /uk/privacy and /uk/terms the Ukrainian one first.
+ */
+export function legalPage(page: 'privacy' | 'terms', language: PublicLanguage = 'en'): string {
   const documents = page === 'privacy' ? privacy : terms;
-  const other =
-    page === 'privacy'
-      ? { href: '/terms', label: 'Terms of service' }
-      : { href: '/privacy', label: 'Privacy policy' };
+  const main = documents[language];
+  const second: PublicLanguage = language === 'en' ? 'uk' : 'en';
+  const otherPage = page === 'privacy' ? '/terms' : '/privacy';
+  const otherLabel = (page === 'privacy' ? terms : privacy)[language].title;
+  const home = pagePath('/', language);
+  const title = `${main.title} — WebWallet`;
   return `<!doctype html>
-<html lang="en">
+<html lang="${language}">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="color-scheme" content="light dark" />
 <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-<title>${escape(documents.en.title)} — WebWallet</title>
+<title>${escape(title)}</title>
+<meta name="description" content="${escape(firstSentence(main.intro))}" />
+${seoHead(`/${page}`, language, title, firstSentence(main.intro))}
 <style>
 :root { color-scheme: light dark; --bg: #fafafa; --text: #18181b; --muted: #52525b; --border: #e4e4e7; --link: #0d52a8; }
 @media (prefers-color-scheme: dark) { :root { --bg: #2b2b2b; --text: #e6e6e6; --muted: #ababab; --border: #45484a; --link: #7aaef2; } }
@@ -53,10 +63,10 @@ article + article { border-top: 1px solid var(--border); margin-top: 48px; paddi
 </head>
 <body>
 <main>
-<header><a class="brand" href="/">WebWallet</a><nav><a href="#en">English</a> · <a href="#uk">Українська</a></nav></header>
-${section(documents.en, 'en', 'en')}
-${section(documents.uk, 'uk', 'uk')}
-<footer><a href="/">WebWallet</a><a href="${other.href}">${other.label}</a></footer>
+<header><a class="brand" href="${home}">WebWallet</a><nav><a href="#${language}">${label[language]}</a> · <a href="#${second}">${label[second]}</a></nav></header>
+${section(main, language, language)}
+${section(documents[second], second, second)}
+<footer><a href="${home}">WebWallet</a><a href="${pagePath(otherPage, language)}">${escape(otherLabel)}</a></footer>
 </main>
 </body>
 </html>

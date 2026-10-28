@@ -3,18 +3,20 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { Logo } from '../components/Logo';
 import { ColorSchemeSwitch, LanguageSwitch } from '../components/PreferenceSwitches';
+import { usePublicPath } from '../landing/usePublicPath';
 import { privacy, terms, type LegalDocument } from './content';
 
 /** The privacy policy or the terms of service, open to everyone, in the language of the page. */
 export function LegalPage({ page }: { page: 'privacy' | 'terms' }) {
   const { t, i18n } = useTranslation();
+  const path = usePublicPath();
   const documents = page === 'privacy' ? privacy : terms;
   const document: LegalDocument = i18n.language === 'en' ? documents.en : documents.uk;
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--ww-bg)' }}>
       <Group justify="space-between" px={32} py={20} wrap="wrap">
-        <Anchor component={Link} to="/" underline="never" c="inherit" aria-label="WebWallet">
+        <Anchor component={Link} to={path('/')} underline="never" c="inherit" aria-label="WebWallet">
           <Logo />
         </Anchor>
         <Group gap={8}>
@@ -49,10 +51,10 @@ export function LegalPage({ page }: { page: 'privacy' | 'terms' }) {
             </Stack>
           ))}
           <Group gap="lg" pt="md" style={{ borderTop: '1px solid var(--ww-border)' }}>
-            <Anchor component={Link} to="/" size="sm">
+            <Anchor component={Link} to={path('/')} size="sm">
               {t('legal.home')}
             </Anchor>
-            <Anchor component={Link} to={page === 'privacy' ? '/terms' : '/privacy'} size="sm">
+            <Anchor component={Link} to={path(page === 'privacy' ? '/terms' : '/privacy')} size="sm">
               {page === 'privacy' ? t('legal.terms') : t('legal.privacy')}
             </Anchor>
           </Group>

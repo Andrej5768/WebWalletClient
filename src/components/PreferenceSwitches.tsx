@@ -1,15 +1,29 @@
 import { SegmentedControl, Tooltip, useMantineColorScheme, type MantineColorScheme } from '@mantine/core';
 import { Monitor, Moon, Sun } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useLocation, useNavigate } from 'react-router';
+import appI18n from '../i18n';
+import { isUkrainianPath, withoutUkrainianPrefix } from '../landing/seo';
 
+/**
+ * The interface language. It is saved for the next visits; on a public page that has a pair in the other language
+ * (/uk/terms and /terms) it also opens that pair, since the Ukrainian pages stay Ukrainian.
+ */
 export function LanguageSwitch() {
   const { t, i18n } = useTranslation();
+  const { pathname } = useLocation();
+  const navigate = useNavigate();
+  const change = (value: string) => {
+    void appI18n.changeLanguage(value);
+    if (isUkrainianPath(pathname) && value === 'en') navigate(withoutUkrainianPrefix(pathname));
+    else if ((pathname === '/privacy' || pathname === '/terms') && value === 'uk') navigate(`/uk${pathname}`);
+  };
   return (
     <SegmentedControl
       aria-label={t('language.label')}
       size="xs"
       value={i18n.language}
-      onChange={(value) => void i18n.changeLanguage(value)}
+      onChange={change}
       data={[
         { value: 'uk', label: 'УКР' },
         { value: 'en', label: 'ENG' },

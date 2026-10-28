@@ -22,6 +22,7 @@ import { DonutIcon } from '../components/icons';
 import { Logo } from '../components/Logo';
 import { ColorSchemeSwitch, LanguageSwitch } from '../components/PreferenceSwitches';
 import { locale } from '../i18n';
+import { usePublicPath } from './usePublicPath';
 import classes from './landing.module.css';
 
 const SERVER_REPO = 'https://github.com/Andrej5768/WebWallet';
@@ -213,6 +214,7 @@ function GoalsExample({ number }: { number: (value: number, digits?: number) => 
 /** Home page for visitors who are not signed in: what the project is, for whom, what it does. */
 export function LandingPage() {
   const { t, i18n } = useTranslation();
+  const path = usePublicPath();
   const number = (value: number, digits = 0) =>
     new Intl.NumberFormat(locale(i18n.language), {
       minimumFractionDigits: digits,
@@ -377,10 +379,10 @@ export function LandingPage() {
         <div className={`${classes.container} ${classes.footerRow}`}>
           <span>© 2026 WebWallet · {t('landing.footer')}</span>
           <Group gap={16}>
-            <Anchor component={Link} to="/privacy" c="dimmed" size="sm">
+            <Anchor component={Link} to={path('/privacy')} c="dimmed" size="sm">
               {t('legal.privacy')}
             </Anchor>
-            <Anchor component={Link} to="/terms" c="dimmed" size="sm">
+            <Anchor component={Link} to={path('/terms')} c="dimmed" size="sm">
               {t('legal.terms')}
             </Anchor>
             <Anchor href={SERVER_REPO} c="dimmed" size="sm" target="_blank" rel="noreferrer">
