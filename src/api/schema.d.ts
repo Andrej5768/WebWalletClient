@@ -526,6 +526,43 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/banks/monobank/auth": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Connect Monobank through the bank app
+         * @description Available when the server is a registered Monobank service provider (features.monobankProvider of the app configuration), otherwise 404. Show acceptUrl as a QR code, or open it on a phone; then poll the status until the user approves the access in the bank app (within 24 hours).
+         */
+        post: operations["startProviderAuth"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/banks/monobank/auth/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Status of a connection through the bank app; APPROVED carries the new connection */
+        get: operations["providerAuthStatus"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/banks/monobank/schedule": {
         parameters: {
             query?: never;
@@ -2347,6 +2384,7 @@ export interface components {
             demo: boolean;
             googleSignIn: boolean;
             marketSearch: boolean;
+            monobankProvider: boolean;
             push: boolean;
             telegram: boolean;
         };
@@ -3501,6 +3539,37 @@ export interface components {
             close: number;
             /** Format: date */
             date: string;
+        };
+        ProviderAuthResponse: {
+            acceptUrl: string;
+            connection: components["schemas"]["ConnectionResponse"] | null;
+            /** Format: date-time */
+            expiresAt: string;
+            /** Format: int64 */
+            id: number;
+            /** @enum {string} */
+            status: "PENDING" | "APPROVED" | "EXPIRED";
+        };
+        ProviderConnectRequest: {
+            /**
+             * Format: time
+             * @example 06:00
+             */
+            dailyAt?: string;
+            /** Format: date */
+            since?: string;
+            /** @enum {string} */
+            syncMode?: "INTERVAL" | "DAILY" | "WEBHOOK" | "MANUAL";
+            /**
+             * Format: time
+             * @example 23:00
+             */
+            windowEnd?: string;
+            /**
+             * Format: time
+             * @example 08:00
+             */
+            windowStart?: string;
         };
         QuarterPaymentRequest: {
             paid?: boolean;
@@ -4745,6 +4814,52 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["ConnectionResponse"];
+                };
+            };
+        };
+    };
+    startProviderAuth: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProviderConnectRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ProviderAuthResponse"];
+                };
+            };
+        };
+    };
+    providerAuthStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ProviderAuthResponse"];
                 };
             };
         };

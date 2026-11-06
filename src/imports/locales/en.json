@@ -10,7 +10,7 @@
       "freedom": "Freedom Finance — XLSX reports"
     },
     "monobank": {
-      "intro": "Connect Monobank with a personal token: cards and jars become accounts and transactions arrive on their own.",
+      "intro": "Connect Monobank: cards and jars become accounts and transactions arrive on their own.",
       "connect": "Connect",
       "connectTitle": "Connect Monobank",
       "changeToken": "Change token",
@@ -57,7 +57,19 @@
       "missingIncome": "The bank shows more: missing income?",
       "missingExpenses": "The bank shows less: missing expenses?",
       "syncedUntil": "Loaded up to {{date}}",
-      "loading": "Loading history…"
+      "loading": "Loading history…",
+      "provider": {
+        "hint": "You approve the access in the Monobank app; no token to copy.",
+        "connect": "Connect in the app",
+        "useToken": "Use a personal token instead",
+        "useApp": "Connect in the Monobank app",
+        "scan": "Scan the QR code with your phone camera and approve the access in the Monobank app.",
+        "qr": "QR code for the Monobank app",
+        "openApp": "Open in the Monobank app",
+        "waiting": "Waiting for your approval…",
+        "expired": "The time to approve has run out. Please try again.",
+        "retry": "Try again"
+      }
     },
     "privat": {
       "title": "PrivatBank — PDF statement",

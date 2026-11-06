@@ -8,6 +8,7 @@ export type ImportResult = Schemas['ImportResult'];
 export type Connection = Schemas['ConnectionResponse'];
 export type SyncMode = NonNullable<Schemas['ScheduleRequest']['syncMode']>;
 export type Schedule = Schemas['ScheduleRequest'];
+export type ProviderAuth = Schemas['ProviderAuthResponse'];
 
 // openapi-fetch serializes JSON by default; uploads go as multipart form data.
 const multipart = (body?: { file: string }) => {
