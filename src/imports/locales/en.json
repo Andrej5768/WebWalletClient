@@ -4,6 +4,7 @@
     "notStored": "The file is not stored.",
     "sources": {
       "monobank": "Monobank — connect",
+      "monobankPdf": "Monobank — PDF statement",
       "privatbank": "PrivatBank — PDF statement",
       "zenToken": "Zen Money — token",
       "zenFile": "Zen Money — file",
@@ -80,6 +81,11 @@
       "accountHint": "By default the account with the card number of the statement; it is created if there is none.",
       "auto": "Detect automatically",
       "submit": "Upload and review"
+    },
+    "monoPdf": {
+      "title": "Monobank — PDF statement",
+      "subtitle": "A card statement from the Monobank app",
+      "accountHint": "By default the account of the card, e.g. the one of the Monobank connection; operations it already has are skipped."
     },
     "zen": {
       "title": "Zen Money",

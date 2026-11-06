@@ -26,6 +26,15 @@ export const previewPrivatBank = (file: File, accountId?: number): Promise<Previ
     }),
   );
 
+export const previewMonobankPdf = (file: File, accountId?: number): Promise<Preview> =>
+  unwrap(
+    api.POST('/api/v1/imports/monobank/preview', {
+      params: { query: { accountId } },
+      body: { file: file as unknown as string },
+      bodySerializer: multipart,
+    }),
+  );
+
 export const previewZenMoneyToken = (token: string): Promise<Preview> =>
   unwrap(api.POST('/api/v1/imports/zenmoney/preview', { body: { token } }));
 
