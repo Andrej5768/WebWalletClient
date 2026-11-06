@@ -230,7 +230,7 @@ function ValueChart({ accountId }: { accountId?: number }) {
           <QueryError error={history.error} onRetry={() => void history.refetch()} />
         ) : rows.length < 2 ? (
           <Text size="sm" c="dimmed" py="xl" ta="center">
-            {t('invOverview.chart.empty')}
+            {t(rows.length === 1 ? 'invOverview.chart.firstDay' : 'invOverview.chart.empty')}
           </Text>
         ) : (
           <CompositeChart
@@ -273,7 +273,7 @@ function ValueChart({ accountId }: { accountId?: number }) {
             }}
           />
         )}
-        {portfolioResult && (
+        {portfolioResult && rows.length > 1 && (
           <Summary
             portfolio={portfolioResult}
             benchmark={benchmarkResult}

@@ -18,7 +18,7 @@ import {
   Text,
   Textarea,
 } from '@mantine/core';
-import { DateInput } from '@mantine/dates';
+import { DayInput } from '../components/DayInput';
 import { useForm, type UseFormReturnType } from '@mantine/form';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeftRight, Info, Unlink } from 'lucide-react';
@@ -266,12 +266,7 @@ function TransactionForm({ transaction, defaultAccountId, defaults, onClose }: P
             classNames={{ input: amountClass }}
             {...form.getInputProps('amount')}
           />
-          <DateInput
-            label={t('transactions.form.date')}
-            valueFormat="DD.MM.YYYY"
-            size="md"
-            {...form.getInputProps('date')}
-          />
+          <DayInput label={t('transactions.form.date')} size="md" {...form.getInputProps('date')} />
           {values.type === 'TRANSFER' ? (
             <Group style={{ gridColumn: '1 / -1' }} gap="xs" wrap="nowrap" align="flex-end">
               <Select

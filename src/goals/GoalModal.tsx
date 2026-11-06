@@ -1,5 +1,5 @@
 import { Group, Modal, Select, Stack, Text, TextInput, ThemeIcon } from '@mantine/core';
-import { DateInput } from '@mantine/dates';
+import { DayInput } from '../components/DayInput';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -152,11 +152,10 @@ export function GoalModal({
               onChange={(value) => value && setCurrency(value)}
             />
           </Group>
-          <DateInput
+          <DayInput
             label={t('goals.form.date')}
             description={t('goals.form.dateHint')}
             inputWrapperOrder={['label', 'input', 'description', 'error']}
-            valueFormat="DD.MM.YYYY"
             clearable
             value={date}
             error={errors.targetDate}

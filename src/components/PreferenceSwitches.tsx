@@ -2,19 +2,35 @@ import { SegmentedControl, Tooltip, useMantineColorScheme, type MantineColorSche
 import { Monitor, Moon, Sun } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router';
+import { api } from '../api/client';
+import { useAuth } from '../auth/context';
 import appI18n from '../i18n';
 import { isUkrainianPath, withoutUkrainianPrefix } from '../landing/seo';
 
 /**
  * The interface language. It is saved for the next visits; on a public page that has a pair in the other language
- * (/uk/terms and /terms) it also opens that pair, since the Ukrainian pages stay Ukrainian.
+ * (/uk/terms and /terms) it also opens that pair, since the Ukrainian pages stay Ukrainian. A signed-in user's
+ * profile keeps a language too and wins on the next start, so the switch saves it there as well.
  */
 export function LanguageSwitch() {
   const { t, i18n } = useTranslation();
   const { pathname } = useLocation();
   const navigate = useNavigate();
+  const { user, setUser } = useAuth();
   const change = (value: string) => {
     void appI18n.changeLanguage(value);
+    if (user && user.locale !== value) {
+      void api
+        .PUT('/api/v1/me', {
+          body: {
+            firstName: user.firstName,
+            lastName: user.lastName,
+            baseCurrency: user.baseCurrency,
+            locale: value,
+          },
+        })
+        .then(({ data }) => data && setUser(data));
+    }
     if (isUkrainianPath(pathname) && value === 'en') navigate(withoutUkrainianPrefix(pathname));
     else if ((pathname === '/privacy' || pathname === '/terms') && value === 'uk') navigate(`/uk${pathname}`);
   };

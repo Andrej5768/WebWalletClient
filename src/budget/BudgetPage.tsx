@@ -30,6 +30,21 @@ export function BudgetPage() {
   const envelopes = flatEnvelopes(rows);
   const overspent = envelopes.filter((row) => row.available < 0);
   const ready = budget.data?.readyToAssign ?? 0;
+  // The card shows the income the table shows; the free money is counted from what stayed on the budget accounts,
+  // so the difference (money moved to a deposit, a broker) is named under it.
+  const movedOut = budget.data ? budget.data.income - budget.data.inflow : 0;
+  const incomeNote = [
+    budget.data?.plannedIncome
+      ? t('budget.plannedIncome', { amount: formatMoney(budget.data.plannedIncome, currency) })
+      : null,
+    movedOut > 0 ? t('budget.movedOut', { amount: formatMoney(movedOut, currency) }) : null,
+    movedOut < 0 ? t('budget.movedIn', { amount: formatMoney(-movedOut, currency) }) : null,
+  ]
+    .filter(Boolean)
+    .join(' · ');
+  // Spending without a category is not in any envelope, so it is named apart: the card plus it gives the table total.
+  const uncategorizedSpent =
+    plan.data?.totals.find((totals) => totals.month === key)?.uncategorizedExpenses ?? 0;
 
   const update = useMutation({
     mutationFn: ({ month, categoryId, assigned }: { month: string; categoryId: number; assigned: number }) =>
@@ -132,17 +147,18 @@ export function BudgetPage() {
       <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="sm">
         <Figure
           label={t('budget.inflow')}
-          value={money(budget.data?.inflow, currency)}
-          note={
-            budget.data?.plannedIncome
-              ? t('budget.plannedIncome', { amount: formatMoney(budget.data.plannedIncome, currency) })
-              : undefined
-          }
+          value={money(budget.data?.income, currency)}
+          note={incomeNote || undefined}
         />
         <Figure label={t('budget.assigned')} value={money(budget.data?.assigned, currency)} />
         <Figure
           label={t('budget.spent')}
           value={money(budget.data ? -budget.data.activity : undefined, currency)}
+          note={
+            uncategorizedSpent > 0
+              ? t('budget.uncategorizedSpent', { amount: formatMoney(uncategorizedSpent, currency) })
+              : undefined
+          }
         />
         <Figure label={t('budget.available')} value={money(budget.data?.available, currency)} />
       </SimpleGrid>

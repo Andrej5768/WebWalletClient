@@ -1,5 +1,6 @@
 import '@testing-library/jest-dom/vitest';
 import { configure } from '@testing-library/react';
+import '../app/dates';
 import { setAccessToken } from '../api/session';
 import i18n from '../i18n';
 import { unexpectedRequests } from './render';

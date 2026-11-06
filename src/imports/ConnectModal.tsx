@@ -1,5 +1,5 @@
 import { Alert, Anchor, Modal, PasswordInput, Stack, Text } from '@mantine/core';
-import { DateInput } from '@mantine/dates';
+import { DayInput } from '../components/DayInput';
 import { useForm } from '@mantine/form';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
@@ -76,11 +76,10 @@ export function ConnectModal({ current, onClose }: { current?: Connection | null
             inputWrapperOrder={['label', 'input', 'description', 'error']}
             {...form.getInputProps('token')}
           />
-          <DateInput
+          <DayInput
             label={t('imports.monobank.since')}
             description={t('imports.monobank.sinceHint')}
             inputWrapperOrder={['label', 'input', 'description', 'error']}
-            valueFormat="DD.MM.YYYY"
             minDate={earliest}
             maxDate={today.format('YYYY-MM-DD')}
             w={220}

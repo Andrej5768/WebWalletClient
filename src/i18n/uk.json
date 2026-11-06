@@ -2,6 +2,7 @@
   "common": {
     "all": "Усі",
     "cancel": "Скасувати",
+    "close": "Закрити",
     "save": "Зберегти",
     "delete": "Видалити",
     "retry": "Спробувати ще раз",
@@ -183,6 +184,7 @@
       "hint": "Дохід місяця мінус план"
     },
     "savings": "Заощадження",
+    "moreAccounts": "ще {{count}}",
     "unconverted": "Без курсу: {{currencies}}"
   },
   "accounts": {
@@ -448,10 +450,13 @@
     "inflow": "Дохід місяця",
     "thisMonth": "Поточний місяць",
     "plannedIncome": "план {{amount}}",
+    "movedOut": "{{amount}} переказано з бюджету",
+    "movedIn": "{{amount}} переказано в бюджет",
+    "uncategorizedSpent": "і {{amount}} без категорії",
     "plan": {
       "average": "Середнє за 3 місяці",
       "averageOf": "Середній факт за {{months}}",
-      "takeAverage": "→ у план {{month}}",
+      "takeAverage": "Середнє у план {{month}}",
       "plan": "план",
       "actual": "факт",
       "income": "Доходи",

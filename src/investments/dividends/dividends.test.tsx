@@ -9,7 +9,7 @@ import {
   instrumentOf,
 } from '../../test/fixtures';
 import { json, mockApi, plain, renderApp, renderWithProviders, signedInApi } from '../../test/render';
-import { monthWeeks, openingMonth, shortName, statusKey, upcoming } from './model';
+import { monthWeeks, openingMonth, shortName, shortNameFont, statusKey, upcoming } from './model';
 import { UpcomingPayments } from './UpcomingPayments';
 
 const today = kyivToday();
@@ -187,6 +187,8 @@ it('opens the calendar on the nearest month with payments and names bonds by nam
   expect(openingMonth([], '2026-10')).toBe('2026-10');
   expect(shortName(coupon)).toBe('ОВДП 22.07.2027');
   expect(shortName(stock)).toBe('AAPL');
+  expect(shortNameFont(coupon)).toBeUndefined();
+  expect(shortNameFont(stock)).toBe('monospace');
   expect(statusKey(coupon)).toBe('SCHEDULED');
   expect(statusKey(stock)).toBe('DECLARED');
 });

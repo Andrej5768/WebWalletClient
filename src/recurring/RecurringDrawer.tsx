@@ -18,7 +18,7 @@ import {
   Tooltip,
   UnstyledButton,
 } from '@mantine/core';
-import { DateInput } from '@mantine/dates';
+import { DayInput } from '../components/DayInput';
 import { useForm } from '@mantine/form';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import dayjs from 'dayjs';
@@ -545,7 +545,7 @@ function RecurringForm({ recurring, onDone }: { recurring: Recurring | null; onD
               />
             </Group>
           )}
-          <DateInput
+          <DayInput
             label={t(anchored ? 'recurring.form.startFrom' : 'recurring.form.startDate')}
             description={
               values.frequency === 'MONTHLY'
@@ -555,7 +555,6 @@ function RecurringForm({ recurring, onDone }: { recurring: Recurring | null; onD
                   : undefined
             }
             inputWrapperOrder={['label', 'input', 'description', 'error']}
-            valueFormat="DD.MM.YYYY"
             {...form.getInputProps('startDate')}
           />
           <Radio.Group
@@ -570,9 +569,8 @@ function RecurringForm({ recurring, onDone }: { recurring: Recurring | null; onD
             </Group>
           </Radio.Group>
           {values.end === 'date' && (
-            <DateInput
+            <DayInput
               aria-label={t('recurring.form.endDateLabel')}
-              valueFormat="DD.MM.YYYY"
               w={200}
               {...form.getInputProps('endDate')}
             />

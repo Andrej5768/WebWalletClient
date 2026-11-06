@@ -34,6 +34,7 @@ import {
   openingMonth,
   receivedByMonth,
   shortName,
+  shortNameFont,
   STATUS_COLORS,
   STATUSES,
 } from './model';
@@ -114,6 +115,7 @@ export function DividendsTab({ accountId }: { accountId?: number }) {
       accountId: event.accountId,
     });
   const names = new Map(events.map((event) => [event.instrumentId, shortName(event)]));
+  const fonts = new Map(events.map((event) => [event.instrumentId, shortNameFont(event)]));
 
   return (
     <Stack gap="md">
@@ -274,7 +276,11 @@ export function DividendsTab({ accountId }: { accountId?: number }) {
             {data.receivedByInstrument.map((item) => (
               <div key={item.instrumentId} data-testid="payer">
                 <Group justify="space-between" mb={4}>
-                  <Text size="sm" fw={600} ff="monospace">
+                  <Text
+                    size="sm"
+                    fw={600}
+                    ff={names.has(item.instrumentId) ? fonts.get(item.instrumentId) : 'monospace'}
+                  >
                     {names.get(item.instrumentId) ?? item.symbol}
                   </Text>
                   <Text size="sm" className="num">
