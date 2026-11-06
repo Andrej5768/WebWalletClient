@@ -22,7 +22,10 @@ export function App() {
   const localizedTheme = useMemo(() => {
     const close = { closeButtonProps: { 'aria-label': t('common.close') } };
     return mergeThemeOverrides(theme, {
-      components: { Modal: { defaultProps: close }, Drawer: { defaultProps: close } },
+      components: {
+        Modal: { defaultProps: close },
+        Drawer: { defaultProps: close },
+      },
     });
   }, [t]);
   return (

@@ -76,7 +76,7 @@ export function InvestmentTab({
         </Group>
       </Alert>
 
-      <SimpleGrid cols={{ base: 1, xs: 2, md: 4 }} spacing="sm">
+      <SimpleGrid cols={{ base: 2, md: 4 }} spacing="sm">
         <Figure
           label={t('taxes.investments.dividends', { year })}
           value={uah(data.dividendsUah)}

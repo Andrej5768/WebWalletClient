@@ -95,7 +95,7 @@ function Figures({ data }: { data: Portfolio }) {
   const money = (value: number, signed = false) => formatMoney(value, data.currency, { signed });
   const sign = (value: number) => (value < 0 ? 'expense' : value > 0 ? 'income' : '');
   return (
-    <SimpleGrid cols={{ base: 1, xs: 2, md: 5 }} spacing="sm">
+    <SimpleGrid cols={{ base: 2, md: 5 }} spacing="sm">
       <Figure
         label={t('invOverview.value')}
         value={money(data.value)}

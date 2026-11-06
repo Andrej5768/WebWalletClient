@@ -81,3 +81,22 @@ body {
 .faint {
   color: var(--ww-faint);
 }
+
+/* A phone: a row of segments (periods, tabs of a form) scrolls inside itself instead of widening the page. */
+@media (max-width: 767.98px) {
+  .mantine-SegmentedControl-root {
+    max-width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .mantine-Tabs-list {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .mantine-Tabs-tab {
+    flex: none;
+  }
+}

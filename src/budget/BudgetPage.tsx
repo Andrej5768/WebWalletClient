@@ -1,4 +1,15 @@
-import { ActionIcon, Alert, Button, Card, Group, SimpleGrid, Stack, Text, Title } from '@mantine/core';
+import {
+  ActionIcon,
+  Alert,
+  Button,
+  Card,
+  Group,
+  SimpleGrid,
+  Skeleton,
+  Stack,
+  Text,
+  Title,
+} from '@mantine/core';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeftRight, ChevronLeft, ChevronRight, CopyPlus, TriangleAlert } from 'lucide-react';
 import { useState } from 'react';
@@ -9,6 +20,8 @@ import { Figure } from '../components/Figure';
 import { formatMonthTitle } from '../lib/format';
 import { formatMoney } from '../lib/money';
 import { assign, budgetChanged, copyPreviousMonth, useBudget } from './api';
+import { usePhone } from '../lib/usePhone';
+import { MonthList } from './MonthList';
 import { MoveMoneyModal } from './MoveMoneyModal';
 import { flatEnvelopes, monthKey, parseMonth } from './model';
 import { assignMany, planRange, usePlan } from './plan';
@@ -22,6 +35,8 @@ export function BudgetPage() {
   const key = monthKey(month);
   const budget = useBudget(key);
   const range = planRange();
+  // A phone shows one month as a list: the table of 25 months needs a wide screen.
+  const phone = usePhone();
   const plan = usePlan(range.from, range.to);
   const [moving, setMoving] = useState<{ from?: number; to?: number } | null>(null);
 
@@ -134,7 +149,12 @@ export function BudgetPage() {
             <Text size="sm" c="dimmed" fw={500}>
               {t('budget.readyToAssign')}
             </Text>
-            <Text className={`num ${ready < 0 ? 'expense' : 'income'}`} fz={32} fw={600} lh={1.1}>
+            <Text
+              className={`num ${ready < 0 ? 'expense' : 'income'}`}
+              fz={{ base: 26, sm: 32 }}
+              fw={600}
+              lh={1.1}
+            >
               {budget.data ? formatMoney(ready, currency) : '—'}
             </Text>
           </Stack>
@@ -144,7 +164,7 @@ export function BudgetPage() {
         </Group>
       </Card>
 
-      <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="sm">
+      <SimpleGrid cols={{ base: 2, lg: 4 }} spacing="sm">
         <Figure
           label={t('budget.inflow')}
           value={money(budget.data?.income, currency)}
@@ -182,18 +202,31 @@ export function BudgetPage() {
       )}
       <ProblemAlert error={update.error ?? updateMany.error ?? copyPrevious.error ?? plan.error} />
 
-      <PlanTable
-        plan={plan.data}
-        loading={plan.isLoading}
-        current={range.current}
-        selected={key}
-        onSelect={select}
-        actions={{
-          assign: (month, categoryId, assigned) => update.mutate({ month, categoryId, assigned }),
-          assignMany: (month, plans) => updateMany.mutate({ month, plans }),
-          copyPrevious: (month) => copyPrevious.mutate(month),
-        }}
-      />
+      {phone ? (
+        budget.data ? (
+          <MonthList
+            budget={budget.data}
+            month={month}
+            editable={key >= range.current}
+            onAssign={(categoryId, assigned) => update.mutate({ month: key, categoryId, assigned })}
+          />
+        ) : (
+          <Skeleton height={420} radius="md" />
+        )
+      ) : (
+        <PlanTable
+          plan={plan.data}
+          loading={plan.isLoading}
+          current={range.current}
+          selected={key}
+          onSelect={select}
+          actions={{
+            assign: (month, categoryId, assigned) => update.mutate({ month, categoryId, assigned }),
+            assignMany: (month, plans) => updateMany.mutate({ month, plans }),
+            copyPrevious: (month) => copyPrevious.mutate(month),
+          }}
+        />
+      )}
 
       {moving && (
         <MoveMoneyModal

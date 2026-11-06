@@ -186,7 +186,7 @@ export function GoalModal({
             </Text>
             <RadioTiles
               label={t('goals.form.icon')}
-              style={{ display: 'grid', gridTemplateColumns: 'repeat(8, minmax(36px, 1fr))' }}
+              style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(36px, 1fr))' }}
               value={icon}
               onChange={setIcon}
               options={GOAL_ICONS.map((name) => {

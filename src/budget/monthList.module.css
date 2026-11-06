@@ -1,0 +1,38 @@
+.section {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  padding: 12px 14px 8px;
+}
+
+.group {
+  padding: 10px 14px 6px;
+  background: var(--ww-subtle);
+  border-top: 1px solid var(--ww-border);
+}
+
+.row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 14px;
+  border-top: 1px solid var(--ww-border);
+}
+
+.nested {
+  padding-left: 26px;
+}
+
+.meta {
+  min-height: 32px;
+}
+
+/* Tall enough to hit with a thumb. */
+.plan {
+  width: 112px;
+}
+
+.plan input {
+  min-height: 32px;
+}

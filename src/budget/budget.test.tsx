@@ -2,7 +2,16 @@ import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import dayjs from 'dayjs';
 import { budgetRowOf } from '../test/fixtures';
-import { bodyOf, currentMonth as month, json, mockApi, plain, renderApp, signedInApi } from '../test/render';
+import {
+  asPhone,
+  bodyOf,
+  currentMonth as month,
+  json,
+  mockApi,
+  plain,
+  renderApp,
+  signedInApi,
+} from '../test/render';
 import { planRange, type PlanRow } from './plan';
 
 const food = budgetRowOf({
@@ -241,5 +250,25 @@ it('copies the previous month with one request', async () => {
 
   await waitFor(() =>
     expect(requests.some((request) => new URL(request.url).pathname.endsWith('/copy-previous'))).toBe(true),
+  );
+});
+
+it('shows one month as a list on a phone and saves a plan typed there', async () => {
+  asPhone();
+  const requests = api({
+    [`PUT /api/v1/budget/${month}/categories/2`]: () => json(budget),
+  });
+  renderApp('/budget');
+
+  const field = await screen.findByRole('textbox', { name: /План: Продукти/ });
+  // The table of 25 months is left for wider screens
+  expect(screen.queryByRole('table')).not.toBeInTheDocument();
+  expect(screen.getAllByText(/витрачено/).length).toBeGreaterThan(0);
+
+  await userEvent.clear(field);
+  await userEvent.type(field, '8000+500{Enter}');
+
+  await waitFor(async () =>
+    expect(await bodyOf(requests, 'PUT', `/api/v1/budget/${month}/categories/2`)).toEqual({ assigned: 8500 }),
   );
 });

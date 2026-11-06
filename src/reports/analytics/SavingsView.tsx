@@ -31,7 +31,7 @@ export function SavingsView() {
   return (
     <Stack gap="md">
       <UnconvertedAlert currencies={data.unconvertedCurrencies} />
-      <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="sm">
+      <SimpleGrid cols={{ base: 2, sm: 3 }} spacing="sm">
         <Figure
           label={rate}
           value={formatPercent(data.averageRate)}

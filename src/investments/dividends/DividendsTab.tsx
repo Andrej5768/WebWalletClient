@@ -126,7 +126,7 @@ export function DividendsTab({ accountId }: { accountId?: number }) {
         </Text>
         <CurrencySwitch label={t('invDividends.currency')} />
       </Group>
-      <SimpleGrid cols={{ base: 1, xs: 2, md: 4 }} spacing="sm">
+      <SimpleGrid cols={{ base: 2, md: 4 }} spacing="sm">
         <Figure
           label={t('invDividends.next12')}
           value={money(data.next12Months)}

@@ -162,7 +162,7 @@ export function AccountsPage() {
         </Alert>
       )}
 
-      <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} spacing="sm">
+      <SimpleGrid cols={{ base: 2, lg: 4 }} spacing="sm">
         <Figure
           label={t('balance.netWorth.label')}
           value={summary.data ? formatMoney(summary.data.netWorth, currency) : '—'}
@@ -190,7 +190,7 @@ export function AccountsPage() {
       </SimpleGrid>
 
       <Card withBorder radius="md" p={0} style={{ overflowX: 'auto' }}>
-        <div style={{ minWidth: 940 }}>
+        <div className={classes.sheet}>
           <div className={`${classes.row} ${classes.head}`}>
             <span>{t('accounts.columns.account')}</span>
             <span>{t('accounts.columns.currency')}</span>

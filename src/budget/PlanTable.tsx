@@ -465,7 +465,15 @@ function MonthHead({
 }
 
 /** A plan typed into the table: takes arithmetic like the amount fields, saved when the field is left. */
-function PlanInput({ value, label, onSave }: { value: number; label: string; onSave(value: number): void }) {
+export function PlanInput({
+  value,
+  label,
+  onSave,
+}: {
+  value: number;
+  label: string;
+  onSave(value: number): void;
+}) {
   const [draft, setDraft] = useState<string | null>(null);
   const save = (text: string) => {
     setDraft(null);

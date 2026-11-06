@@ -173,7 +173,7 @@ export function TransactionsPage() {
       {editMissing && <QueryError error={{ detail: t('transactions.notFound') }} />}
 
       <Card withBorder radius="md" p={0} style={{ overflowX: 'auto' }}>
-        <div style={{ minWidth: 760 }}>
+        <div className={classes.list}>
           {transactions.isLoading && <Skeleton height={240} m="md" />}
           {showPlanned && (
             <PlannedGroup

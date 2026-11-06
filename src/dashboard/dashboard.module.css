@@ -1,6 +1,7 @@
 .columns {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+  /* min() lets a column be narrower than 380 px on a phone instead of pushing the page sideways. */
+  grid-template-columns: repeat(auto-fit, minmax(min(380px, 100%), 1fr));
   gap: 16px;
   align-items: start;
 }
@@ -81,6 +82,14 @@
 .axis {
   fill: var(--ww-faint);
   font-size: 11px;
+}
+
+/* The chart is drawn 640 units wide and scaled to the card; on a phone that is about half, so the labels are
+   drawn twice as large to stay readable. */
+@media (max-width: 767.98px) {
+  .axis {
+    font-size: 22px;
+  }
 }
 
 .minimum {

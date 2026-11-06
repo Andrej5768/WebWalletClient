@@ -166,6 +166,7 @@
   "shell": {
     "mainNav": "Головне меню",
     "collapse": "Згорнути або розгорнути меню",
+    "menu": "Меню",
     "signOut": "Вийти",
     "addTransaction": "Операція",
     "signOutFailed": "Не вдалося завершити сесію. Ви вийшли на цьому пристрої; якщо комп’ютер спільний, змініть пароль."
@@ -453,6 +454,11 @@
     "movedOut": "{{amount}} переказано з бюджету",
     "movedIn": "{{amount}} переказано в бюджет",
     "uncategorizedSpent": "і {{amount}} без категорії",
+    "month": {
+      "spent": "витрачено {{amount}}",
+      "incomeOfPlan": "{{income}} з {{plan}}",
+      "leftOfPlan": "лишилось {{left}} з {{plan}}"
+    },
     "plan": {
       "average": "Середнє за 3 місяці",
       "averageOf": "Середній факт за {{months}}",

@@ -48,7 +48,7 @@ export function ReportsPage() {
         <Title order={1} size="h2">
           {t('nav.reports')}
         </Title>
-        <Group gap="sm" wrap="wrap">
+        <Group gap="sm" wrap="wrap" maw="100%" miw={0}>
           <SegmentedControl
             aria-label={t('transactions.period')}
             value={preset}

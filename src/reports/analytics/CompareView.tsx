@@ -109,7 +109,7 @@ function CompareResult({
   return (
     <Stack gap="md">
       <UnconvertedAlert currencies={data.unconvertedCurrencies} />
-      <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="sm">
+      <SimpleGrid cols={{ base: 2, sm: 3 }} spacing="sm">
         <Figure label={t('analytics.compare.periodA')} value={money(data.totalA)} note={labelA} />
         <Figure label={t('analytics.compare.periodB')} value={money(data.totalB)} note={labelB} />
         <Figure

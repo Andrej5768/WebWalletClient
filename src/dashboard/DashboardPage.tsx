@@ -80,7 +80,8 @@ export function DashboardPage() {
           </Text>
           <Text
             className={`num ${(summary.data?.readyToAssign ?? 0) < 0 ? 'expense' : ''}`}
-            fz={22}
+            fz={{ base: 18, sm: 22 }}
+            style={{ overflowWrap: 'anywhere' }}
             fw={600}
             mt={4}
           >

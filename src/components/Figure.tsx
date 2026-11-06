@@ -18,7 +18,14 @@ export function Figure({
       <Text size="xs" c="dimmed" fw={500}>
         {label}
       </Text>
-      <Text className={`num ${className ?? ''}`} fz={22} fw={600} mt={4}>
+      {/* Smaller on a phone, and a long amount breaks rather than being cut off. */}
+      <Text
+        className={`num ${className ?? ''}`}
+        fz={{ base: 18, sm: 22 }}
+        fw={600}
+        mt={4}
+        style={{ overflowWrap: 'anywhere' }}
+      >
         {value}
       </Text>
       {note && (

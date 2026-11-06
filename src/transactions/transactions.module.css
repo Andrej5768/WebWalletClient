@@ -10,6 +10,11 @@
   font-weight: 600;
 }
 
+/* Wide enough for the account column; a phone drops that column and the list fits the screen. */
+.list {
+  min-width: 760px;
+}
+
 .row {
   display: grid;
   grid-template-columns: 32px minmax(200px, 1fr) minmax(120px, 200px) minmax(140px, max-content);
@@ -57,4 +62,29 @@
   border-top: 1px solid var(--ww-border);
   background: var(--mantine-color-blue-light);
   color: var(--mantine-color-text);
+}
+
+/* A phone: the icon, the title and the amount; the account column gives way so the amount stays in view. */
+@media (max-width: 767.98px) {
+  .list {
+    min-width: 0;
+  }
+
+  .row {
+    grid-template-columns: 32px minmax(0, 1fr) auto;
+    column-gap: 10px;
+    padding: 8px 12px;
+  }
+
+  .row > :nth-child(3) {
+    display: none;
+  }
+
+  .row :global(.mantine-Select-root) {
+    width: 100% !important;
+  }
+
+  .day {
+    padding: 0 12px;
+  }
 }
