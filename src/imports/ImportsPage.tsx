@@ -21,6 +21,7 @@ import { FileDropInput } from '../components/FileDropInput';
 import { ProblemAlert } from '../components/feedback';
 import {
   previewFreedom,
+  previewMonobankPdf,
   previewPrivatBank,
   previewZenMoneyFile,
   previewZenMoneyToken,
@@ -45,6 +46,8 @@ export function ImportsPage() {
 
   const [privatFile, setPrivatFile] = useState<File | null>(null);
   const [privatAccount, setPrivatAccount] = useState<string | null>(null);
+  const [monoFile, setMonoFile] = useState<File | null>(null);
+  const [monoAccount, setMonoAccount] = useState<string | null>(null);
   const [zenMode, setZenMode] = useState<ZenMode>('token');
   const [zenToken, setZenToken] = useState('');
   const [zenFile, setZenFile] = useState<File | null>(null);
@@ -55,6 +58,11 @@ export function ImportsPage() {
 
   const privat = useMutation({
     mutationFn: () => previewPrivatBank(privatFile!, privatAccount ? Number(privatAccount) : undefined),
+    onSuccess: setPreview,
+    meta: { errorShown: true },
+  });
+  const mono = useMutation({
+    mutationFn: () => previewMonobankPdf(monoFile!, monoAccount ? Number(monoAccount) : undefined),
     onSuccess: setPreview,
     meta: { errorShown: true },
   });
@@ -108,6 +116,7 @@ export function ImportsPage() {
               {t('imports.sources.monobank')}
             </Menu.Item>
             <Menu.Item onClick={() => scrollTo('privatbank')}>{t('imports.sources.privatbank')}</Menu.Item>
+            <Menu.Item onClick={() => scrollTo('monobank-pdf')}>{t('imports.sources.monobankPdf')}</Menu.Item>
             <Menu.Item
               onClick={() => {
                 setZenMode('token');
@@ -170,6 +179,48 @@ export function ImportsPage() {
             />
             <ProblemAlert error={privat.error} />
             <Button disabled={!privatFile} loading={privat.isPending} onClick={() => privat.mutate()}>
+              {t('imports.privat.submit')}
+            </Button>
+          </Stack>
+        </Card>
+
+        <Card withBorder radius="md" padding="lg" id="monobank-pdf">
+          <Stack gap="md">
+            <Group gap="sm">
+              <ThemeIcon variant="light" color="gray" size={36} radius="md">
+                <FileText size={18} />
+              </ThemeIcon>
+              <Stack gap={0}>
+                <Title order={2} size="h4">
+                  {t('imports.monoPdf.title')}
+                </Title>
+                <Text size="xs" c="dimmed">
+                  {t('imports.monoPdf.subtitle')}
+                </Text>
+              </Stack>
+            </Group>
+            <FileDropInput
+              label={t('imports.privat.file')}
+              placeholder={t('imports.privat.choose')}
+              accept="application/pdf,.pdf,.p7s"
+              clearable
+              value={monoFile}
+              onChange={setMonoFile}
+              description={t('imports.notStored')}
+              inputWrapperOrder={['label', 'input', 'description', 'error']}
+            />
+            <Select
+              label={t('imports.privat.account')}
+              description={t('imports.monoPdf.accountHint')}
+              inputWrapperOrder={['label', 'input', 'description', 'error']}
+              placeholder={t('imports.privat.auto')}
+              clearable
+              data={cardAccounts}
+              value={monoAccount}
+              onChange={setMonoAccount}
+            />
+            <ProblemAlert error={mono.error} />
+            <Button disabled={!monoFile} loading={mono.isPending} onClick={() => mono.mutate()}>
               {t('imports.privat.submit')}
             </Button>
           </Stack>

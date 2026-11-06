@@ -922,6 +922,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/imports/detect": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Tell which import a file belongs to
+         * @description For a file shared into the app: a PrivatBank or Monobank statement by the bank named in the PDF, a Zen Money export by its header, a spreadsheet as Freedom Finance reports; UNKNOWN otherwise. The file is not stored.
+         */
+        post: operations["detect"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/imports/freedom/preview": {
         parameters: {
             query?: never;
@@ -935,7 +955,7 @@ export interface paths {
          * Preview Freedom Finance reports (XLSX) without saving anything
          * @description The trades report and the cash flows report, in any order; the cash flows give the currency of the fees, so both are needed for exact money. Without accountId the operations go to the brokerage account named Freedom Finance, created when there is none. Confirm with POST /previews/{id}/confirm within an hour, discard with DELETE /api/v1/imports/previews/{id}. Only the parsed reports are kept, not the files.
          */
-        post: operations["preview_1"];
+        post: operations["preview_2"];
         delete?: never;
         options?: never;
         head?: never;
@@ -956,6 +976,26 @@ export interface paths {
          * @description Tickers not listed get the suggested instruments, operations not excluded are imported; those imported before are skipped. Rejected when the reports sell more than they buy before. The preview is removed afterwards; 404 when it is unknown or expired.
          */
         post: operations["confirm_2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/imports/monobank/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Preview a Monobank card statement (signed PDF from the Monobank app) without saving anything
+         * @description Without accountId the account with the card number of the statement is used, e.g. the one of a Monobank connection, or created. Operations already brought in through the connection are shown as duplicates. Confirm with POST /api/v1/imports/previews/{id}/confirm within an hour; the file is not stored.
+         */
+        post: operations["preview_1"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2441,7 +2481,7 @@ export interface components {
             operations: components["schemas"]["OperationPreview"][];
             providerUnavailable: boolean;
             /** @enum {string} */
-            source: "PRIVATBANK" | "ZENMONEY" | "FREEDOM";
+            source: "PRIVATBANK" | "MONOBANK" | "ZENMONEY" | "FREEDOM";
             /** Format: date */
             to: string | null;
         };
@@ -2954,6 +2994,10 @@ export interface components {
             id: number | null;
             name: string;
         };
+        ImportDetectResponse: {
+            /** @enum {string} */
+            source: "PRIVATBANK" | "MONOBANK" | "ZENMONEY" | "FREEDOM" | "UNKNOWN";
+        };
         ImportOperation: {
             account: components["schemas"]["ImportAccount"];
             amount: number;
@@ -2982,7 +3026,7 @@ export interface components {
             id: string;
             operations: components["schemas"]["PageResponseImportOperation"];
             /** @enum {string} */
-            source: "PRIVATBANK" | "ZENMONEY" | "FREEDOM";
+            source: "PRIVATBANK" | "MONOBANK" | "ZENMONEY" | "FREEDOM";
             summary: components["schemas"]["ImportResult"];
         };
         ImportResult: {
@@ -5476,7 +5520,34 @@ export interface operations {
             };
         };
     };
-    preview_1: {
+    detect: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    file: string;
+                };
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ImportDetectResponse"];
+                };
+            };
+        };
+    };
+    preview_2: {
         parameters: {
             query?: {
                 accountId?: number;
@@ -5529,6 +5600,35 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["BrokerImportResult"];
+                };
+            };
+        };
+    };
+    preview_1: {
+        parameters: {
+            query?: {
+                accountId?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    file: string;
+                };
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ImportPreviewResponse"];
                 };
             };
         };

@@ -278,6 +278,24 @@ it('reviews a PrivatBank statement before importing it', async () => {
   ]);
 });
 
+it('previews a Monobank PDF statement with the card account by default', async () => {
+  const requests = mockApi({
+    ...base,
+    'GET /api/v1/banks/monobank': () => json({ code: 'NOT_FOUND' }, 404),
+    'POST /api/v1/imports/monobank/preview': () => json({ ...preview, source: 'MONOBANK' }),
+  });
+  const { container } = renderPage();
+
+  const fileInput = container.querySelector('#monobank-pdf input[type="file"]') as HTMLInputElement;
+  await userEvent.upload(fileInput, new File(['%PDF'], 'report.pdf', { type: 'application/pdf' }));
+  const card = container.querySelector('#monobank-pdf') as HTMLElement;
+  await userEvent.click(within(card).getByRole('button', { name: 'Завантажити й переглянути' }));
+
+  expect(await screen.findByRole('dialog')).toBeInTheDocument();
+  expect(requests.some((request) => request.url.includes('/api/v1/imports/monobank/preview'))).toBe(true);
+  expect(requests.some((request) => request.url.includes('accountId'))).toBe(false);
+});
+
 it('previews a Zen Money import by token', async () => {
   const requests = mockApi({
     ...base,
