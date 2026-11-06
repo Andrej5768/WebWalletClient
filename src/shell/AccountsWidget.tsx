@@ -27,7 +27,10 @@ export function AccountsWidget() {
   const active = (data ?? []).filter((account) => !account.archived);
   if (!active.length) return null;
 
-  const everyday = active.filter((account) => !SAVINGS.includes(account.type)).slice(0, SHOWN);
+  const allEveryday = active.filter((account) => !SAVINGS.includes(account.type));
+  const everyday = allEveryday.slice(0, SHOWN);
+  // The accounts that do not fit are counted, so the list does not look complete when it is not.
+  const hidden = allEveryday.length - everyday.length;
   const savings = active.filter((account) => SAVINGS.includes(account.type));
   // A savings account without an exchange rate is left out of the total; the total says so.
   const { total: savingsTotal, incomplete: savingsIncomplete } = sumInBase(savings);
@@ -51,6 +54,11 @@ export function AccountsWidget() {
           </span>
         </div>
       ))}
+      {hidden > 0 && (
+        <Anchor component={Link} to="/accounts" size="xs" c="dimmed">
+          {t('balance.moreAccounts', { count: hidden })}
+        </Anchor>
+      )}
       {savings.length > 0 && (
         <div
           className={classes.accountRow}

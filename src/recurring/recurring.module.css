@@ -98,3 +98,22 @@
 .row .num {
   white-space: nowrap;
 }
+
+/* A phone: the amount stays in the first line; the account and the state of the payment move under its name. */
+@media (max-width: 767.98px) {
+  .row {
+    grid-template-columns: 32px minmax(0, 1fr) auto;
+    column-gap: 10px;
+    row-gap: 4px;
+    padding: 8px 12px;
+  }
+
+  .row > :nth-child(3) {
+    grid-column: 2 / -1;
+    grid-row: 2;
+  }
+
+  .row > :nth-child(3):empty {
+    display: none;
+  }
+}

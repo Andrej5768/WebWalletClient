@@ -141,7 +141,11 @@ export function TransactionFiltersBar({ filters }: { filters: TransactionFilters
                 variant="default"
                 size="sm"
                 leftSection={<Search size={16} />}
-                rightSection={<Kbd size="xs">{os === 'macos' ? '⌘ K' : 'Ctrl K'}</Kbd>}
+                rightSection={
+                  <Kbd size="xs" visibleFrom="sm">
+                    {os === 'macos' ? '⌘ K' : 'Ctrl K'}
+                  </Kbd>
+                }
                 onClick={() => setSearchOpen(true)}
               >
                 {t('transactions.search')}

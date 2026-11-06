@@ -152,7 +152,7 @@ function ProfileForm({ profile, onClose }: { profile: TaxProfile | null; onClose
           <TextInput
             label={t('taxes.profile.fields.office')}
             withAsterisk
-            description={t('taxes.profile.officeHint')}
+            description={form.errors.office ? undefined : t('taxes.profile.officeHint')}
             inputWrapperOrder={['label', 'input', 'description', 'error']}
             maxLength={4}
             {...form.getInputProps('office')}

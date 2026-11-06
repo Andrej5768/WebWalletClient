@@ -1,5 +1,5 @@
 import { Modal, SimpleGrid, Stack, Text } from '@mantine/core';
-import { DateInput } from '@mantine/dates';
+import { DayInput } from '../components/DayInput';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ProblemAlert } from '../components/feedback';
@@ -43,12 +43,7 @@ export function ConfirmModal({ occurrence, onClose }: { occurrence: Occurrence; 
               value={amount}
               onChange={setAmount}
             />
-            <DateInput
-              label={t('recurring.confirm.date')}
-              valueFormat="DD.MM.YYYY"
-              value={date}
-              onChange={setDate}
-            />
+            <DayInput label={t('recurring.confirm.date')} value={date} onChange={setDate} />
           </SimpleGrid>
           <ProblemAlert error={confirm.error} />
           <FormFooter

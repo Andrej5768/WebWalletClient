@@ -2,6 +2,7 @@
   "common": {
     "all": "All",
     "cancel": "Cancel",
+    "close": "Close",
     "save": "Save",
     "delete": "Delete",
     "retry": "Try again",
@@ -165,6 +166,7 @@
   "shell": {
     "mainNav": "Main",
     "collapse": "Collapse or expand the menu",
+    "menu": "Menu",
     "signOut": "Sign out",
     "addTransaction": "Transaction",
     "signOutFailed": "Could not end the session. You are signed out on this device; if the computer is shared, change your password."
@@ -183,6 +185,7 @@
       "hint": "Month's income minus the plan"
     },
     "savings": "Savings",
+    "moreAccounts": "+{{count}} more",
     "unconverted": "No rate: {{currencies}}"
   },
   "accounts": {
@@ -438,10 +441,18 @@
     "inflow": "Month's income",
     "thisMonth": "This month",
     "plannedIncome": "plan {{amount}}",
+    "movedOut": "{{amount}} moved off the budget",
+    "movedIn": "{{amount}} moved into the budget",
+    "uncategorizedSpent": "and {{amount}} without a category",
+    "month": {
+      "spent": "spent {{amount}}",
+      "incomeOfPlan": "{{income}} of {{plan}}",
+      "leftOfPlan": "{{left}} left of {{plan}}"
+    },
     "plan": {
       "average": "Average of 3 months",
       "averageOf": "Average actual of {{months}}",
-      "takeAverage": "→ to {{month}} plan",
+      "takeAverage": "Average to the {{month}} plan",
       "plan": "plan",
       "actual": "actual",
       "income": "Income",

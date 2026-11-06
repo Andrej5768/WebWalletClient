@@ -11,7 +11,7 @@ import {
   Table,
   Text,
 } from '@mantine/core';
-import { DateInput } from '@mantine/dates';
+import { DayInput } from '../components/DayInput';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, X } from 'lucide-react';
 import { useState } from 'react';
@@ -158,10 +158,9 @@ function BulkForm({ onClose }: { onClose: () => void }) {
             return (
               <Table.Tr key={row.key}>
                 <Table.Td>
-                  <DateInput
+                  <DayInput
                     size="xs"
                     aria-label={label(t('transactions.form.date'))}
-                    valueFormat="DD.MM.YYYY"
                     value={row.date}
                     onChange={(date) => change(row.key, { date })}
                   />

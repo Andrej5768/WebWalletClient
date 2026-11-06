@@ -118,3 +118,23 @@
   display: block;
   padding-top: 2px;
 }
+
+.drawerBody {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-height: calc(100% - 60px);
+}
+
+/* A phone: the sidebar lives in a drawer, the header and the page take the whole width. */
+@media (max-width: 767.98px) {
+  .header {
+    flex-wrap: nowrap;
+    gap: 8px;
+    padding: 8px 12px;
+  }
+
+  .content {
+    padding: 16px 12px 40px;
+  }
+}

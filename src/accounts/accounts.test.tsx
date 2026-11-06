@@ -181,3 +181,23 @@ it('opens the positions of a brokerage account from its menu', async () => {
   await waitFor(() => expect(router.state.location.pathname).toBe('/investments'));
   expect(router.state.location.search).toBe('?tab=positions&accountId=9');
 });
+
+it('counts the accounts that do not fit under the menu', async () => {
+  mockApi({
+    ...signedInApi,
+    'GET /api/v1/accounts': () =>
+      json(
+        Array.from({ length: 8 }, (_, index) => ({
+          id: index + 1,
+          name: `Картка ${index + 1}`,
+          type: 'CARD',
+          currency: 'UAH',
+          balance: 100,
+          balanceInBase: 100,
+        })),
+      ),
+  });
+  renderApp('/accounts');
+
+  expect(await screen.findByRole('link', { name: 'ще 2' })).toHaveAttribute('href', '/accounts');
+});

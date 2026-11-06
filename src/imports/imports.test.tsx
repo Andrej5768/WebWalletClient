@@ -84,6 +84,7 @@ const base = {
   'GET /api/v1/accounts': () => json(accounts),
   'GET /api/v1/categories': () => json(categories),
   'GET /api/v1/tags': () => json([]),
+  'GET /api/v1/app/config': () => json({ features: { monobankProvider: false } }),
 };
 
 function renderPage() {
@@ -111,6 +112,61 @@ it('connects Monobank with a token and a daily schedule', async () => {
     syncMode: 'DAILY',
     dailyAt: '06:00',
   });
+});
+
+it('connects Monobank through the bank app and waits for the approval', async () => {
+  const pending = {
+    id: 7,
+    status: 'PENDING',
+    acceptUrl: 'https://mbnk.app/auth/req-1',
+    expiresAt: '2026-11-07T10:00:00Z',
+  };
+  let polls = 0;
+  const requests = mockApi({
+    ...base,
+    'GET /api/v1/app/config': () => json({ features: { monobankProvider: true } }),
+    'GET /api/v1/banks/monobank': () => json({ code: 'NOT_FOUND' }, 404),
+    'POST /api/v1/banks/monobank/auth': () => json(pending),
+    'GET /api/v1/banks/monobank/auth/7': () =>
+      json(++polls < 2 ? pending : { ...pending, status: 'APPROVED', connection }),
+  });
+  renderPage();
+
+  await userEvent.click(await screen.findByRole('button', { name: 'Підключити' }));
+  const dialog = await screen.findByRole('dialog');
+  // No token to copy: the access is approved in the bank app
+  await within(dialog).findByText(/копіювати токен не потрібно/);
+  expect(within(dialog).queryByLabelText('Особистий токен')).not.toBeInTheDocument();
+  await userEvent.click(within(dialog).getByText('Раз на день'));
+  await userEvent.click(within(dialog).getByRole('button', { name: 'Підключити через застосунок' }));
+
+  expect(await within(dialog).findByRole('link', { name: 'Відкрити в застосунку Monobank' })).toHaveAttribute(
+    'href',
+    'https://mbnk.app/auth/req-1',
+  );
+  expect(await bodyOf(requests, 'POST', '/api/v1/banks/monobank/auth')).toMatchObject({ syncMode: 'DAILY' });
+  await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument(), { timeout: 8000 });
+}, 15000);
+
+it('keeps the personal token as a choice when the bank app is available', async () => {
+  const requests = mockApi({
+    ...base,
+    'GET /api/v1/app/config': () => json({ features: { monobankProvider: true } }),
+    'GET /api/v1/banks/monobank': () => json({ code: 'NOT_FOUND' }, 404),
+    'POST /api/v1/banks/monobank': () => json(connection),
+  });
+  renderPage();
+
+  await userEvent.click(await screen.findByRole('button', { name: 'Підключити' }));
+  const dialog = await screen.findByRole('dialog');
+  await userEvent.click(
+    await within(dialog).findByRole('button', { name: 'Ввести особистий токен натомість' }),
+  );
+  await userEvent.type(within(dialog).getByLabelText('Особистий токен'), 'u-secret');
+  await userEvent.click(within(dialog).getByRole('button', { name: 'Підключити' }));
+
+  await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+  expect(await bodyOf(requests, 'POST', '/api/v1/banks/monobank')).toMatchObject({ token: 'u-secret' });
 });
 
 it('shows the difference, changes the schedule and stops syncing a card', async () => {

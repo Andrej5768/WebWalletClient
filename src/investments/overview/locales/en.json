@@ -32,6 +32,7 @@
       "difference": "{{amount}} vs {{name}}",
       "loading": "Index prices are loading — the comparison appears in a few minutes.",
       "empty": "No data for the chart yet: add a transfer to the brokerage account or the first trade.",
+      "firstDay": "The chart starts tomorrow: so far there is only today's value.",
       "portfolio": "Portfolio",
       "sameDeposits": "Same deposits in {{name}}",
       "differenceLabel": "Difference",

@@ -26,6 +26,11 @@ export function shortName(event: Pick<DividendEvent, 'symbol' | 'name' | 'type'>
   return BONDS.has(event.type) ? event.name : event.symbol;
 }
 
+/** A ticker is set in the monospace font; the name of a bond is ordinary text. */
+export function shortNameFont(event: Pick<DividendEvent, 'type'>): 'monospace' | undefined {
+  return BONDS.has(event.type) ? undefined : 'monospace';
+}
+
 /**
  * The month the calendar opens on: the current one when it has payments, else the nearest later month with some,
  * else the current one.

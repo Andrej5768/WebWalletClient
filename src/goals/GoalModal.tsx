@@ -1,5 +1,5 @@
 import { Group, Modal, Select, Stack, Text, TextInput, ThemeIcon } from '@mantine/core';
-import { DateInput } from '@mantine/dates';
+import { DayInput } from '../components/DayInput';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -152,11 +152,10 @@ export function GoalModal({
               onChange={(value) => value && setCurrency(value)}
             />
           </Group>
-          <DateInput
+          <DayInput
             label={t('goals.form.date')}
             description={t('goals.form.dateHint')}
             inputWrapperOrder={['label', 'input', 'description', 'error']}
-            valueFormat="DD.MM.YYYY"
             clearable
             value={date}
             error={errors.targetDate}
@@ -187,7 +186,7 @@ export function GoalModal({
             </Text>
             <RadioTiles
               label={t('goals.form.icon')}
-              style={{ display: 'grid', gridTemplateColumns: 'repeat(8, minmax(36px, 1fr))' }}
+              style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(36px, 1fr))' }}
               value={icon}
               onChange={setIcon}
               options={GOAL_ICONS.map((name) => {

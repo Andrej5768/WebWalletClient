@@ -1,5 +1,5 @@
 import { Button, Group, Modal, Radio, Select, SimpleGrid, Stack, Text, TextInput } from '@mantine/core';
-import { DateInput } from '@mantine/dates';
+import { DayInput } from '../../components/DayInput';
 import { useForm } from '@mantine/form';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
@@ -143,9 +143,18 @@ export function InstrumentModal({
     >
       <form onSubmit={form.onSubmit((input) => save.mutate(input))} noValidate>
         <Stack gap="md">
-          <TextInput label={t('invInstrument.manual.name')} data-autofocus {...form.getInputProps('name')} />
+          <TextInput
+            label={t('invInstrument.manual.name')}
+            withAsterisk
+            data-autofocus
+            {...form.getInputProps('name')}
+          />
           <SimpleGrid cols={2}>
-            <TextInput label={t('invInstrument.manual.symbol')} {...form.getInputProps('symbol')} />
+            <TextInput
+              label={t('invInstrument.manual.symbol')}
+              withAsterisk
+              {...form.getInputProps('symbol')}
+            />
             <TextInput label="ISIN" placeholder="UA4000227045" {...form.getInputProps('isin')} />
             <Select
               label={t('invInstrument.manual.type')}
@@ -162,6 +171,7 @@ export function InstrumentModal({
             />
             <MoneyInput
               label={t('invInstrument.manual.nominal')}
+              withAsterisk={values.valuation === 'NOMINAL'}
               currency={values.currency ?? undefined}
               {...form.getInputProps('nominal')}
             />
@@ -179,9 +189,8 @@ export function InstrumentModal({
               }))}
               {...form.getInputProps('couponFrequency')}
             />
-            <DateInput
+            <DayInput
               label={t('invInstrument.manual.maturity')}
-              valueFormat="DD.MM.YYYY"
               clearable
               {...form.getInputProps('maturityDate')}
             />
@@ -210,14 +219,14 @@ export function InstrumentModal({
             <SimpleGrid cols={2}>
               <MoneyInput
                 label={t('invInstrument.manual.price')}
+                withAsterisk
                 description={t('invInstrument.manual.priceHint')}
                 inputWrapperOrder={['label', 'input', 'description', 'error']}
                 currency={values.currency ?? undefined}
                 {...form.getInputProps('manualPrice')}
               />
-              <DateInput
+              <DayInput
                 label={t('invInstrument.manual.priceDate')}
-                valueFormat="DD.MM.YYYY"
                 {...form.getInputProps('manualPriceDate')}
               />
             </SimpleGrid>

@@ -178,8 +178,8 @@ it('adds an instrument by hand from the drawer', async () => {
   const panel = await drawer();
   await userEvent.click(await panel.findByRole('button', { name: /Додати вручну/ }));
   const editor = within((await screen.findAllByRole('dialog')).at(-1)!);
-  await userEvent.type(editor.getByLabelText('Назва'), 'ОВДП 22.07.2027');
-  await userEvent.type(editor.getByLabelText('Позначення'), 'UA4000227045');
+  await userEvent.type(editor.getByLabelText(/^Назва/), 'ОВДП 22.07.2027');
+  await userEvent.type(editor.getByLabelText(/^Позначення/), 'UA4000227045');
   await userEvent.type(editor.getByLabelText('ISIN'), 'UA4000227045');
   await userEvent.type(editor.getByLabelText(/Купон, річних/), '15,2');
   await userEvent.click(editor.getByRole('button', { name: 'Зберегти' }));

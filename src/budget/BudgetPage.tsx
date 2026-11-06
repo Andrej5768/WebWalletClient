@@ -1,4 +1,15 @@
-import { ActionIcon, Alert, Button, Card, Group, SimpleGrid, Stack, Text, Title } from '@mantine/core';
+import {
+  ActionIcon,
+  Alert,
+  Button,
+  Card,
+  Group,
+  SimpleGrid,
+  Skeleton,
+  Stack,
+  Text,
+  Title,
+} from '@mantine/core';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeftRight, ChevronLeft, ChevronRight, CopyPlus, TriangleAlert } from 'lucide-react';
 import { useState } from 'react';
@@ -9,6 +20,8 @@ import { Figure } from '../components/Figure';
 import { formatMonthTitle } from '../lib/format';
 import { formatMoney } from '../lib/money';
 import { assign, budgetChanged, copyPreviousMonth, useBudget } from './api';
+import { usePhone } from '../lib/usePhone';
+import { MonthList } from './MonthList';
 import { MoveMoneyModal } from './MoveMoneyModal';
 import { flatEnvelopes, monthKey, parseMonth } from './model';
 import { assignMany, planRange, usePlan } from './plan';
@@ -22,6 +35,8 @@ export function BudgetPage() {
   const key = monthKey(month);
   const budget = useBudget(key);
   const range = planRange();
+  // A phone shows one month as a list: the table of 25 months needs a wide screen.
+  const phone = usePhone();
   const plan = usePlan(range.from, range.to);
   const [moving, setMoving] = useState<{ from?: number; to?: number } | null>(null);
 
@@ -30,6 +45,21 @@ export function BudgetPage() {
   const envelopes = flatEnvelopes(rows);
   const overspent = envelopes.filter((row) => row.available < 0);
   const ready = budget.data?.readyToAssign ?? 0;
+  // The card shows the income the table shows; the free money is counted from what stayed on the budget accounts,
+  // so the difference (money moved to a deposit, a broker) is named under it.
+  const movedOut = budget.data ? budget.data.income - budget.data.inflow : 0;
+  const incomeNote = [
+    budget.data?.plannedIncome
+      ? t('budget.plannedIncome', { amount: formatMoney(budget.data.plannedIncome, currency) })
+      : null,
+    movedOut > 0 ? t('budget.movedOut', { amount: formatMoney(movedOut, currency) }) : null,
+    movedOut < 0 ? t('budget.movedIn', { amount: formatMoney(-movedOut, currency) }) : null,
+  ]
+    .filter(Boolean)
+    .join(' · ');
+  // Spending without a category is not in any envelope, so it is named apart: the card plus it gives the table total.
+  const uncategorizedSpent =
+    plan.data?.totals.find((totals) => totals.month === key)?.uncategorizedExpenses ?? 0;
 
   const update = useMutation({
     mutationFn: ({ month, categoryId, assigned }: { month: string; categoryId: number; assigned: number }) =>
@@ -119,7 +149,12 @@ export function BudgetPage() {
             <Text size="sm" c="dimmed" fw={500}>
               {t('budget.readyToAssign')}
             </Text>
-            <Text className={`num ${ready < 0 ? 'expense' : 'income'}`} fz={32} fw={600} lh={1.1}>
+            <Text
+              className={`num ${ready < 0 ? 'expense' : 'income'}`}
+              fz={{ base: 26, sm: 32 }}
+              fw={600}
+              lh={1.1}
+            >
               {budget.data ? formatMoney(ready, currency) : '—'}
             </Text>
           </Stack>
@@ -129,20 +164,21 @@ export function BudgetPage() {
         </Group>
       </Card>
 
-      <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="sm">
+      <SimpleGrid cols={{ base: 2, lg: 4 }} spacing="sm">
         <Figure
           label={t('budget.inflow')}
-          value={money(budget.data?.inflow, currency)}
-          note={
-            budget.data?.plannedIncome
-              ? t('budget.plannedIncome', { amount: formatMoney(budget.data.plannedIncome, currency) })
-              : undefined
-          }
+          value={money(budget.data?.income, currency)}
+          note={incomeNote || undefined}
         />
         <Figure label={t('budget.assigned')} value={money(budget.data?.assigned, currency)} />
         <Figure
           label={t('budget.spent')}
           value={money(budget.data ? -budget.data.activity : undefined, currency)}
+          note={
+            uncategorizedSpent > 0
+              ? t('budget.uncategorizedSpent', { amount: formatMoney(uncategorizedSpent, currency) })
+              : undefined
+          }
         />
         <Figure label={t('budget.available')} value={money(budget.data?.available, currency)} />
       </SimpleGrid>
@@ -166,18 +202,31 @@ export function BudgetPage() {
       )}
       <ProblemAlert error={update.error ?? updateMany.error ?? copyPrevious.error ?? plan.error} />
 
-      <PlanTable
-        plan={plan.data}
-        loading={plan.isLoading}
-        current={range.current}
-        selected={key}
-        onSelect={select}
-        actions={{
-          assign: (month, categoryId, assigned) => update.mutate({ month, categoryId, assigned }),
-          assignMany: (month, plans) => updateMany.mutate({ month, plans }),
-          copyPrevious: (month) => copyPrevious.mutate(month),
-        }}
-      />
+      {phone ? (
+        budget.data ? (
+          <MonthList
+            budget={budget.data}
+            month={month}
+            editable={key >= range.current}
+            onAssign={(categoryId, assigned) => update.mutate({ month: key, categoryId, assigned })}
+          />
+        ) : (
+          <Skeleton height={420} radius="md" />
+        )
+      ) : (
+        <PlanTable
+          plan={plan.data}
+          loading={plan.isLoading}
+          current={range.current}
+          selected={key}
+          onSelect={select}
+          actions={{
+            assign: (month, categoryId, assigned) => update.mutate({ month, categoryId, assigned }),
+            assignMany: (month, plans) => updateMany.mutate({ month, plans }),
+            copyPrevious: (month) => copyPrevious.mutate(month),
+          }}
+        />
+      )}
 
       {moving && (
         <MoveMoneyModal

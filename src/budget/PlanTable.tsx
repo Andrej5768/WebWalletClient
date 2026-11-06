@@ -1,6 +1,6 @@
 import { ActionIcon, Button, Group, Menu, Modal, Skeleton, Text, Tooltip } from '@mantine/core';
 import dayjs from 'dayjs';
-import { Lock, MoreHorizontal, Repeat } from 'lucide-react';
+import { ArrowRight, Lock, MoreHorizontal, Repeat } from 'lucide-react';
 import { useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { locale } from '../i18n';
@@ -73,13 +73,28 @@ export function PlanTable({
       tense(month) === 'future' && month !== selected ? classes.future : '',
     ].join(' ');
 
-  // Opens on the current month with one month before it in view.
+  // Opens on the current month with one month before it in view. When the page comes from cached data the columns
+  // still change width after the first paint, so the table is re-anchored on every resize until the user scrolls it.
   const scrolled = useRef(false);
+  const ready = Boolean(plan) && !loading;
   useLayoutEffect(() => {
-    if (scrolled.current || !plan || !sheet.current) return;
+    const element = sheet.current;
+    if (!ready || !element) return;
     scrolled.current = true;
-    scrollTo(sheet.current, dayjs(`${current}-01`).subtract(1, 'month').format('YYYY-MM'), false);
-  }, [plan, current]);
+    const anchor = () =>
+      scrollTo(element, dayjs(`${current}-01`).subtract(1, 'month').format('YYYY-MM'), false);
+    anchor();
+    if (typeof ResizeObserver === 'undefined') return;
+    const observer = new ResizeObserver(anchor);
+    observer.observe(element.querySelector('table') ?? element);
+    const release = () => observer.disconnect();
+    const events = ['wheel', 'pointerdown', 'touchstart', 'keydown'] as const;
+    events.forEach((name) => element.addEventListener(name, release, { once: true, passive: true }));
+    return () => {
+      release();
+      events.forEach((name) => element.removeEventListener(name, release));
+    };
+  }, [ready, current]);
   // A month chosen with the arrows above the table comes into view.
   useEffect(() => {
     if (sheet.current && scrolled.current) scrollTo(sheet.current, selected, true);
@@ -146,9 +161,11 @@ export function PlanTable({
           <button
             type="button"
             className={classes.take}
+            aria-label={t('budget.plan.takeAverage', { month: monthLabel(selected).short })}
+            title={t('budget.plan.takeAverage', { month: monthLabel(selected).short })}
             onClick={() => actions.assign(selected, line.categoryId, Math.round(line.average))}
           >
-            {t('budget.plan.takeAverage', { month: monthLabel(selected).short })}
+            <ArrowRight size={12} />
           </button>
         )}
       </td>
@@ -448,7 +465,15 @@ function MonthHead({
 }
 
 /** A plan typed into the table: takes arithmetic like the amount fields, saved when the field is left. */
-function PlanInput({ value, label, onSave }: { value: number; label: string; onSave(value: number): void }) {
+export function PlanInput({
+  value,
+  label,
+  onSave,
+}: {
+  value: number;
+  label: string;
+  onSave(value: number): void;
+}) {
   const [draft, setDraft] = useState<string | null>(null);
   const save = (text: string) => {
     setDraft(null);
@@ -497,8 +522,11 @@ function scrollTo(sheet: HTMLDivElement, month: string, onlyIfHidden: boolean) {
   const head = sheet.querySelector<HTMLElement>(`th[data-month="${month}"]`);
   const pinned = sheet.querySelector<HTMLElement>('thead th:nth-child(2)');
   if (!head || !pinned) return;
-  const pinnedRight = pinned.offsetLeft + pinned.offsetWidth;
-  const left = head.offsetLeft - pinnedRight;
+  // Measured on screen relative to the sheet: the pinned columns are sticky, so their offsetLeft grows with the
+  // scroll, and offsetLeft of a month counts from a parent outside the sheet.
+  const origin = sheet.getBoundingClientRect().left + sheet.clientLeft;
+  const pinnedRight = pinned.getBoundingClientRect().right - origin;
+  const left = head.getBoundingClientRect().left - origin + sheet.scrollLeft - pinnedRight;
   if (onlyIfHidden) {
     const visibleFrom = sheet.scrollLeft;
     const visibleTo = sheet.scrollLeft + sheet.clientWidth - pinnedRight;

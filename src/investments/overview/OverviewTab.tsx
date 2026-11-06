@@ -95,7 +95,7 @@ function Figures({ data }: { data: Portfolio }) {
   const money = (value: number, signed = false) => formatMoney(value, data.currency, { signed });
   const sign = (value: number) => (value < 0 ? 'expense' : value > 0 ? 'income' : '');
   return (
-    <SimpleGrid cols={{ base: 1, xs: 2, md: 5 }} spacing="sm">
+    <SimpleGrid cols={{ base: 2, md: 5 }} spacing="sm">
       <Figure
         label={t('invOverview.value')}
         value={money(data.value)}
@@ -230,7 +230,7 @@ function ValueChart({ accountId }: { accountId?: number }) {
           <QueryError error={history.error} onRetry={() => void history.refetch()} />
         ) : rows.length < 2 ? (
           <Text size="sm" c="dimmed" py="xl" ta="center">
-            {t('invOverview.chart.empty')}
+            {t(rows.length === 1 ? 'invOverview.chart.firstDay' : 'invOverview.chart.empty')}
           </Text>
         ) : (
           <CompositeChart
@@ -273,7 +273,7 @@ function ValueChart({ accountId }: { accountId?: number }) {
             }}
           />
         )}
-        {portfolioResult && (
+        {portfolioResult && rows.length > 1 && (
           <Summary
             portfolio={portfolioResult}
             benchmark={benchmarkResult}

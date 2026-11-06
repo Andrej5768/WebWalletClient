@@ -154,3 +154,18 @@ export function renderWithProviders(ui: ReactNode, path = '/') {
     </Providers>,
   );
 }
+
+/**
+ * Makes the screen a phone for this test: every max-width media query matches. The stub of setup.ts comes back
+ * when the test ends.
+ */
+export function asPhone() {
+  const original = window.matchMedia;
+  window.matchMedia = ((query: string) => ({
+    ...original(query),
+    matches: query.includes('max-width'),
+  })) as typeof window.matchMedia;
+  onTestFinished(() => {
+    window.matchMedia = original;
+  });
+}

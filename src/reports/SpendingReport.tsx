@@ -60,7 +60,7 @@ export function SpendingReport({ period }: { period: Period }) {
         </Card>
       ) : (
         <Group align="flex-start" gap="md" wrap="wrap">
-          <Card withBorder radius="md" padding="lg" w={300}>
+          <Card withBorder radius="md" padding="lg" w={{ base: '100%', sm: 300 }}>
             <Stack align="center" gap="xs">
               <DonutChart
                 data={chart}
@@ -162,7 +162,7 @@ function CategoryRow({
           </Group>
           <ShareBar share={row.share ?? 0} color={color} />
         </Stack>
-        <Text size="sm" className="num" fw={500} w={130} ta="right">
+        <Text size="sm" className="num" fw={500} miw={96} ta="right" style={{ flex: 'none' }}>
           {formatMoney(row.amount ?? 0, currency)}
         </Text>
       </Group>
@@ -180,7 +180,7 @@ function CategoryRow({
             <Text size="xs" c="dimmed" className="num">
               {formatPercent(child.share)}
             </Text>
-            <Text size="sm" className="num" w={130} ta="right">
+            <Text size="sm" className="num" miw={96} ta="right" style={{ flex: 'none' }}>
               {formatMoney(child.amount ?? 0, currency)}
             </Text>
           </Group>

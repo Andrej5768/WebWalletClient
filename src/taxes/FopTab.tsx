@@ -101,7 +101,7 @@ export function FopTab({ year, onRates, onProfile }: { year: number; onRates(): 
         </Alert>
       )}
 
-      <SimpleGrid cols={{ base: 1, xs: 2, md: 5 }} spacing="sm">
+      <SimpleGrid cols={{ base: 2, md: 5 }} spacing="sm">
         <Figure
           label={t('taxes.fop.income', { year })}
           value={uah(totals.income)}

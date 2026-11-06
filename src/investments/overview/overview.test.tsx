@@ -232,3 +232,14 @@ it('computes the result of a period without the deposits', () => {
   expect(result([], (point) => point.value)).toBeNull();
   expect(rangeFrom('all', kyivToday())).toBeUndefined();
 });
+
+it('says the chart starts tomorrow when the portfolio has only today', async () => {
+  api({
+    'GET /api/v1/investments/history': () =>
+      json(historyOf({ points: [{ date: '2026-10-15', value: 150, deposited: 120, benchmark: null }] })),
+  });
+  renderApp('/investments');
+
+  expect(await screen.findByText(/Графік з’явиться завтра/)).toBeInTheDocument();
+  expect(screen.queryByTestId('history-summary')).not.toBeInTheDocument();
+});

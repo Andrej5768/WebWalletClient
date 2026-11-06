@@ -52,7 +52,7 @@ export function PositionsTab({ accountId }: { accountId?: number }) {
   return (
     <Stack gap="md">
       <UnconvertedAlert currencies={data.unconvertedCurrencies} />
-      <SimpleGrid cols={{ base: 1, sm: dayKnown ? 3 : 2 }} spacing="sm">
+      <SimpleGrid cols={{ base: 2, sm: dayKnown ? 3 : 2 }} spacing="sm">
         <Figure label={t('invPositions.value')} value={money(data.value)} />
         <Figure
           label={t('invPositions.unrealized')}

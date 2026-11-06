@@ -11,7 +11,7 @@ import {
   Text,
   Textarea,
 } from '@mantine/core';
-import { DateInput } from '@mantine/dates';
+import { DayInput } from '../../components/DayInput';
 import { useForm } from '@mantine/form';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { X } from 'lucide-react';
@@ -351,11 +351,7 @@ function OperationForm({
             ))}
 
           <SimpleGrid cols={2}>
-            <DateInput
-              label={t('invOperations.date')}
-              valueFormat="DD.MM.YYYY"
-              {...form.getInputProps('date')}
-            />
+            <DayInput label={t('invOperations.date')} {...form.getInputProps('date')} />
             {trade && (
               <NumberInput
                 label={t('invOperations.quantity')}

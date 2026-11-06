@@ -7,7 +7,7 @@ import { formatDayShort, formatMonthTitle, formatPercent } from '../../lib/forma
 import { formatMoney, formatQuantity } from '../../lib/money';
 import type { DividendEvent } from '../api';
 import classes from './dividends.module.css';
-import { shortName } from './model';
+import { shortName, shortNameFont } from './model';
 import { StatusBadge } from './StatusBadge';
 
 /** The payments by month: amounts in the currency of the security, totals in that of the calendar. */
@@ -74,7 +74,7 @@ export function PaymentsList({
                   )}
                 </div>
                 <div style={{ minWidth: 0 }}>
-                  <Text size="sm" fw={600} ff="monospace">
+                  <Text size="sm" fw={600} ff={shortNameFont(event)}>
                     {shortName(event)}
                   </Text>
                   <Text size="xs" c="dimmed" truncate>

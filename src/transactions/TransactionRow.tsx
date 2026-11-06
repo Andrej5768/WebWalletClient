@@ -125,7 +125,7 @@ export function TransactionRow({
         {tags.length > 0 && (
           <Group gap={4}>
             {tags.map((tag) => (
-              <Badge key={tag.id} size="xs" variant="light" color={mantineColor(tag.color)}>
+              <Badge key={tag.id} size="xs" variant="light" color={mantineColor(tag.color)} tt="none">
                 #{tag.name}
               </Badge>
             ))}

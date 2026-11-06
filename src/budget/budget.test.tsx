@@ -2,7 +2,16 @@ import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import dayjs from 'dayjs';
 import { budgetRowOf } from '../test/fixtures';
-import { bodyOf, currentMonth as month, json, mockApi, plain, renderApp, signedInApi } from '../test/render';
+import {
+  asPhone,
+  bodyOf,
+  currentMonth as month,
+  json,
+  mockApi,
+  plain,
+  renderApp,
+  signedInApi,
+} from '../test/render';
 import { planRange, type PlanRow } from './plan';
 
 const food = budgetRowOf({
@@ -132,6 +141,24 @@ it('shows the free money, the planned income and overspending of the selected mo
   expect(screen.getByText(/Перевитрата: Кафе/)).toBeInTheDocument();
 });
 
+it('shows the income of the table and names the money moved off the budget and spent without a category', async () => {
+  api({
+    [`GET /api/v1/budget/${month}`]: () => json({ ...budget, income: 20250, inflow: 15250 }),
+    'GET /api/v1/budget': () =>
+      json({
+        ...plan,
+        totals: plan.totals.map((totals) =>
+          totals.month === month ? { ...totals, uncategorizedExpenses: 1250.5 } : totals,
+        ),
+      }),
+  });
+  renderApp('/budget');
+
+  expect(plain((await screen.findByText(/20\s250,00/)).textContent)).toBe('20 250,00 ₴');
+  expect(screen.getByText(/5\s000,00 ₴ переказано з бюджету/)).toBeInTheDocument();
+  expect(await screen.findByText(/і 1\s250,50 ₴ без категорії/)).toBeInTheDocument();
+});
+
 it('asks for twelve months back and twelve ahead and shows income and expenses together', async () => {
   const requests = api();
   renderApp('/budget');
@@ -223,5 +250,25 @@ it('copies the previous month with one request', async () => {
 
   await waitFor(() =>
     expect(requests.some((request) => new URL(request.url).pathname.endsWith('/copy-previous'))).toBe(true),
+  );
+});
+
+it('shows one month as a list on a phone and saves a plan typed there', async () => {
+  asPhone();
+  const requests = api({
+    [`PUT /api/v1/budget/${month}/categories/2`]: () => json(budget),
+  });
+  renderApp('/budget');
+
+  const field = await screen.findByRole('textbox', { name: /План: Продукти/ });
+  // The table of 25 months is left for wider screens
+  expect(screen.queryByRole('table')).not.toBeInTheDocument();
+  expect(screen.getAllByText(/витрачено/).length).toBeGreaterThan(0);
+
+  await userEvent.clear(field);
+  await userEvent.type(field, '8000+500{Enter}');
+
+  await waitFor(async () =>
+    expect(await bodyOf(requests, 'PUT', `/api/v1/budget/${month}/categories/2`)).toEqual({ assigned: 8500 }),
   );
 });
